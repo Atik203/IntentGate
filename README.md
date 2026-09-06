@@ -1,8 +1,8 @@
-# Intent-Consistency Verification at the Action Gate
+# IntentGate
 
-**A Request-Derived Alternative to Formal Contract Gating for Tool-Using LLM Agents**
+**Intent-Consistency Verification at the Action Gate: A Request-Derived Alternative to Formal Contract Gating for Tool-Using LLM Agents**
 
-> LLM Security · Agentic AI · AI Safety — Thesis Project (2026)
+> LLM Security · Agentic AI · AI Safety — Thesis Project (2026) · [github.com/Atik203/IntentGate](https://github.com/Atik203/IntentGate)
 
 MCP-style agents now execute real actions (email, payments, code, files). Benchmarks show systemic hijack vulnerability — AgentDojo 629 cases, InjecAgent 1,054 cases (GPT-4 24%→47% ASR), MCPTox 1,312 cases on 45 live servers (up to 72.8% ASR, <3% refusal), ASB 84.3% mixed ASR — yet defenses are siloed or require hand-authored contracts (ToolGate, arXiv 2601.04688v1, never tested adversarially).
 
@@ -13,9 +13,18 @@ This project builds a **model-agnostic middleware gate** that derives an _intent
 ## Repository Structure
 
 ```
-E:\Phiton\
+IntentGate\
 ├── README.md                      # this file
-├── blueprint.md                   # single source of truth
+├── blueprint.md                   # single source of truth (design, Sec 0–18)
+├── roadmap.md                     # phased tracker (Phases 0–8, Gates 0–3, success criteria)
+├── pyproject.toml                 # intent-gate package (pip install -e .)
+├── configs\                       # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
+├── src\intent_gate\               # parser / scoring / gate / agent / baselines.toolgate / eval
+├── harness\                       # run_injecagent.py, run_mcptox.py, compare_b2.py, common.py
+├── scripts\                       # pilot_score_dist.py, check_parser.py, clone_benchmarks.ps1
+├── tests\                         # pytest suite (parser, veto, no-bypass, ordering, metrics)
+├── data\                          # (gitignored) benchmark clones + snapshots — scripts/clone_benchmarks.ps1
+├── results\                       # (gitignored) JSONL traces + reports
 ├── literature_review\
 │   ├── index.md                   # Master Comparison Matrix + Gap Map + Verification Log (5 anchors + Closest)
 │   └── papers\
@@ -36,6 +45,7 @@ E:\Phiton\
 - **Index:** [`literature_review/index.md`](literature_review/index.md) — Master Matrix (5 verified 2026-08-24), Legend, Quick Triage, Gap Map, Verification Log
 - **Papers:** 5 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
 - **Blueprint:** [`blueprint.md`](blueprint.md) — Phase 1–5, Sections 0–18 (design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique)
+- **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
 
 All 5 papers verified via full arXiv html (not snippets).
 
@@ -114,10 +124,10 @@ Full reviews: [`literature_review/papers/`](literature_review/papers/)
 @misc{intentgate2026,
   title={Intent-Consistency Verification at the Action Gate: A Request-Derived Alternative to Formal Contract Gating for Tool-Using LLM Agents},
   year={2026},
-  note={Thesis project — blueprint at E:\Phiton\blueprint.md}
+  note={Thesis project — IntentGate, https://github.com/Atik203/IntentGate}
 }
 ```
 
 ---
 
-_Last updated: 2026-08-24 — blueprint is the single source of truth._
+_Last updated: 2026-09-06 — blueprint is the single source of truth, roadmap.md tracks status._
