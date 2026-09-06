@@ -1,0 +1,13 @@
+# Pin exact model versions; log model IDs + embedding hash in every JSONL result (blueprint Sec 6).
+agent:
+  provider: "api"          # api first (Weeks 1-2); local vllm/ollama later
+  model_id: "gpt-4o-mini"
+  temperature: 0
+  max_steps: 15
+parser:
+  model_id: "gpt-4o-mini"
+  temperature: 0
+  max_retries: 1
+embeddings:
+  model_id: "sentence-transformers/all-MiniLM-L6-v2"
+  device: "cpu"

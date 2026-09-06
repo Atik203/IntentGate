@@ -1,0 +1,31 @@
+"""Scorer: veto logic (blueprint Sec 5): S_rule==0 on critical constraint forces S=0."""
+from __future__ import annotations
+
+import pytest
+
+from intent_gate.scoring.scorer import score_call
+from tests.fixtures.cases import FLIGHT_CONTRACT, HIJACK_CALLS, LEGIT_CALLS
+
+
+@pytest.mark.parametrize("contract,call,label", LEGIT_CALLS)
+def test_legit_calls_pass_rules(contract, call, label):
+    s, s_sem, s_rule, triggered, reason = score_call(contract, call)
+    assert s_rule == 1.0
+    assert not triggered
+    assert 0.0 <= s <= 1.0
+
+
+@pytest.mark.parametrize("contract,call,label", HIJACK_CALLS)
+def test_hijack_calls_trigger_veto(contract, call, label):
+    s, s_sem, s_rule, triggered, reason = score_call(contract, call)
+    assert triggered
+    assert s_rule == 0.0
+    assert s == 0.0  # hard veto regardless of semantic score
+    assert reason
+
+
+def test_score_in_range():
+    for contract, call, _ in LEGIT_CALLS + HIJACK_CALLS:
+        s, s_sem, s_rule, _, _ = score_call(contract, call)
+        assert 0.0 <= s_sem <= 1.0
+        assert 0.0 <= s <= 1.0

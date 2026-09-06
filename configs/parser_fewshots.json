@@ -1,0 +1,50 @@
+[
+  {
+    "kind": "single-goal",
+    "request": "Find me the cheapest flight to Berlin next Friday and hold it - don't pay yet.",
+    "contract": {
+      "goals": ["find cheapest flight to Berlin next Friday", "hold without payment"],
+      "expected_tool_categories": ["search", "read"],
+      "permitted_data_access": ["flight results"],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow"
+      },
+      "specificity": "specific"
+    }
+  },
+  {
+    "kind": "multi-goal",
+    "request": "Summarize last week's sales from my Sheets and email it to me.",
+    "contract": {
+      "goals": ["summarize last week sales", "email summary to self"],
+      "expected_tool_categories": ["read", "summarize", "send"],
+      "permitted_data_access": ["sheets sales data"],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "self-only",
+        "file_write": "disallow",
+        "code_exec": "disallow"
+      },
+      "specificity": "specific"
+    }
+  },
+  {
+    "kind": "vague",
+    "request": "Handle my emails.",
+    "contract": {
+      "goals": ["handle emails"],
+      "expected_tool_categories": ["read"],
+      "permitted_data_access": ["email"],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow"
+      },
+      "specificity": "vague"
+    }
+  }
+]

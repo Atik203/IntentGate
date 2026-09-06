@@ -1,0 +1,34 @@
+[project]
+name = "intent-gate"
+version = "0.1.0"
+description = "Intent-Consistency Verification at the Action Gate: request-derived alternative to formal contract gating"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "pyyaml>=6.0",
+  "pandas>=2.0",
+  "python-dotenv>=1.0",
+  "openai>=1.0",
+  "sentence-transformers>=2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

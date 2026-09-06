@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IntentContract",
+  "description": "Frozen per-session intent contract derived once from the trusted user request (blueprint Sec 4/5).",
+  "type": "object",
+  "required": ["goals", "expected_tool_categories", "permitted_data_access", "side_effect_limits"],
+  "properties": {
+    "goals": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "description": "Normalized goals from the raw request."
+    },
+    "expected_tool_categories": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "e.g. search, read, summarize, book, hold"
+    },
+    "permitted_data_access": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "e.g. flight results, sheets sales data"
+    },
+    "side_effect_limits": {
+      "type": "object",
+      "required": ["financial", "external_send", "file_write", "code_exec"],
+      "properties": {
+        "financial": {"type": "string", "description": "\"no payment\" / \"allow\" / constrained text"},
+        "external_send": {"type": "string", "description": "\"disallow\" / \"self-only\" / \"allow\""},
+        "file_write": {"type": "string", "description": "\"disallow\" / \"allow\""},
+        "code_exec": {"type": "string", "description": "\"disallow\" / \"allow\""},
+        "irreversible": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "specificity": {
+      "type": "string",
+      "enum": ["specific", "vague"],
+      "description": "Parser confidence heuristic; vague contracts fail closed."
+    },
+    "raw_request": {
+      "type": "string",
+      "description": "Original request kept as embedding fallback signal."
+    }
+  }
+}

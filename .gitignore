@@ -2,3 +2,20 @@
 /mds
 **.docx
 literature_review.md
+
+# python / venv / pytest
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# secrets / local env
+.env
+
+# benchmark clones + snapshots (re-clone via scripts/clone_benchmarks.ps1)
+data/raw/
+
+# run outputs (JSONL traces, reports) - keep via results/.gitkeep only
+results/*.jsonl
+results/*.json
+!results/.gitkeep*.egg-info/
