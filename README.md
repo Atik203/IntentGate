@@ -8,6 +8,10 @@ MCP-style agents now execute real actions (email, payments, code, files). Benchm
 
 This project builds a **model-agnostic middleware gate** that derives an _intent contract_ automatically from the user's original request and blocks/escalates any tool call inconsistent with that intent — evaluated head-to-head against an unprotected agent and a ToolGate reimplementation on the benchmarks ToolGate never tested.
 
+## Setup
+
+Install and verify in ~5 minutes: see **[`setup.md`](setup.md)** (venv + `pip install -e ".[dev]"` + `.env` + `pytest -q` + smoke-test scripts).
+
 ---
 
 ## Repository Structure
@@ -15,6 +19,7 @@ This project builds a **model-agnostic middleware gate** that derives an _intent
 ```
 IntentGate\
 ├── README.md                      # this file
+├── setup.md                       # install + verify instructions (venv, pip, .env, tests)
 ├── blueprint.md                   # single source of truth (design, Sec 0–18)
 ├── roadmap.md                     # phased tracker (Phases 0–8, Gates 0–3, success criteria)
 ├── pyproject.toml                 # intent-gate package (pip install -e .)
