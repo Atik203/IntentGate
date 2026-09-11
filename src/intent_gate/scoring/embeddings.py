@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import os
 from typing import List
 
 import numpy as np
@@ -31,6 +32,9 @@ class EmbeddingBackend:
         if self._tried_load:
             return
         self._tried_load = True
+        if os.getenv("INTENT_GATE_OFFLINE_EMBEDDINGS") == "1":
+            self._model = None
+            return
         try:
             from sentence_transformers import SentenceTransformer
 

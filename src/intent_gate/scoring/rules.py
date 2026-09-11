@@ -12,23 +12,54 @@ SEND_TOOLS = {"send_email", "send_message", "email", "post_external"}
 FILE_TOOLS = {"write_file", "delete_file", "rm", "shred"}
 CODE_TOOLS = {"exec", "exec_code", "run_code", "run_shell", "python_exec"}
 
+FINANCIAL_KEYWORDS = (
+    "transfer",
+    "withdraw",
+    "purchase",
+    "buy",
+    "pay_bill",
+    "paybill",
+    "paynow",
+    "makepayment",
+    "sendpayment",
+    "send_money",
+    "sendmoney",
+    "deposit",
+)
+SEND_KEYWORDS = ("send", "send_message", "sendmessage", "sendmail", "post_external", "forward", "reply")
+SHARE_KEYWORD = "share"
+SHARE_SENSITIVE = ("password", "credential", "cred", "secret", "file", "data", "result", "profile", "address", "payment", "contact")
+
+
+def _is_send_tool(n: str) -> bool:
+    if any(k in n for k in SEND_KEYWORDS):
+        return True
+    return SHARE_KEYWORD in n and any(s in n for s in SHARE_SENSITIVE)
+FILE_KEYWORDS = ("write_file", "delete_file", "file_delete", "remove_file", "overwrite", "shred")
+CODE_KEYWORDS = ("exec", "shell", "run_code", "python_exec")
+
 
 def tool_category(name: str) -> str:
+    """Map tool names (snake_case or benchmark CamelCase) to a risk category."""
     n = (name or "").lower()
-    if n in FINANCIAL_TOOLS:
+    if n in FINANCIAL_TOOLS or any(k in n for k in FINANCIAL_KEYWORDS):
         return "financial"
-    if n in SEND_TOOLS:
+    if n in SEND_TOOLS or _is_send_tool(n):
         return "send"
-    if n in FILE_TOOLS:
+    if n in FILE_TOOLS or any(k in n for k in FILE_KEYWORDS):
         return "file"
-    if n in CODE_TOOLS:
+    if n in CODE_TOOLS or any(k in n for k in CODE_KEYWORDS):
         return "code"
     return "other"
 
 
-def _limit_allows(limit_val: str, strict_tokens=("disallow", "no payment", "self-only", "no")) -> bool:
-    v = (limit_val or "").lower()
-    return not any(t in v for t in strict_tokens)
+CLOSED_PREFIXES = ("disallow", "no ", "deny", "forbidden", "self-only")
+
+
+def _limit_allows(limit_val: str) -> bool:
+    """A limit is closed when it starts with an explicit denial prefix; otherwise open."""
+    v = (limit_val or "").strip().lower()
+    return not v.startswith(CLOSED_PREFIXES)
 
 
 def evaluate_rules(contract: IntentContract, call: ToolCall) -> tuple[float, bool, str]:
@@ -40,17 +71,17 @@ def evaluate_rules(contract: IntentContract, call: ToolCall) -> tuple[float, boo
 
     # Financial veto: any money-moving tool when financial limit is closed
     if cat == "financial" or "transfer" in name or name.startswith("pay"):
-        if not _limit_allows(limits.get("financial", "no payment"), ("disallow", "no payment", "no")):
+        if not _limit_allows(limits.get("financial", "no payment")):
             return 0.0, True, f"financial tool {call.name} not in intent (limit={limits.get('financial')})"
 
     # Code exec veto: single exec can do arbitrary side effects (Sec 10 scope boundary)
     if cat == "code":
-        if not _limit_allows(limits.get("code_exec", "disallow"), ("disallow", "no")):
+        if not _limit_allows(limits.get("code_exec", "disallow")):
             return 0.0, True, f"code_exec {call.name} disallowed by intent"
 
     # File write veto
     if cat == "file":
-        if not _limit_allows(limits.get("file_write", "disallow"), ("disallow", "no")):
+        if not _limit_allows(limits.get("file_write", "disallow")):
             return 0.0, True, f"file tool {call.name} disallowed by intent"
 
     # External send: block send to non-self recipient when limit is self-only/disallow

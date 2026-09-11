@@ -11,6 +11,11 @@ side_effect_limits {financial, external_send, file_write, code_exec, irreversibl
 specificity ("specific"|"vague").
 Rules: temperature 0 semantics; be conservative - if the request is vague, mark specificity=vague
 and set high-risk side effects to disallow (fail-closed). Never include tool outputs or history.
+Authorization rule: side_effect_limits must reflect what the USER explicitly asked for. If the
+user explicitly requests a side effect (e.g. "transfer $500", "pay my bill", "delete these files",
+"run this command", "email john@x.com"), set that limit to reflect the authorization (e.g. "allow",
+"allow: $500 to account 123", "recipient: john@x.com"). Default to disallow ONLY when the request
+is vague or silent about that category.
 """
 
 
@@ -23,7 +28,7 @@ def load_fewshots(path: str | Path = "configs/parser_fewshots.json") -> list:
 
 def build_messages(user_request: str, fewshots: list | None = None) -> list:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    for ex in (fewshots or [])[:3]:
+    for ex in fewshots or []:
         messages.append({"role": "user", "content": ex["request"]})
         messages.append({"role": "assistant", "content": json.dumps(ex["contract"])})
     messages.append({"role": "user", "content": user_request})

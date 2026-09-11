@@ -27,10 +27,11 @@ class LLMClient:
                 kwargs["base_url"] = self._base_url
             self._client = OpenAI(**kwargs)
 
-    def call(self, messages: list, temperature: float = 0.0) -> str:
+    def call(self, messages: list, temperature: float = 0.0, response_format: dict | None = None) -> str:
         self._ensure()
+        kwargs = {"response_format": response_format} if response_format else {}
         resp = self._client.chat.completions.create(
-            model=self.model_id, messages=messages, temperature=temperature
+            model=self.model_id, messages=messages, temperature=temperature, **kwargs
         )
         return resp.choices[0].message.content or ""
 
