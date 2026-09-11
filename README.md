@@ -45,9 +45,9 @@ IntentGate\
 │       ├── 03-mcptox-wang-2025.md             # Anchor — 1,312 live-MCP poisoning cases
 │       ├── 04-asb-zhang-2025.md               # Anchor — 10-scenario/27-method superset
 │       └── 05-toolgate-liu-2026.md            # Closest — Hoare-contract gate (B2 baseline)
-├── literature_reivew.md           # original 10-paper Q1–Q9 synthesis (source for index)
-├── mds\                           # (optional) pasted paper markdowns for offline access
-└── pdfs\                          # (optional) paper PDFs
+├── literature_review.md           # (local, gitignored) original 10-paper Q1–Q9 synthesis
+├── mds\                           # (optional, gitignored) pasted paper markdowns for offline access
+└── pdfs\                          # (optional, gitignored) paper PDFs
 ```
 
 ## Branch Model (5-member team)

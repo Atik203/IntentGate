@@ -18,6 +18,12 @@ dev = [
   "pytest>=8.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Atik203/IntentGate"
+Repository = "https://github.com/Atik203/IntentGate"
+Issues = "https://github.com/Atik203/IntentGate/issues"
+Changelog = "https://github.com/Atik203/IntentGate/blob/main/CHANGELOG.md"
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"

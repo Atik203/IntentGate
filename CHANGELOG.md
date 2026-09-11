@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.gitattributes` for consistent line endings across Windows/macOS/Linux.
 - `dev` integration branch workflow (feature branches -> `dev` -> `main`).
 
+### Fixed
+- Untracked generated `src/intent_gate.egg-info/` and `pdfs/InjectAgent.pdf` (both covered by `.gitignore`).
+- Corrected `literature_review.md` filename in README/blueprint; marked gitignored local-only paths.
+
 ## [0.1.0] - 2026-09-06
 
 ### Added

@@ -44,7 +44,7 @@
 - *Post-hoc audit log (detect after execution)* — rejected because it does not prevent the side effect; prevention at the gate is the thesis claim.
 - *LLM-as-judge on full trajectory* — rejected as sole gate because it is itself prompt-injectable and non-deterministic; we use embeddings + rules as primary signal, LLM only for intent parsing (offline, before any attacker content is seen).
 
-**Why this final design was chosen.** It is the only design that (a) unifies multiple attack vectors under one mechanism (the tool call itself), (b) derives policy automatically from the user's own request (zero per-tool authoring vs. ToolGate's manual cost), and (c) can be evaluated *directly* against the adversarial benchmarks ToolGate never tested on — which is the exact cross-paper gap identified in `literature_reivew.md:288-289`.
+**Why this final design was chosen.** It is the only design that (a) unifies multiple attack vectors under one mechanism (the tool call itself), (b) derives policy automatically from the user's own request (zero per-tool authoring vs. ToolGate's manual cost), and (c) can be evaluated *directly* against the adversarial benchmarks ToolGate never tested on — which is the exact cross-paper gap identified in `literature_review.md:288-289`.
 
 ---
 
