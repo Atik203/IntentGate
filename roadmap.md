@@ -32,7 +32,7 @@
 
 - [x] Clone benchmarks into `data/raw/` (InjecAgent, MCPTox snapshot, ToolGate, AgentDojo) via `scripts/clone_benchmarks.ps1`
 - [x] Record exact commit hashes / snapshot versions (required for reproducibility, blueprint Sec 8) → `configs/benchmark_versions.yaml`
-- [ ] B1 unprotected ReAct runs on 20 InjecAgent cases — reproduce ballpark ASR (~24% GPT-4 family)
+- [x] B1 unprotected ReAct runs on 20 InjecAgent cases — ballpark reproduced (20% ours = 20% authors' harness, paper ~24% GPT-4); our pipeline is gate-ready
 - [ ] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented)
 - [ ] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/pilot_score_dist.py` filled with real labeled cases
 - [ ] Go/No-Go decision on Assumption 2 (blueprint Sec 0/Sec 13 step 4); if overlap → rule-heavier redesign (A2) or LLM-as-judge (A4)

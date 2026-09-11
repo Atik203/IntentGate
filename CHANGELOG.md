@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clone script downloads the MCPTox ZIP snapshot (git protocol is unsupported on anonymous.4open.science).
 - `harness/adapters/injecagent.py`: case loader (safe `Tool Parameters` parsing, split/setting inference, deterministic subsets) + fixture tests (32 total).
 - `scripts/run_injecagent_reference.py`: runs InjecAgent's own prompted-agent pipeline on a deterministic subset (S3a reference). Result: 20.0% ASR-valid first step on 20 base cases with `gpt-4o-mini` (paper ballpark ~24%) → harness trusted; see `docs/experiments/b1_reference_injecagent_20.md`.
+- Gate-ready InjecAgent harness: vendored prompts (`harness/prompts/injecagent.py`), ported evaluator with differential parity test (`harness/parsing.py`), case runner emitting structured `ToolCall`s (`harness/injecagent_runner.py`), `scripts/run_injecagent_ours.py`. Our B1 run matches the authors' reference 20/20 case evals (20.0% ASR; `docs/experiments/b1_ours_injecagent_20.md`).
 
 ### Fixed
 - Untracked generated `src/intent_gate.egg-info/` and `pdfs/InjectAgent.pdf` (both covered by `.gitignore`).
