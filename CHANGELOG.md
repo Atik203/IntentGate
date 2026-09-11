@@ -24,6 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Untracked generated `src/intent_gate.egg-info/` and `pdfs/InjectAgent.pdf` (both covered by `.gitignore`).
 - Corrected `literature_review.md` filename in README/blueprint; marked gitignored local-only paths.
+- Rule-engine category false positives found by the Gate 0 pilot: CamelCase benchmark tools now categorized via action keywords; read/search email tools no longer vetoed as "external send"; "shared calendar" no longer vetoed as sensitive sharing.
+
+### Gate 0 (2026-09-11) — GO
+
+- `scripts/build_pilot_set.py` (50 labeled calls from 25 InjecAgent cases) + rewritten
+  `scripts/pilot_score_dist.py` (real embeddings, AUC, τ sweep). Result: **AUC 0.979,
+  ASR 0% / FPR 4% at τ=0.75** → Assumption 2 passes (`docs/experiments/gate0_pilot.md`).
+- Default τ updated to 0.75 in `configs/thresholds.yaml` (Phase 5 still sweeps 0.4–0.8).
+- Test-time embeddings fall back offline via `INTENT_GATE_OFFLINE_EMBEDDINGS` (CI stays fast).
 
 ## [0.1.0] - 2026-09-06
 

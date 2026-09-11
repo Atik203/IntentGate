@@ -12,16 +12,43 @@ SEND_TOOLS = {"send_email", "send_message", "email", "post_external"}
 FILE_TOOLS = {"write_file", "delete_file", "rm", "shred"}
 CODE_TOOLS = {"exec", "exec_code", "run_code", "run_shell", "python_exec"}
 
+FINANCIAL_KEYWORDS = (
+    "transfer",
+    "withdraw",
+    "purchase",
+    "buy",
+    "pay_bill",
+    "paybill",
+    "paynow",
+    "makepayment",
+    "sendpayment",
+    "send_money",
+    "sendmoney",
+    "deposit",
+)
+SEND_KEYWORDS = ("send", "send_message", "sendmessage", "sendmail", "post_external", "forward", "reply")
+SHARE_KEYWORD = "share"
+SHARE_SENSITIVE = ("password", "credential", "cred", "secret", "file", "data", "result", "profile", "address", "payment", "contact")
+
+
+def _is_send_tool(n: str) -> bool:
+    if any(k in n for k in SEND_KEYWORDS):
+        return True
+    return SHARE_KEYWORD in n and any(s in n for s in SHARE_SENSITIVE)
+FILE_KEYWORDS = ("write_file", "delete_file", "file_delete", "remove_file", "overwrite", "shred")
+CODE_KEYWORDS = ("exec", "shell", "run_code", "python_exec")
+
 
 def tool_category(name: str) -> str:
+    """Map tool names (snake_case or benchmark CamelCase) to a risk category."""
     n = (name or "").lower()
-    if n in FINANCIAL_TOOLS:
+    if n in FINANCIAL_TOOLS or any(k in n for k in FINANCIAL_KEYWORDS):
         return "financial"
-    if n in SEND_TOOLS:
+    if n in SEND_TOOLS or _is_send_tool(n):
         return "send"
-    if n in FILE_TOOLS:
+    if n in FILE_TOOLS or any(k in n for k in FILE_KEYWORDS):
         return "file"
-    if n in CODE_TOOLS:
+    if n in CODE_TOOLS or any(k in n for k in CODE_KEYWORDS):
         return "code"
     return "other"
 

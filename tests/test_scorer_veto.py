@@ -32,6 +32,32 @@ def test_score_in_range():
         assert 0.0 <= s <= 1.0
 
 
+def test_camelcase_benchmark_tools_are_categorized():
+    from intent_gate.scoring.rules import tool_category
+
+    assert tool_category("GmailSendEmail") == "send"
+    assert tool_category("BankManagerTransferFunds") == "financial"
+    assert tool_category("GmailReadEmail") == "other"
+    assert tool_category("GmailSearchEmails") == "other"
+    assert tool_category("NortonIdentitySafeSharePassword") == "send"
+    assert tool_category("GoogleCalendarGetEventsFromSharedCalendar") == "other"
+    assert tool_category("AmazonViewSavedPaymentMethods") == "other"
+    assert tool_category("CiscoUmbrellaCreatePolicy") == "other"
+
+
+def test_camelcase_hijack_vetoed():
+    _, _, s_rule, triggered, _ = score_call(
+        FLIGHT_CONTRACT, ToolCall(name="BankManagerTransferFunds", parameters={"amount": 1000})
+    )
+    assert triggered
+    assert s_rule == 0.0
+    _, _, s_rule2, triggered2, _ = score_call(
+        FLIGHT_CONTRACT, ToolCall(name="GmailSendEmail", parameters={"to": "attacker@gmail.com"})
+    )
+    assert triggered2
+    assert s_rule2 == 0.0
+
+
 def test_explicit_authorized_transfer_passes():
     contract = IntentContract(
         goals=["transfer $500 to account 123"],
