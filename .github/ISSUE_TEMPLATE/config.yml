@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Atik203/IntentGate/security/advisories/new
+    about: Report privately per SECURITY.md — never in a public issue.
+  - name: Setup help
+    url: https://github.com/Atik203/IntentGate/blob/dev/setup.md
+    about: Install, run tests, and clone benchmarks.
+  - name: Roadmap / current status
+    url: https://github.com/Atik203/IntentGate/blob/dev/roadmap.md
+    about: See which phase and Gate the team is on before filing a task.
