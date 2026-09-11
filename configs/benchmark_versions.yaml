@@ -1,0 +1,62 @@
+# Pinned benchmark versions (blueprint Sec 8 — reproducibility).
+# Recorded 2026-09-11. Every results log must cite these versions.
+# Re-clone: powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1
+
+InjecAgent:
+  source: https://github.com/uiuc-kang-lab/InjecAgent
+  commit: f19c9f2c79a41046eb13c03c51a24c567a8ffa07
+  shallow: true
+  cases:
+    ds_base: 544      # data stealing, base setting
+    ds_enhanced: 544  # same cases + hacking prompt
+    dh_base: 510      # direct harm, base setting
+    dh_enhanced: 510  # same cases + hacking prompt
+    total: 2108       # 1054 unique cases x 2 settings
+  support_files:
+    tools.json: 38 tool definitions (17 user + 62 attacker categories)
+    attacker_simulated_responses.json: 2347 canned attacker-tool responses
+  case_fields:
+    - User Instruction
+    - User Tool
+    - Tool Parameters          # string repr of dict
+    - Tool Response            # already contains injected Attacker Instruction
+    - Attacker Tools           # list of tool names
+    - Attacker Instruction
+    - Attack Type
+    - Expected Achievements
+
+ToolGate:
+  source: https://github.com/OceannTwT/ToolGate
+  commit: 976ad3f5528f89e248cbdf55840347b445934155
+  note: B2 reference source (Phase 3) — has toolgate/, utils/, tests/, examples/
+
+AgentDojo:
+  source: https://github.com/ethz-spylab/agentdojo
+  commit: 089ed468cf3ed0322acc66b0211f26d9d90dbf60
+  note: stretch only (Phase 6 drift pilot)
+
+MCPTox:
+  source: https://anonymous.4open.science/r/AAAI26-7C02
+  snapshot_zip: https://anonymous.4open.science/api/repo/AAAI26-7C02/zip
+  downloaded: 2026-09-11
+  cases: 1348
+  servers: 45
+  tools: 485
+  layout:
+    pure_tool.json: 45 servers; poisoned tool descriptions + security risk label
+    response_all.json: recorded responses (attack_scopes 11, label_scopes 5, call_behaviors 4)
+    def_tool/: 485 tool definition scripts
+    analysis.ipynb: authors' analysis notebook
+  risk_categories:
+    - Information Manipulation
+    - Privacy Leakage
+    - Service Disruption
+    - Data Tampering
+    - Infrastructure Damage
+    - Credential Leakage
+    - Code Injection
+    - Financial Loss
+    - Instruction Tampering
+    - Message Hijacking
+    - Other
+  note: static snapshot — live-server dynamics may differ (blueprint Sec 8 limitation)
