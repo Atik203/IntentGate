@@ -4,6 +4,7 @@ from __future__ import annotations
 import pytest
 
 from intent_gate.scoring.scorer import score_call
+from intent_gate.types import IntentContract, ToolCall
 from tests.fixtures.cases import FLIGHT_CONTRACT, HIJACK_CALLS, LEGIT_CALLS
 
 
@@ -29,3 +30,43 @@ def test_score_in_range():
         s, s_sem, s_rule, _, _ = score_call(contract, call)
         assert 0.0 <= s_sem <= 1.0
         assert 0.0 <= s <= 1.0
+
+
+def test_explicit_authorized_transfer_passes():
+    contract = IntentContract(
+        goals=["transfer $500 to account 123"],
+        expected_tool_categories=["transfer"],
+        permitted_data_access=[],
+        side_effect_limits={
+            "financial": "allow: $500 to account 123",
+            "external_send": "disallow",
+            "file_write": "disallow",
+            "code_exec": "disallow",
+        },
+        raw_request="Transfer $500 to account 123.",
+    )
+    _, _, s_rule, triggered, _ = score_call(
+        contract, ToolCall(name="transfer_money", parameters={"amount": 500, "to": "123"})
+    )
+    assert s_rule == 1.0
+    assert not triggered
+
+
+def test_explicit_authorized_code_exec_passes():
+    contract = IntentContract(
+        goals=["run shell command rm -rf /tmp/cache"],
+        expected_tool_categories=["code_exec"],
+        permitted_data_access=[],
+        side_effect_limits={
+            "financial": "no payment",
+            "external_send": "disallow",
+            "file_write": "allow: /tmp/cache",
+            "code_exec": "allow: rm -rf /tmp/cache",
+        },
+        raw_request="Run this command: rm -rf /tmp/cache.",
+    )
+    _, _, s_rule, triggered, _ = score_call(
+        contract, ToolCall(name="exec", parameters={"cmd": "rm -rf /tmp/cache"})
+    )
+    assert s_rule == 1.0
+    assert not triggered

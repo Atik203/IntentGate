@@ -36,7 +36,7 @@
 - [x] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented; 30% attack-influenced, heuristic evaluator)
 - [ ] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/pilot_score_dist.py` filled with real labeled cases
 - [ ] Go/No-Go decision on Assumption 2 (blueprint Sec 0/Sec 13 step 4); if overlap → rule-heavier redesign (A2) or LLM-as-judge (A4)
-- [ ] Freeze `intent_schema.json` + 3 few-shot examples; spot-check parser on 30 diverse requests
+- [x] Freeze `intent_schema.json` (v1, 2026-09-11) + 7 few-shot examples; 30-request parser spot-check done (all LLM, over-blocking bug fixed; `docs/experiments/parser_spotcheck_v1.md`)
 - [ ] `references.bib` started (verified figures only)
 
 ## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1

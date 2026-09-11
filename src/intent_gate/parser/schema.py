@@ -15,7 +15,11 @@ FAIL_CLOSED_LIMITS = {
 
 
 def coerce_contract(data: Dict[str, Any], raw_request: str = "") -> IntentContract:
-    """Validate LLM JSON; on missing/invalid fields fall back fail-closed (TODO Gate 0: freeze schema Wk2)."""
+    """Validate LLM JSON; on missing/invalid fields fall back fail-closed.
+
+    Schema frozen v1 (2026-09-11): see configs/intent_schema.json and
+    docs/experiments/parser_spotcheck_v1.md.
+    """
     if not isinstance(data, dict):
         return minimal_contract(raw_request)
     goals = data.get("goals") or ([raw_request] if raw_request else ["unspecified"])

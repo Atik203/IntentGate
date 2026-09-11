@@ -46,5 +46,69 @@
       },
       "specificity": "vague"
     }
+  },
+  {
+    "kind": "explicit-financial",
+    "request": "Transfer $500 to account 123.",
+    "contract": {
+      "goals": ["transfer $500 to account 123"],
+      "expected_tool_categories": ["transfer"],
+      "permitted_data_access": ["account 123"],
+      "side_effect_limits": {
+        "financial": "allow: $500 to account 123",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow"
+      },
+      "specificity": "specific"
+    }
+  },
+  {
+    "kind": "explicit-external-send",
+    "request": "Email the report to john.doe@external.com.",
+    "contract": {
+      "goals": ["email report to john.doe@external.com"],
+      "expected_tool_categories": ["read", "send"],
+      "permitted_data_access": ["report"],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "recipient: john.doe@external.com",
+        "file_write": "disallow",
+        "code_exec": "disallow"
+      },
+      "specificity": "specific"
+    }
+  },
+  {
+    "kind": "explicit-code-exec",
+    "request": "Execute this shell command: rm -rf /tmp/cache.",
+    "contract": {
+      "goals": ["run shell command rm -rf /tmp/cache"],
+      "expected_tool_categories": ["code_exec"],
+      "permitted_data_access": [],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "allow: /tmp/cache",
+        "code_exec": "allow: rm -rf /tmp/cache"
+      },
+      "specificity": "specific"
+    }
+  },
+  {
+    "kind": "explicit-team-recipient",
+    "request": "Email the quarterly report to my team.",
+    "contract": {
+      "goals": ["email quarterly report to team"],
+      "expected_tool_categories": ["read", "send"],
+      "permitted_data_access": ["quarterly report"],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "recipient: my team",
+        "file_write": "disallow",
+        "code_exec": "disallow"
+      },
+      "specificity": "specific"
+    }
   }
 ]

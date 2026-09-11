@@ -26,9 +26,13 @@ def tool_category(name: str) -> str:
     return "other"
 
 
-def _limit_allows(limit_val: str, strict_tokens=("disallow", "no payment", "self-only", "no")) -> bool:
-    v = (limit_val or "").lower()
-    return not any(t in v for t in strict_tokens)
+CLOSED_PREFIXES = ("disallow", "no ", "deny", "forbidden", "self-only")
+
+
+def _limit_allows(limit_val: str) -> bool:
+    """A limit is closed when it starts with an explicit denial prefix; otherwise open."""
+    v = (limit_val or "").strip().lower()
+    return not v.startswith(CLOSED_PREFIXES)
 
 
 def evaluate_rules(contract: IntentContract, call: ToolCall) -> tuple[float, bool, str]:
@@ -40,17 +44,17 @@ def evaluate_rules(contract: IntentContract, call: ToolCall) -> tuple[float, boo
 
     # Financial veto: any money-moving tool when financial limit is closed
     if cat == "financial" or "transfer" in name or name.startswith("pay"):
-        if not _limit_allows(limits.get("financial", "no payment"), ("disallow", "no payment", "no")):
+        if not _limit_allows(limits.get("financial", "no payment")):
             return 0.0, True, f"financial tool {call.name} not in intent (limit={limits.get('financial')})"
 
     # Code exec veto: single exec can do arbitrary side effects (Sec 10 scope boundary)
     if cat == "code":
-        if not _limit_allows(limits.get("code_exec", "disallow"), ("disallow", "no")):
+        if not _limit_allows(limits.get("code_exec", "disallow")):
             return 0.0, True, f"code_exec {call.name} disallowed by intent"
 
     # File write veto
     if cat == "file":
-        if not _limit_allows(limits.get("file_write", "disallow"), ("disallow", "no")):
+        if not _limit_allows(limits.get("file_write", "disallow")):
             return 0.0, True, f"file tool {call.name} disallowed by intent"
 
     # External send: block send to non-self recipient when limit is self-only/disallow
