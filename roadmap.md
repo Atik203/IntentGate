@@ -30,8 +30,8 @@
 
 **Goal: confirm Assumption 2 (scorer separates hijack from legit) before building the full gate. Cheapest place to fail.**
 
-- [~] Clone benchmarks into `data/raw/` (InjecAgent, MCPTox snapshot, ToolGate, AgentDojo) via `scripts/clone_benchmarks.ps1`
-- [ ] Record exact commit hashes / snapshot versions (required for reproducibility, blueprint Sec 8)
+- [x] Clone benchmarks into `data/raw/` (InjecAgent, MCPTox snapshot, ToolGate, AgentDojo) via `scripts/clone_benchmarks.ps1`
+- [x] Record exact commit hashes / snapshot versions (required for reproducibility, blueprint Sec 8) → `configs/benchmark_versions.yaml`
 - [ ] B1 unprotected ReAct runs on 20 InjecAgent cases — reproduce ballpark ASR (~24% GPT-4 family)
 - [ ] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented)
 - [ ] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/pilot_score_dist.py` filled with real labeled cases

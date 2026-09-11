@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub PR/issue templates and CI workflow running `pytest -q` on `dev` and `main`.
 - `.gitattributes` for consistent line endings across Windows/macOS/Linux.
 - `dev` integration branch workflow (feature branches -> `dev` -> `main`).
+- Pinned benchmark versions in `configs/benchmark_versions.yaml`: InjecAgent @ `f19c9f2c`, ToolGate @ `976ad3f5`, AgentDojo @ `089ed468`, MCPTox snapshot 2026-09-11 (1,348 cases, 45 servers).
+- Clone script downloads the MCPTox ZIP snapshot (git protocol is unsupported on anonymous.4open.science).
 
 ### Fixed
 - Untracked generated `src/intent_gate.egg-info/` and `pdfs/InjectAgent.pdf` (both covered by `.gitignore`).
