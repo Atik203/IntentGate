@@ -4,6 +4,10 @@
 
 **Last updated:** 2026-08-24
 
+> **FROZEN for Phase 2 (Gate 0, 2026-09-11).** This index and the 5 detailed paper reviews
+> are the citation basis for the thesis/paper (BibTeX: `references.bib`). Re-verification of
+> flagged figures happens only via a roadmap + CHANGELOG entry.
+
 ---
 
 ## Master Comparison Matrix

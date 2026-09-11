@@ -16,6 +16,5 @@ __pycache__/
 data/raw/
 
 # run outputs (JSONL traces, reports) - keep via results/.gitkeep only
-results/*.jsonl
-results/*.json
+results/*
 !results/.gitkeep*.egg-info/
