@@ -37,7 +37,7 @@
 - [x] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/build_pilot_set.py` + `scripts/pilot_score_dist.py`
 - [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/gate0_pilot.md`); three rule-engine FPs found and fixed
 - [x] Freeze `intent_schema.json` (v1, 2026-09-11) + 7 few-shot examples; 30-request parser spot-check done (all LLM, over-blocking bug fixed; `docs/experiments/parser_spotcheck_v1.md`)
-- [ ] `references.bib` started (verified figures only)
+- [x] `references.bib` started (verified figures only) → 10 entries, `literature_review/index.md` frozen
 
 ## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1
 
