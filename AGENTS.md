@@ -77,3 +77,14 @@ To maximize context cache hits (DeepSeek context caching, OpenAI automatic promp
 - Before touching `src/` or `harness/`, run `pytest -q` and keep it green.
 - Do not commit `.env`, `data/raw/`, `results/*.jsonl`, `.venv/`, `*.egg-info/` (gitignore already covers these).
 - Security-relevant code paths (parser ordering, no-bypass, veto logic) have dedicated tests — add/extend them with any change.
+
+## Branching (5-member team)
+
+```
+feature branch ──PR──> dev ──PR (all tests green + review)──> main
+```
+
+- `main` = production (release only, never commit directly); `dev` = integration (all PRs target it).
+- Create feature branches from `dev`: `feat/<topic>`, `fix/<topic>`, `docs/<topic>`, `exp/<topic>`, or `<member>/<topic>`.
+- CI (`.github/workflows/tests.yml`) runs `pytest -q` on pushes/PRs to `dev` and `main`.
+- Update `roadmap.md` checkboxes and `CHANGELOG.md` (`[Unreleased]`) in the same PR. Full rules: `CONTRIBUTING.md`.

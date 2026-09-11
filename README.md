@@ -20,9 +20,16 @@ Install and verify in ~5 minutes: see **[`setup.md`](setup.md)** (venv + `pip in
 IntentGate\
 ├── README.md                      # this file
 ├── setup.md                       # install + verify instructions (venv, pip, .env, tests)
+├── CONTRIBUTING.md                # branch model, PR rules, definition of done
+├── SECURITY.md                    # vulnerability reporting + scope
+├── CODE_OF_CONDUCT.md             # Contributor Covenant v2.1
+├── CHANGELOG.md                   # Keep a Changelog; updated per PR
+├── LICENSE                        # MIT
+├── AGENTS.md                      # instructions for AI coding agents (+ LLM cache guidance)
 ├── blueprint.md                   # single source of truth (design, Sec 0–18)
 ├── roadmap.md                     # phased tracker (Phases 0–8, Gates 0–3, success criteria)
 ├── pyproject.toml                 # intent-gate package (pip install -e .)
+├── .github\                       # PR/issue templates + CI (pytest on dev/main)
 ├── configs\                       # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
 ├── src\intent_gate\               # parser / scoring / gate / agent / baselines.toolgate / eval
 ├── harness\                       # run_injecagent.py, run_mcptox.py, compare_b2.py, common.py
@@ -42,6 +49,18 @@ IntentGate\
 ├── mds\                           # (optional) pasted paper markdowns for offline access
 └── pdfs\                          # (optional) paper PDFs
 ```
+
+## Branch Model (5-member team)
+
+```
+feature branch (feat/, fix/, docs/, exp/, <member>/) ──PR──> dev ──PR (tested+reviewed)──> main
+```
+
+- **`main`** — production. Only merges from `dev` after all tests pass. Never commit directly.
+- **`dev`** — integration branch. All feature PRs target `dev`.
+- Feature branches start from `dev`, named after the feature or the member (e.g. `feat/gate-veto`, `atik/toolgate-contracts`).
+
+Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.md`](SECURITY.md).
 
 ---
 
@@ -120,6 +139,16 @@ Realistic: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, U
 | 5   | ToolGate (Liu et al., 2026)          | arXiv 2601.04688v1   | Closest system (B2)     |
 
 Full reviews: [`literature_review/papers/`](literature_review/papers/)
+
+---
+
+## Contributing
+
+5-member team workflow: feature branch → `dev` → `main`. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before your first PR; CI runs `pytest -q` on `dev` and `main`. All contributors follow [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Report vulnerabilities privately per [`SECURITY.md`](SECURITY.md) (never in public issues).
+
+## License
+
+[MIT](LICENSE) — Copyright (c) 2026 IntentGate contributors.
 
 ---
 

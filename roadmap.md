@@ -22,6 +22,9 @@
 - [x] `configs/`: `intent_schema.json`, `parser_fewshots.json`, `thresholds.yaml`, `models.yaml`
 - [x] `scripts/`: `pilot_score_dist.py`, `check_parser.py`, `clone_benchmarks.ps1`
 - [x] `.env.example`, `data/README.md`, `results/.gitkeep`, `.gitignore` (venv, egg-info, data/raw, results)
+- [x] Professional repo docs: `LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`
+- [x] GitHub PR/issue templates + CI workflow (`pytest -q` on `dev`/`main`)
+- [x] Branch model: feature branch → `dev` → `main` (dev integration branch created)
 
 ## Phase 2 — Foundation & Pilot (Weeks 1–2) → Gate 0
 
