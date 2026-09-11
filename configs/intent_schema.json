@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "Intent contract schema v1 — FROZEN 2026-09-11 after 30-request spot-check (docs/experiments/parser_spotcheck_v1.md). Changes require a roadmap + CHANGELOG entry and parser re-validation.",
   "title": "IntentContract",
   "description": "Frozen per-session intent contract derived once from the trusted user request (blueprint Sec 4/5).",
   "type": "object",

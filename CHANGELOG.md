@@ -17,10 +17,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `harness/adapters/injecagent.py`: case loader (safe `Tool Parameters` parsing, split/setting inference, deterministic subsets) + fixture tests (32 total).
 - `scripts/run_injecagent_reference.py`: runs InjecAgent's own prompted-agent pipeline on a deterministic subset (S3a reference). Result: 20.0% ASR-valid first step on 20 base cases with `gpt-4o-mini` (paper ballpark ~24%) → harness trusted; see `docs/experiments/b1_reference_injecagent_20.md`.
 - Gate-ready InjecAgent harness: vendored prompts (`harness/prompts/injecagent.py`), ported evaluator with differential parity test (`harness/parsing.py`), case runner emitting structured `ToolCall`s (`harness/injecagent_runner.py`), `scripts/run_injecagent_ours.py`. Our B1 run matches the authors' reference 20/20 case evals (20.0% ASR; `docs/experiments/b1_ours_injecagent_20.md`).
+- MCPTox static snapshot support: adapter (`harness/adapters/mcptox.py`), heuristic runner/evaluator (`harness/mcptox_runner.py`), `scripts/run_mcptox_ours.py`. B1 n=20: 10% success, 30% attack-influenced; evaluator validated vs authors' labels (precision 0.82 / recall 0.26); see `docs/experiments/b1_mcptox_20.md`.
+- LLM intent parser v1: JSON mode + one repair retry + fail-closed fallbacks (`IntentParser._parse_llm`), `build_parser()` factory, `response_format` support in `LLMClient`. Authorization rule + 4 extra few-shots fix over-blocking of explicit user side effects. Schema frozen v1 (`configs/intent_schema.json`); 30-request spot-check all-LLM (`docs/experiments/parser_spotcheck_v1.md`).
+- Rule-engine fix: `_limit_allows` no longer treats the substring "no" as a denial (word-boundary prefixes only), so scoped authorizations ("allow: $500 to account 123") pass.
 
 ### Fixed
 - Untracked generated `src/intent_gate.egg-info/` and `pdfs/InjectAgent.pdf` (both covered by `.gitignore`).
 - Corrected `literature_review.md` filename in README/blueprint; marked gitignored local-only paths.
+- Rule-engine category false positives found by the Gate 0 pilot: CamelCase benchmark tools now categorized via action keywords; read/search email tools no longer vetoed as "external send"; "shared calendar" no longer vetoed as sensitive sharing.
+
+### Gate 0 (2026-09-11) — GO
+
+- `scripts/build_pilot_set.py` (50 labeled calls from 25 InjecAgent cases) + rewritten
+  `scripts/pilot_score_dist.py` (real embeddings, AUC, τ sweep). Result: **AUC 0.979,
+  ASR 0% / FPR 4% at τ=0.75** → Assumption 2 passes (`docs/experiments/gate0_pilot.md`).
+- Default τ updated to 0.75 in `configs/thresholds.yaml` (Phase 5 still sweeps 0.4–0.8).
+- Test-time embeddings fall back offline via `INTENT_GATE_OFFLINE_EMBEDDINGS` (CI stays fast).
 
 ## [0.1.0] - 2026-09-06
 

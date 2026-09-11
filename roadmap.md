@@ -33,10 +33,10 @@
 - [x] Clone benchmarks into `data/raw/` (InjecAgent, MCPTox snapshot, ToolGate, AgentDojo) via `scripts/clone_benchmarks.ps1`
 - [x] Record exact commit hashes / snapshot versions (required for reproducibility, blueprint Sec 8) → `configs/benchmark_versions.yaml`
 - [x] B1 unprotected ReAct runs on 20 InjecAgent cases — ballpark reproduced (20% ours = 20% authors' harness, paper ~24% GPT-4); our pipeline is gate-ready
-- [ ] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented)
-- [ ] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/pilot_score_dist.py` filled with real labeled cases
-- [ ] Go/No-Go decision on Assumption 2 (blueprint Sec 0/Sec 13 step 4); if overlap → rule-heavier redesign (A2) or LLM-as-judge (A4)
-- [ ] Freeze `intent_schema.json` + 3 few-shot examples; spot-check parser on 30 diverse requests
+- [x] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented; 30% attack-influenced, heuristic evaluator)
+- [x] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/build_pilot_set.py` + `scripts/pilot_score_dist.py`
+- [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/gate0_pilot.md`); three rule-engine FPs found and fixed
+- [x] Freeze `intent_schema.json` (v1, 2026-09-11) + 7 few-shot examples; 30-request parser spot-check done (all LLM, over-blocking bug fixed; `docs/experiments/parser_spotcheck_v1.md`)
 - [ ] `references.bib` started (verified figures only)
 
 ## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1
@@ -120,7 +120,7 @@
 
 | Gate | Definition | Status |
 |---|---|---|
-| Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [ ] |
+| Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
 | Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [ ] |
 | Gate 2 | Gate integrated; unit tests green; p95 latency measured | [ ] |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [ ] |
