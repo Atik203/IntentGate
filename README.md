@@ -4,9 +4,9 @@
 
 > LLM Security · Agentic AI · AI Safety — Thesis Project (2026) · [github.com/Atik203/IntentGate](https://github.com/Atik203/IntentGate)
 
-MCP-style agents now execute real actions (email, payments, code, files). Benchmarks show systemic hijack vulnerability — AgentDojo 629 cases, InjecAgent 1,054 cases (GPT-4 24%→47% ASR), MCPTox 1,312 cases on 45 live servers (up to 72.8% ASR, <3% refusal), ASB 84.3% mixed ASR — yet defenses are siloed or require hand-authored contracts (ToolGate, arXiv 2601.04688v1, never tested adversarially).
+MCP-style agents now execute real actions (email, payments, code, files). Benchmarks show systemic hijack vulnerability — AgentDojo 629 cases, InjecAgent 1,054 cases (GPT-4 24%→47% ASR), MCPTox 1,312 cases on 45 live servers (up to 72.8% ASR, <3% refusal), ASB 84.3% mixed ASR — yet defenses are siloed, require hand-authored contracts (ToolGate, arXiv 2601.04688v1, never tested adversarially), or were published only recently on a different benchmark pair (TraceGrant, arXiv 2608.21126v1 — 0% ASR on AgentDojo/ASB, but no InjecAgent/MCPTox; IGAC, SSRN 7195899 — server-side, no adversarial benchmarks).
 
-This project builds a **model-agnostic middleware gate** that derives an _intent contract_ automatically from the user's original request and blocks/escalates any tool call inconsistent with that intent — evaluated head-to-head against an unprotected agent and a ToolGate reimplementation on the benchmarks ToolGate never tested.
+This project builds a **model-agnostic middleware gate** that derives an _intent contract_ automatically from the user's original request and blocks/escalates any tool call inconsistent with that intent — evaluated head-to-head against an unprotected agent and a ToolGate reimplementation as **two separate benchmark studies**: InjecAgent (injection) and MCPTox (tool-poisoning), each reported independently, **no published gate has run either one**.
 
 ## Setup
 
@@ -38,13 +38,15 @@ IntentGate\
 ├── data\                          # (gitignored) benchmark clones + snapshots — scripts/clone_benchmarks.ps1
 ├── results\                       # (gitignored) JSONL traces + reports
 ├── literature_review\
-│   ├── index.md                   # Master Comparison Matrix + Gap Map + Verification Log (5 anchors + Closest)
+│   ├── index.md                   # Master Comparison Matrix + Gap Map + Verification Log (5 anchors + 3 closest/supporting)
 │   └── papers\
 │       ├── 01-agentdojo-debenedetti-2024.md   # Anchor — dynamic 97-task/629-case injection harness
 │       ├── 02-injecagent-zhan-2024.md         # Anchor — 1,054 indirect-injection cases
 │       ├── 03-mcptox-wang-2025.md             # Anchor — 1,312 live-MCP poisoning cases
 │       ├── 04-asb-zhang-2025.md               # Anchor — 10-scenario/27-method superset
-│       └── 05-toolgate-liu-2026.md            # Closest — Hoare-contract gate (B2 baseline)
+│       ├── 05-toolgate-liu-2026.md            # Closest (formal) — Hoare-contract gate (B2 baseline)
+│       ├── 06-tracegrant-liao-2026.md         # Closest (request-derived) — POEC contract, 0% ASR AgentDojo/ASB
+│       └── 07-igac-zhu-2026.md                # Supporting (request-derived) — server-side intent certificate
 ├── literature_review.md           # (local, gitignored) original 10-paper Q1–Q9 synthesis
 ├── mds\                           # (optional, gitignored) pasted paper markdowns for offline access
 └── pdfs\                          # (optional, gitignored) paper PDFs
@@ -66,12 +68,12 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 
 ## Literature Review
 
-- **Index:** [`literature_review/index.md`](literature_review/index.md) — Master Matrix (5 verified 2026-08-24), Legend, Quick Triage, Gap Map, Verification Log
-- **Papers:** 5 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
+- **Index:** [`literature_review/index.md`](literature_review/index.md) — Master Matrix (5 anchors verified 2026-08-24 + TraceGrant/IGAC added 2026-09-12), Legend, Quick Triage, Gap Map, Verification Log
+- **Papers:** 7 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
 - **Blueprint:** [`blueprint.md`](blueprint.md) — Phase 1–5, Sections 0–18 (design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique)
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
 
-All 5 papers verified via full arXiv html (not snippets).
+Papers 1–5 verified via full arXiv html; papers 6–7 (TraceGrant, IGAC) verified via full PDF text 2026-09-12 (local `pdfs/`).
 
 ---
 
@@ -81,9 +83,9 @@ All 5 papers verified via full arXiv html (not snippets).
 2. **Domain:** LLM Security · Agentic AI · AI Safety
 3. **Motivation:** Shift from chat to action via MCP; OWASP excessive agency Top 10; formal gating exists but is manual and non-adversarial
 4. **Problem:** Injection, tool poisoning, and drift all converge to one observable — an agent executes an action the user never intended
-5. **Gap:** Single-vector filters vs. manual Hoare contracts (ToolGate, never on InjecAgent/MCPTox); no auto-derived, cross-vector gate
+5. **Gap:** Single-vector filters vs. manual Hoare contracts (ToolGate, never on InjecAgent/MCPTox); request-derived gates exist but own AgentDojo/ASB (TraceGrant, 0% ASR) or are unevaluated adversarially (IGAC); no auto-derived gate tested on **injection + registration-time tool poisoning**
 6. **Solution:** Parse user request → structured intent contract (goals, tool categories, data scopes, side-effect limits) → middleware gate scores every proposed `tool_call(name,params)` via `S = α·cosine(embed(contract), embed(call)) + (1-α)·rule_compliance` with veto; decision `allow / block / escalate` via threshold `τ` (sweep)
-7. **Novelty:** Zero per-tool authoring, vector-agnostic (injection + poisoning), first adversarial test of contract-style gating
+7. **Novelty:** Zero per-tool authoring, one gate mechanism evaluated on two distinct vectors **as separate studies** (injection → InjecAgent; poisoning → MCPTox; per-vector ASR/FPR, never combined), graded scorer (similarity + veto) with τ/δ threshold + escalate band, first adversarial test of request-derived contract gating — TraceGrant and ToolGate test neither vector
 8. **Deliverables:** Pip-installable wrapper, ToolGate reimplementation (Appendix G), evaluation report (ASR/FPR/latency/setup-cost), workshop/Findings paper draft
 9. **Evaluation:** B1 unprotected ReAct vs B2 ToolGate vs Ours on InjecAgent (1,054) + MCPTox (1,312, 45 servers) — metrics ASR, FPR, escalation rate, latency p95, setup cost (0 vs manual count); stretch multi-turn drift pilot (20 AgentDojo cases)
 10. **Stack:** Open LLM (Qwen/Llama via API), ReAct/MCP client, Python middleware, `all-MiniLM-L6-v2` (CPU), no fine-tuning
@@ -136,7 +138,9 @@ Realistic: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, U
 | 2   | InjecAgent (Zhan et al., 2024)       | Findings of ACL 2024 | Anchor benchmark        |
 | 3   | MCPTox (Wang et al., 2025)           | arXiv → AAAI 2026    | Anchor benchmark (live) |
 | 4   | ASB (Zhang et al., 2025)             | ICLR 2025            | Anchor superset         |
-| 5   | ToolGate (Liu et al., 2026)          | arXiv 2601.04688v1   | Closest system (B2)     |
+| 5   | ToolGate (Liu et al., 2026)          | arXiv 2601.04688v1   | Closest (formal), B2 baseline |
+| 6   | TraceGrant (Liao et al., 2026)       | arXiv 2608.21126v1   | Closest (request-derived), 0% ASR AgentDojo/ASB |
+| 7   | IGAC (Zhu & Wang, 2026)              | SSRN 7195899         | Supporting (server-side intent AC) |
 
 Full reviews: [`literature_review/papers/`](literature_review/papers/)
 
@@ -164,4 +168,4 @@ Full reviews: [`literature_review/papers/`](literature_review/papers/)
 
 ---
 
-_Last updated: 2026-09-06 — blueprint is the single source of truth, roadmap.md tracks status._
+_Last updated: 2026-09-12 — blueprint is the single source of truth, roadmap.md tracks status; lit-review index re-opened for TraceGrant + IGAC (roadmap + CHANGELOG entries)._
