@@ -26,7 +26,7 @@ Relevant to Our Idea:
 ASB is our broadest anchor — it proves single-vector defenses are insufficient because mixed attacks (84.3% ASR) compound vectors we would otherwise handle separately. Our gate, at the tool-call chokepoint, is vector-agnostic across DPI/IPI (user prompt vs. observation) but ASB shows future work must also handle memory poisoning and PoT backdoors that corrupt *planning* before any tool is called — i.e., the gate is necessary but not sufficient for those stages. Practically, ASB's D/IPI formalization and 5 injection phrasings (Naive, Escape Characters, Context Ignoring, Fake Completion, Combined) give us a ready-made paraphrase set for our stretch adaptive pilot, and its defense taxonomy lets us position our gate vs. all 11 defenses in one table without reimplementing them (we cite their published ASR deltas). Crucially, ASB's NRP metric is the precedent for our own joint reporting (ASR + FPR + latency + setup cost) rather than ASR alone — a gate that reduces ASR but destroys utility is not a win, which is why we pair ASR with FPR/utility.
 
 Gap / Limitation Noted in Paper:
-The authors acknowledge scenarios/tools are still simulated (not live MCP servers like MCPTox), so the combinatorial scale (27 methods × 13 backbones × 10 scenarios) trades depth per pair for breadth. They list future work as improving defenses and expanding attack scenarios — exactly where a unified gate that is evaluated on live MCPTox + simulated ASB would fit. No defense is proposed as a solution; all are benchmarked and found inadequate.
+The authors acknowledge scenarios/tools are still simulated (not live MCP servers like MCPTox), so the combinatorial scale (27 methods × 13 backbones × 10 scenarios) trades depth per pair for breadth. They list future work as improving defenses and expanding attack scenarios — exactly where per-vector studies on live MCPTox and on simulated AgentDojo would fit. No defense is proposed as a solution; all are benchmarked and found inadequate.
 
 ---
 
@@ -116,7 +116,7 @@ Per conclusion/future work: simulated (not live) tools/scenarios, no params (cap
 
 **Overlap with C1 (gate):** None — ASB is benchmark-only. But its defense results (all inadequate) are the external evidence we cite for "prompt defenses insufficient, gate needed."
 
-**Overlap with C2 (evaluation):** Methodological overlap — ASB's 7-metric, 13-backbone, stage-wise evaluation is a model for comprehensive reporting, and its Mixed Attack is the strongest argument for why we need cross-vector evaluation (which ASB enables but we instantiate via InjecAgent+MCPTox).
+**Overlap with C2 (evaluation):** Methodological overlap — ASB's 7-metric, 13-backbone, stage-wise evaluation is a model for comprehensive reporting, and its Mixed Attack is the strongest argument for why each vector must be evaluated as its own study (which we do via InjecAgent and MCPTox, reported independently).
 
 ### 6. Our Positioning Strategy
 
