@@ -8,9 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Lit-review controlled unfreeze (2026-09-12, per roadmap + CHANGELOG rule): new reviews `literature_review/papers/06-tracegrant-liao-2026.md` (Closest/High — request-derived POEC contract, 0% ASR on AgentDojo/ASB, no InjecAgent/MCPTox, deterministic+stateful, no graded score/escalation) and `07-igac-zhu-2026.md` (Supporting/Medium-High — server-side intent certificate/manifest narrowing, no adversarial benchmarks, 36-trial external subset). Matrix, Quick Triage, Gap Map row 1, and Verification Log updated; Gap Map row 1 "None/Novel" claim superseded; 2 new BibTeX entries in `references.bib`.
-- `blueprint.md` novelty/C2 claims narrowed to a graded (τ/δ, escalate) stateless zero-setup gate evaluated as **two separate benchmark studies** (InjecAgent injection, MCPTox tool poisoning, reported independently — per supervisor instruction, no combined cross-vector claim); README mirrored; roadmap Phase 8 related-work reframed to three-way gate comparison (ToolGate/TraceGrant/IGAC/Ours) + optional AgentDojo-subset TraceGrant-comparison stretch (Phase 6).
-- `pdfs/` now holds `2608.21126v1.pdf` (TraceGrant) + `ssrn-7195899.pdf` (IGAC) (gitignored).
 - Professional repo docs: `LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, this changelog.
 - GitHub PR/issue templates and CI workflow running `pytest -q` on `dev` and `main`.
 - `.gitattributes` for consistent line endings across Windows/macOS/Linux.
