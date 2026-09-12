@@ -13,6 +13,15 @@ class ToolGateChecker:
         self.no_contract_count = 0
         self.violations = 0
 
+    @property
+    def coverage(self) -> float:
+        """Ratio of tools with contracts to total tools evaluated (0.0–1.0)."""
+        total = len(self.contracts)
+        if total == 0:
+            return 0.0
+        # count tools that have a contract (i.e., appear in the dict)
+        return len([name for name in self.contracts]) / total
+
     def check(self, call: ToolCall) -> str:
         """Return observation string (execute or violation). Same interface as GateMiddleware.execute."""
         if call.name not in self.contracts:
