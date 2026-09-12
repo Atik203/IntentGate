@@ -10,7 +10,6 @@ __pycache__/
 .ruff_cache/
 
 # secrets / local env
-.env
 
 # benchmark clones + snapshots (re-clone via scripts/clone_benchmarks.ps1)
 data/raw/
@@ -18,3 +17,5 @@ data/raw/
 # run outputs (JSONL traces, reports) - keep via results/.gitkeep only
 results/*
 !results/.gitkeep*.egg-info/
+config.bat
+node_modules
