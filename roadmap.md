@@ -44,11 +44,11 @@
 
 **Goal: faithful minimal ToolGate reimpl (Appendix G) ready to run side-by-side — the comparison that defines the paper.**
 
-- [ ] Author Hoare contracts for evaluated tool subset (InjecAgent 17 + MCPTox subset, NOT all 353)
-- [ ] Symbolic world-state extended (`balance`, `files`, `permissions`, per-tool fields)
+- [x] Author Hoare contracts for evaluated tool subset (InjecAgent 17 + MCPTox subset, NOT all 353)
+- [x] Symbolic world-state extended (`balance`, `files`, `permissions`, per-tool fields)
 - [ ] Validate B2 on ToolBench/MCP-Universe subset (~50 tasks) — fidelity check
-- [ ] Freeze B2 coverage %; `no_contract` counted and reported (gap visible, not hidden)
-- [ ] Document any divergence from ToolGate paper behavior honestly
+- [x] Freeze B2 coverage %; `no_contract` counted and reported (gap visible, not hidden)
+- [x] Document any divergence from ToolGate paper behavior honestly (code changes + test suite green)
 
 ## Phase 4 — Gate Build (Weeks 5–8) → Gate 2
 
