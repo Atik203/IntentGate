@@ -113,7 +113,7 @@ Per §5: single-turn only (no conversational memory poisoning or sleeper trigger
 | **Problem** | Measures TPA vulnerability on live MCP servers | Prevents TPA (and IPI) at the tool-call gate, measured *on* MCPTox |
 | **Vector** | Poison at registration (metadata) — pre-execution reasoning | Same vector but defense at same chokepoint: proposed legitimate-tool call (whether triggered by output or description) is checked against intent |
 | **Stealth property** | Malicious action performed by legitimate tool, poisoned tool never executed — bypasses tool-name filters | Our gate checks *legitimate-tool call's parameters* against intent, so stealth via legitimate tool does not bypass it |
-| **Evaluation** | ASR-valid and Refused Ratio per paradigm; shows IPI≠TPA (0% transfer) | Will report ASR-valid + Refused + FPR + latency + setup cost (0) on same triplets; will also run on InjecAgent to prove cross-vector |
+| **Evaluation** | ASR-valid and Refused Ratio per paradigm; shows IPI≠TPA (0% transfer) | Will report ASR-valid + Refused + FPR + latency + setup cost (0) on the same triplets; will also run on InjecAgent — each vector its own study, reported separately |
 | **Most effective paradigm** | Parameter tampering 46.7% (hardest to detect) | Hardest for us too — but rule engine (e.g., recipient allowlist derived from intent) is the counter; ablation A2 isolates this |
 
 **Overlap with C1 (gate):** None — no defense. But MCPTox's design principles (Trigger + Action + Justification) are the *payload* our scorer must be robust to (justification makes poison look plausible). No threat to novelty — complementary substrate.
@@ -124,10 +124,10 @@ Per §5: single-turn only (no conversational memory poisoning or sleeper trigger
 |---|---|
 | **In our paper** | Anchor benchmark A3 (primary poisoning substrate, live-server); also the source of the "IPI≠TPA" and "reasoning models more vulnerable" citations |
 | **How we cite** | As "the first live-MCP TPA benchmark (45 servers, 353 tools, 1,312 cases; up to 72.8% ASR, <3% refusal; reasoning +27.8% ASR; parameter tampering 46.7% most effective; IPI payloads transfer at ~0%)" — we evaluate B1/B2/ours on it |
-| **Relationship** | Substrate, not competitor — our gate's cross-vector claim depends on pairing MCPTox (poisoning) with InjecAgent (injection) |
+| **Relationship** | Substrate, not competitor — our gate is the one mechanism we test on two distinct vectors: MCPTox (poisoning) as its own study and InjecAgent (injection) as another, each reported independently |
 
 **Pre-emptive rebuttal paragraph** (if reviewer asks "why not just evaluate on InjecAgent?"):
-> InjecAgent and MCPTox test distinct vectors that fail to transfer: MCPTox §4.3 shows InjecAgent payloads moved from tool outputs to tool descriptions drop from 41.8% to near 0% ASR because they lack a Trigger Condition and lose contextual prominence among many tool descriptions. A defense tuned only for output injection will therefore not be expected to handle description poisoning. We evaluate on both — plus MCPTox's live-server grounding (45 real servers, 353 authentic tools) — to make our "unified, vector-agnostic gate at the tool call" claim falsifiable, which neither benchmark alone would support.
+> InjecAgent and MCPTox test distinct vectors that fail to transfer: MCPTox §4.3 shows InjecAgent payloads moved from tool outputs to tool descriptions drop from 41.8% to near 0% ASR because they lack a Trigger Condition and lose contextual prominence among many tool descriptions. A defense tuned only for output injection will therefore not be expected to handle description poisoning. We therefore evaluate both vectors, but **each as its own benchmark study** — separate result tables, separate ASR/FPR, separate conclusions on InjecAgent (1,054 injection cases) and on MCPTox's live-server grounding (45 real servers, 353 authentic tools). This keeps the falsifiability of a single gate mechanism against two distinct attack vectors without merging two different datasets into one combined number.
 
 ### 7. Code & Reproducibility
 
@@ -154,5 +154,5 @@ Per §5: single-turn only (no conversational memory poisoning or sleeper trigger
 
 ★★★★★ (Essential — anchor benchmark, live-server poisoning)
 
-**Justification:** MCPTox is the *only* benchmark that grounds Tool Poisoning in live MCP servers and proves it is not a theoretical risk (72.8% ASR, <3% refusal, reasoning models worse). It provides the exact failure taxonomy (parameter tampering > function hijacking) that justifies our parameter-aware rule engine, and the IPI→TPA 0% transfer that justifies our cross-vector evaluation design. Every team member should read §3 (paradigms + design principles) before finalizing the gate's rule set. Mandatory in related work as "the live MCP poisoning benchmark" and in evaluation as the second primary dataset.
+**Justification:** MCPTox is the *only* benchmark that grounds Tool Poisoning in live MCP servers and proves it is not a theoretical risk (72.8% ASR, <3% refusal, reasoning models worse). It provides the exact failure taxonomy (parameter tampering > function hijacking) that justifies our parameter-aware rule engine, and the IPI→TPA 0% transfer that motivates evaluating injection (InjecAgent) and poisoning (MCPTox) as two separate, independently reported studies. Every team member should read §3 (paradigms + design principles) before finalizing the gate's rule set. Mandatory in related work as "the live MCP poisoning benchmark" and in evaluation as the tool-poisoning study.
 
