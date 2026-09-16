@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$comment": "Intent contract schema v1.1 — controlled unfreeze 2026-09-16 (roadmap + CHANGELOG) adding system_change; v1 frozen 2026-09-11 (docs/experiments/parser_spotcheck_v1.md), v1.1 re-validated in docs/experiments/parser_spotcheck_v2.md. Changes require a roadmap + CHANGELOG entry and parser re-validation.",
+  "$comment": "Intent contract schema v1.1 — controlled unfreeze 2026-09-16 (roadmap + CHANGELOG) adding system_change; v1 frozen 2026-09-11. Freeze rule: changes require a roadmap + CHANGELOG entry and parser re-validation; evidence in docs/experiments/02_parser_schema.md (E5 v1 / E6 v1.1).",
   "title": "IntentContract",
   "description": "Frozen per-session intent contract derived once from the trusted user request (blueprint Sec 4/5).",
   "type": "object",

@@ -1,6 +1,6 @@
 # Roadmap — Intent-Consistency Gate Thesis
 
-> Tracker for the thesis + paper. Single source of truth for progress: `blueprint.md` (design), `roadmap.md` (status).
+> Tracker for the thesis + paper. Single source of truth for progress: `docs/blueprint.md` (design), `roadmap.md` (status).
 > Legend: `[x]` done · `[ ]` todo · `[~]` in progress · `Gate N` = blueprint Sec 12/13 milestone.
 > Update this file in the same commit that completes a task.
 
@@ -10,7 +10,7 @@
 
 - [x] 10-paper Q1–Q9 synthesis (`literature_review.md` + `literature_review/index.md`)
 - [x] 5 anchor reviews in `literature_review/papers/` (AgentDojo, InjecAgent, MCPTox, ASB, ToolGate)
-- [x] Master blueprint Sec 0–18 (`blueprint.md` — single source of truth)
+- [x] Master blueprint Sec 0–18 (`docs/blueprint.md` — single source of truth)
 - [x] Repo `README.md` (project overview, structure, evaluation plan, quick start)
 
 ## Phase 1 — Project Structure Initialization — DONE (commit 3ff9e33)
@@ -35,8 +35,8 @@
 - [x] B1 unprotected ReAct runs on 20 InjecAgent cases — ballpark reproduced (20% ours = 20% authors' harness, paper ~24% GPT-4); our pipeline is gate-ready
 - [x] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented; 30% attack-influenced, heuristic evaluator)
 - [x] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/build_pilot_set.py` + `scripts/pilot_score_dist.py`
-- [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/gate0_pilot.md`); three rule-engine FPs found and fixed
-- [x] Intent schema **v1.1** (controlled unfreeze 2026-09-16: adds `system_change`, 9 few-shots, 30-request re-validation `docs/experiments/parser_spotcheck_v2.md`); v1 frozen 2026-09-11 with the original spot-check
+- [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/01_gate0_foundation.md`); three rule-engine FPs found and fixed
+- [x] Intent schema **v1.1** (controlled unfreeze 2026-09-16: adds `system_change`, 9 few-shots, 30-request re-validation `docs/experiments/02_parser_schema.md`); v1 frozen 2026-09-11 with the original spot-check
 - [x] `references.bib` started (verified figures only) → 10 entries, `literature_review/index.md` frozen
 
 ## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1
@@ -45,21 +45,21 @@
 
 - [x] Author Hoare contracts for evaluated tool subset (InjecAgent 79/79 user+attacker tools; MCPTox 65 contracts over the 801-tool registered snapshot = 8.1% distinct / 37.2% availability-weighted — the long tail + poisoned registrations stay `no_contract`)
 - [x] Symbolic world-state extended (`balance`, `files`, `directories`, `permissions`, per-tool fields) + snapshot/rollback on post violations + best-effort seeding from the trusted request
-- [x] Validate B2 — ToolBench not cloned: blueprint Sec 10 fallback used (manual contract review vs official tool schemas + recorded-call replay; `docs/experiments/gate1_b2.md`)
+- [x] Validate B2 — ToolBench not cloned: blueprint Sec 10 fallback used (manual contract review vs official tool schemas + recorded-call replay; `docs/experiments/03_b2_toolgate.md`)
 - [x] Freeze B2 coverage % — `configs/b2_coverage.json` (InjecAgent 100%; MCPTox 8.1% / 37.2% weighted); `no_contract`/`no_contract_tools` counted and reported
-- [x] Document any divergence from ToolGate paper behavior honestly (`docs/experiments/gate1_b2.md`; code changes + test suite green)
+- [x] Document any divergence from ToolGate paper behavior honestly (`docs/experiments/03_b2_toolgate.md`; code changes + test suite green)
 
 ## Phase 4 — Gate Build (Weeks 5–8) → Gate 2
 
 **Goal: working middleware — embed + rule + threshold + escalate + trace — wired to the agent loop.**
 
-- [x] Real LLM intent parser (temp 0, JSON mode, 1 repair retry) replacing heuristic stand-in — landed in Phase 2 (`parser/parser.py`, `docs/experiments/parser_spotcheck_v1.md`)
+- [x] Real LLM intent parser (temp 0, JSON mode, 1 repair retry) replacing heuristic stand-in — landed in Phase 2 (`parser/parser.py`, `docs/experiments/02_parser_schema.md`)
 - [x] Real embedding model (`all-MiniLM-L6-v2`) wired + model hash logged in every trace — `EmbeddingBackend.metadata` (model_id + probe hash + backend) on every JSONL record; contract embedded once per session, only the call per step
 - [x] GateMiddleware integrated with `AgentLoop` (ReAct → gate → executor) — `agent/react.py` loop executes via `gate.execute`, tests in `tests/test_agent_loop_gate.py`
 - [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
 - [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
-- [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/gate2_integration.md`)
-- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/gate2_sweep.md`; 108 tests green) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
+- [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/04_gate2_gated_eval.md`)
+- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
 
 ## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze)
 
@@ -121,7 +121,7 @@
 | Gate | Definition | Status |
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
-| Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — InjecAgent 79/79; MCPTox 65 contracts (37.2% availability-weighted); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/gate1_b2.md`) |
-| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 104 tests green; p95 ≤ 23 ms on gated calls; `docs/experiments/gate2_integration.md` |
+| Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — InjecAgent 79/79; MCPTox 65 contracts (37.2% availability-weighted); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/03_b2_toolgate.md`) |
+| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green; p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [ ] |
 | Submission | Thesis + paper draft complete | [ ] |
