@@ -58,7 +58,7 @@
 - [x] GateMiddleware integrated with `AgentLoop` (ReAct → gate → executor) — `agent/react.py` loop executes via `gate.execute`, tests in `tests/test_agent_loop_gate.py`
 - [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
 - [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
-- [ ] 100-case integration run (InjecAgent + MCPTox); p95 latency measured
+- [ ] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — gated runner wired (`--gate none|ours|toolgate`, `harness/run_injecagent.py` / `harness/run_mcptox.py`), awaiting API run
 - [ ] Unit tests per blueprint Sec 14 + threshold sweep infra (`eval/sweep.py`)
 
 ## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze)

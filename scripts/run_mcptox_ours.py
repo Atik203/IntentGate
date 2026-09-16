@@ -1,6 +1,6 @@
-"""Run OUR B1 pipeline on the MCPTox static snapshot (S4).
+"""Run OUR pipeline on the MCPTox static snapshot (S4 / gated conditions).
 
-Usage: python scripts/run_mcptox_ours.py --limit 20
+Usage: python scripts/run_mcptox_ours.py --limit 20 --gate ours
 """
 from __future__ import annotations
 
@@ -20,8 +20,13 @@ def main():
     ap.add_argument("--limit", type=int, default=20)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--risk", default=None, help="filter to one risk category")
+    ap.add_argument("--gate", choices=["none", "ours", "toolgate"], default="none")
+    ap.add_argument("--tau", type=float, default=0.6)
+    ap.add_argument("--delta", type=float, default=0.1)
+    ap.add_argument("--alpha", type=float, default=0.7)
     ap.add_argument("--model-name", default=None)
     ap.add_argument("--out", default="results/mcptox_ours")
+    ap.add_argument("--trace", default="")
     args = ap.parse_args()
 
     from dotenv import load_dotenv
@@ -30,50 +35,67 @@ def main():
     model_name = args.model_name or os.getenv("AGENT_MODEL_ID", "gpt-4o-mini")
 
     from harness.adapters.mcptox import load_mcptox_cases
-    from harness.mcptox_runner import run_case
+    from harness.gate_policy import build_policy_factory
+    from harness.mcptox_runner import run_cases
     from intent_gate.agent.base import LLMClient
+    from intent_gate.gate.trace import TraceLogger
+    from intent_gate.parser.parser import build_parser
+    from intent_gate.scoring.embeddings import EmbeddingBackend
 
-    cases = load_mcptox_cases(ROOT / "data/raw/mcptox/response_all.json", limit=args.limit, seed=args.seed, risk=args.risk)
+    cases = load_mcptox_cases(
+        ROOT / "data/raw/mcptox/response_all.json", limit=args.limit, seed=args.seed, risk=args.risk
+    )
     llm = LLMClient(model_id=model_name)
     out_dir = (ROOT / args.out).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    counts: dict = {}
-    by_risk: dict = {}
-    out_file = out_dir / "mcptox_b1.jsonl"
-    with out_file.open("w", encoding="utf-8") as fh:
-        for case in cases:
-            result = run_case(case, llm)
-            counts[result.label] = counts.get(result.label, 0) + 1
-            by_risk.setdefault(case.risk, {}).setdefault(result.label, 0)
-            by_risk[case.risk][result.label] += 1
-            fh.write(
-                json.dumps(
-                    {
-                        "case_id": case.case_id,
-                        "server": case.server,
-                        "risk": case.risk,
-                        "paradigm": case.paradigm,
-                        "fake_tool": case.fake_tool,
-                        "label": result.label,
-                        "called_tool": result.called_tool,
-                        "arguments": result.arguments,
-                        "indicators": result.indicators,
-                        "error": result.error,
-                    }
-                )
-                + "\n"
-            )
-            print(f"{result.label:>16} | {case.risk:<24} | {case.fake_tool:<12} -> {result.called_tool}")
+    backend = EmbeddingBackend()
+    trace_path = Path(args.trace) if args.trace else out_dir / "gate_trace.jsonl"
+    trace = TraceLogger(
+        trace_path,
+        metadata={
+            "benchmark": "mcptox",
+            "model_id": model_name,
+            "gate": args.gate,
+            "tau": args.tau,
+            "delta": args.delta,
+            "alpha": args.alpha,
+            "embedding": backend.metadata,
+        },
+    )
+    policy_factory = build_policy_factory(
+        args.gate,
+        parser=build_parser(model_id=os.getenv("PARSER_MODEL_ID")),
+        backend=backend,
+        trace=trace,
+        tau=args.tau,
+        delta=args.delta,
+        alpha=args.alpha,
+    )
 
-    summary = {
-        "model_name": model_name,
-        "n": len(cases),
-        "counts": counts,
-        "by_risk": by_risk,
-        "evaluator": "heuristic (payload/sensitive-path; see harness/mcptox_runner.py)",
-        "snapshot": "AAAI26-7C02 downloaded 2026-09-11 (static)",
-    }
+    def progress(result, case):
+        print(f"{result.label:>16} | {case.risk:<24} | {case.fake_tool:<12} -> {result.called_tool}")
+
+    summary, _ = run_cases(
+        cases,
+        llm,
+        policy_factory=policy_factory,
+        jsonl_path=out_dir / "mcptox_b1.jsonl",
+        progress=progress,
+    )
+    trace.close()
+
+    summary.update(
+        {
+            "model_name": model_name,
+            "gate": args.gate,
+            "tau": args.tau,
+            "delta": args.delta,
+            "embedding": backend.metadata,
+            "evaluator": "heuristic (payload/sensitive-path; see harness/mcptox_runner.py)",
+            "snapshot": "AAAI26-7C02 downloaded 2026-09-11 (static)",
+        }
+    )
     summary_file = out_dir / "summary.json"
     summary_file.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
