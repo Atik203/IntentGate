@@ -38,6 +38,7 @@ def main():
     from harness.gate_policy import build_policy_factory
     from harness.injecagent_runner import build_tool_dict, run_cases, serialize_calls
     from intent_gate.agent.base import LLMClient
+    from intent_gate.baselines.toolgate.world_state import seed_from_request
     from intent_gate.gate.trace import TraceLogger
     from intent_gate.parser.parser import build_parser
     from intent_gate.scoring.embeddings import EmbeddingBackend
@@ -71,6 +72,7 @@ def main():
         tau=args.tau,
         delta=args.delta,
         alpha=args.alpha,
+        state_factory=seed_from_request,
     )
 
     summary = {"model_name": model_name, "setting": args.setting, "gate": args.gate, "splits": {}}
