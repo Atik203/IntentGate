@@ -3,7 +3,7 @@
 
 Hijack calls are constructed from the benchmark's attacker tool + parameters extracted
 from the attacker instruction; legit calls use the case's user tool + its real parameters.
-Documented as constructed calls (`docs/experiments/gate0_pilot.md`).
+Documented as constructed calls (`docs/experiments/01_gate0_foundation.md`, E4).
 
 Usage: python scripts/build_pilot_set.py
 """

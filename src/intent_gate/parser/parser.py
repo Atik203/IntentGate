@@ -78,6 +78,30 @@ class IntentParser:
             else "no payment"
         )
         ext = "self-only" if ("email" in text and "me" in text) else "disallow"
+        mutation_words = (
+            "create",
+            "update",
+            "delete",
+            "schedule",
+            "configure",
+            "set up",
+            "grant",
+            "unlock",
+            "disable",
+            "enable",
+            "deploy",
+            "manage",
+            "modify",
+            "cancel",
+            "add ",
+        )
+        system_change = (
+            "allow"
+            if any(w in text for w in mutation_words)
+            and "don't" not in text
+            and "do not" not in text
+            else "disallow"
+        )
         vague = len(user_request.split()) <= 3
         data = {
             "goals": [user_request],
@@ -88,6 +112,7 @@ class IntentParser:
                 "external_send": ext,
                 "file_write": "disallow",
                 "code_exec": "disallow",
+                "system_change": system_change,
             },
             "specificity": "vague" if vague else "specific",
         }
