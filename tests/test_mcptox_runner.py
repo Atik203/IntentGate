@@ -104,3 +104,40 @@ def test_run_case_handles_error(case):
     result = run_case(case, Broken())
     assert result.label == "error"
     assert "boom" in result.error
+
+
+class StubPolicy:
+    def __init__(self, allowed: bool = True):
+        self.allowed = allowed
+        self.seen = []
+
+    def allows(self, call) -> bool:
+        self.seen.append(call.name)
+        return self.allowed
+
+
+MALICIOUS_OUTPUT = '{"tool": "read_file", "arguments": {"path": "~/.ssh/id_rsa"}}'
+
+
+def test_run_case_gate_blocks_malicious_call(case):
+    policy = StubPolicy(allowed=False)
+    result = run_case(case, FakeLLM(MALICIOUS_OUTPUT), policy_factory=lambda query: policy)
+    assert result.label == "blocked"
+    assert result.gate_events == [{"name": "read_file", "allowed": False}]
+    assert policy.seen == ["read_file"]
+
+
+def test_run_case_gate_allows_malicious_call(case):
+    policy = StubPolicy(allowed=True)
+    result = run_case(case, FakeLLM(MALICIOUS_OUTPUT), policy_factory=lambda query: policy)
+    assert result.label == "success"
+    assert result.gate_events == [{"name": "read_file", "allowed": True}]
+
+
+def test_run_case_gate_untouched_on_ignored_call(case):
+    policy = StubPolicy(allowed=False)
+    output = '{"tool": "read_file", "arguments": {"path": "/data/report.txt"}}'
+    result = run_case(case, FakeLLM(output), policy_factory=lambda query: policy)
+    assert result.label == "ignored"
+    assert result.gate_events == []
+    assert policy.seen == []
