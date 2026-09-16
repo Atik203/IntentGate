@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/Atik203/IntentGate/security/advisories/new
     about: Report privately per SECURITY.md — never in a public issue.
   - name: Setup help
-    url: https://github.com/Atik203/IntentGate/blob/dev/setup.md
+    url: https://github.com/Atik203/IntentGate/blob/dev/docs/setup.md
     about: Install, run tests, and clone benchmarks.
   - name: Roadmap / current status
     url: https://github.com/Atik203/IntentGate/blob/dev/roadmap.md

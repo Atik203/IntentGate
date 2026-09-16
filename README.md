@@ -10,7 +10,7 @@ This project builds a **model-agnostic middleware gate** that derives an _intent
 
 ## Setup
 
-Install and verify in ~5 minutes: see **[`setup.md`](setup.md)** (venv + `pip install -e ".[dev]"` + `.env` + `pytest -q` + smoke-test scripts).
+Install and verify in ~5 minutes: see **[`docs/setup.md`](docs/setup.md)** (venv + `pip install -e ".[dev]"` + `.env` + `pytest -q` + smoke-test scripts).
 
 ---
 
@@ -19,7 +19,6 @@ Install and verify in ~5 minutes: see **[`setup.md`](setup.md)** (venv + `pip in
 ```
 IntentGate\
 ├── README.md                      # this file
-├── setup.md                       # install + verify instructions (venv, pip, .env, tests)
 ├── CONTRIBUTING.md                # branch model, PR rules, definition of done
 ├── SECURITY.md                    # vulnerability reporting + scope
 ├── CODE_OF_CONDUCT.md             # Contributor Covenant v2.1
@@ -29,7 +28,9 @@ IntentGate\
 ├── roadmap.md                     # phased tracker (Phases 0–8, Gates 0–3, success criteria)
 ├── docs\
 │   ├── README.md                  # docs hub (where everything lives + status snapshot)
+│   ├── setup.md                   # install + verify instructions (venv, pip, .env, tests)
 │   ├── blueprint.md               # single source of truth (design, Sec 0–18, indexed)
+│   ├── references.bib             # BibTeX citation basis (10 verified papers)
 │   └── experiments\               # experiment record: README hub + 01–04 reports (E1–E10)
 ├── pyproject.toml                 # intent-gate package (pip install -e .)
 ├── .github\                       # PR/issue templates + CI (pytest on dev/main)
@@ -75,7 +76,7 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
 - **Docs hub:** [`docs/README.md`](docs/README.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E10, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
 
-All 5 papers verified via full arXiv html (not snippets).
+All 5 papers verified via full arXiv html (not snippets). BibTeX: [`docs/references.bib`](docs/references.bib).
 
 ---
 

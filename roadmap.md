@@ -37,7 +37,7 @@
 - [x] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/build_pilot_set.py` + `scripts/pilot_score_dist.py`
 - [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/01_gate0_foundation.md`); three rule-engine FPs found and fixed
 - [x] Intent schema **v1.1** (controlled unfreeze 2026-09-16: adds `system_change`, 9 few-shots, 30-request re-validation `docs/experiments/02_parser_schema.md`); v1 frozen 2026-09-11 with the original spot-check
-- [x] `references.bib` started (verified figures only) → 10 entries, `literature_review/index.md` frozen
+- [x] `docs/references.bib` started (verified figures only) → 10 entries, `literature_review/index.md` frozen
 
 ## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1
 
@@ -65,13 +65,30 @@
 
 **Goal: complete, reproducible results. Nothing gets rewritten after this.**
 
-- [ ] Full runs B1 vs B2 vs Ours: InjecAgent (1,054 cases) + MCPTox (1,348 or snapshot)
-- [ ] τ ∈ {0.4–0.8} × δ ∈ {0.05–0.15} sweep → ASR–FPR Pareto curve (from cached traces, no re-runs)
-- [ ] Ablations A1–A4 (semantic-only / rule-only / raw-request / threshold-escalate)
-- [ ] Per-risk-category breakdown (MCPTox 10 categories) + per-tool breakdown (InjecAgent 17 tools)
-- [ ] Bootstrap 95% CI on ASR + paired McNemar (B1 vs ours, per case)
-- [ ] Error taxonomy: ~50 sampled failures per benchmark (FPR case / false negative / B2 coverage / over-strict)
-- [ ] Headline figures: results table, Pareto curve, setup-cost bar, latency table, cost-vs-ASR table
+**Freeze before starting:** intent schema v1.1 · B2 contracts + `configs/b2_coverage.json` · runner `--gate none|ours|toolgate` · defaults τ=0.75, δ=0.1, α=0.7. Any change after the first full run = new freeze + full re-run.
+
+**Run matrix** (identical prompts/tool blocks/model for every condition; seed 42):
+
+| Condition | InjecAgent — 1,054 cases (dh+ds × base+enhanced) | MCPTox — 1,348 snapshot cases |
+|---|---|---|
+| B1 — none (unprotected) | full | full |
+| B2 — toolgate (manual contracts) | full | full |
+| Ours — intent gate, τ=0.75 | full | full |
+
+- Runner: `harness/run_injecagent.py`, `harness/run_mcptox.py`; run one case-file/setting at a time so failures are resumable; each run writes report JSON + per-case JSONL + gate-trace JSONL (S, S_sem, S_rule, decision, latency, contract, embedding hash, `model_id`).
+- Budget: ≈6.6k agent calls + ≈2.1k parser calls (ours) on `gpt-4o-mini` (est. $10–20, ~2–4 h wall-clock); log tokens/cost per run; artifacts under `results/phase5/`.
+
+- [ ] Full runs B1 vs B2 vs Ours on the matrix above (all 6 file-level runs per condition)
+- [ ] Integrity check per run: case counts, valid rates, `no_contract` counts, parser backends, model/embedding hashes present in every trace
+- [ ] τ ∈ {0.40–0.80 step 0.05} × δ ∈ {0.05, 0.10, 0.15} sweep → ASR–FPR Pareto from cached traces (no re-runs; `scripts/sweep_gated.py`)
+- [ ] Ablations A1–A4 + optional A5 — A1 semantic-only (no rule veto) · A2 rule-only (no embeddings) · A3 raw-request embedding vs structured contract · A4 hard-block only vs escalate-as-block · A5 B2 with seeded file state (baseline sensitivity)
+- [ ] Breakdowns: MCPTox per-risk-category (10) · InjecAgent per-tool (user vs attacker tools) · per split (dh/ds) and setting (base/enhanced)
+- [ ] Stratification: vague vs specific contracts (`specificity`) for FPR; `no_contract` share for B2; escalate share at each τ
+- [ ] Statistics: bootstrap 95% CI (10k resamples) on ASR/FPR + paired McNemar B1 vs ours per case, per benchmark (report CIs and p-values, never a single point)
+- [ ] Error taxonomy: ~50 sampled failures per benchmark, classes {FPR case, false negative, B2 coverage, over-strict}, with contract + score evidence (`scripts/error_taxonomy.py` at scale)
+- [ ] Latency: p50/p95 per call and per case from traces (target p95 < 100 ms) + benign-task utility retention
+- [ ] Headline figures: results table, Pareto curve, setup-cost bar (0 vs 144 contracts), latency table, cost-vs-ASR table
+- [ ] Gate 3 freeze: tag the commit, freeze `docs/experiments/05_phase5_full_evaluation.md`, update roadmap + CHANGELOG (no edits to results after this point)
 
 ## Phase 6 — Stretch & Hardening (Weeks 13–14)
 
