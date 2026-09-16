@@ -69,7 +69,7 @@ Edit `.env` and fill in at least `OPENAI_API_KEY` (used for the agent + intent p
 pytest -q
 ```
 
-Expected: `26 passed` (or more as phases progress).
+Expected: `130 passed` (data-dependent tests skip automatically when benchmark clones are absent).
 
 ## 7. Quick smoke test (no API key needed)
 
@@ -112,7 +112,8 @@ python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base
 
 ## Related docs
 
-- `docs/blueprint.md` — design (single source of truth)
-- `docs/experiments/README.md` — experiment hub (status, datasets, artifacts, reproduce commands)
-- `roadmap.md` — status tracker (Phases 0–8, Gates 0–3)
-- `README.md` — project overview
+- `blueprint.md` — design (single source of truth)
+- `experiments/README.md` — experiment hub (status, datasets, artifacts, reproduce commands)
+- `references.bib` — BibTeX citation basis (10 verified papers)
+- `../roadmap.md` — status tracker (Phases 0–8, Gates 0–3)
+- `../README.md` — project overview

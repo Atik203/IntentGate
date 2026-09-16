@@ -69,6 +69,8 @@ bootstrap CIs + McNemar, and the final Pareto over full traces.
 
 ## Reproduce (quick)
 
+Environment/install: [`../setup.md`](../setup.md).
+
 ```powershell
 .venv\Scripts\Activate.ps1                     # Python 3.12, deps installed
 pytest -q                                      # 130 tests (data-dependent tests skip without clones)
