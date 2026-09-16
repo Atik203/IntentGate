@@ -93,7 +93,7 @@ This clones InjecAgent, MCPTox snapshot, ToolGate, AgentDojo into `data/raw/` (g
 ```bash
 python harness/run_injecagent.py --cases data/raw/InjecAgent/cases.json --gate ours --threshold 0.6
 python harness/run_mcptox.py --cases data/raw/mcptox/cases.json --snapshot v1
-python harness/compare_b2.py --cases data/raw/InjecAgent/cases.json
+python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --report results/comparison.json
 ```
 
 (Paths depend on the benchmark repo layout; adjust after cloning.)
