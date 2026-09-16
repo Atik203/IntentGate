@@ -43,10 +43,10 @@
 
 **Goal: faithful minimal ToolGate reimpl (Appendix G) ready to run side-by-side — the comparison that defines the paper.**
 
-- [x] Author Hoare contracts for evaluated tool subset (InjecAgent evaluated universe: 79 user+attacker tools across dh/ds base+enhanced — NOT all 353; MCPTox subset still pending)
-- [x] Symbolic world-state extended (`balance`, `files`, `permissions`, per-tool fields) + snapshot/rollback on post violations
+- [x] Author Hoare contracts for evaluated tool subset (InjecAgent 79/79 user+attacker tools; MCPTox 65 contracts over the 801-tool registered snapshot = 8.1% distinct / 37.2% availability-weighted — the long tail + poisoned registrations stay `no_contract`)
+- [x] Symbolic world-state extended (`balance`, `files`, `directories`, `permissions`, per-tool fields) + snapshot/rollback on post violations + best-effort seeding from the trusted request
 - [x] Validate B2 — ToolBench not cloned: blueprint Sec 10 fallback used (manual contract review vs official tool schemas + recorded-call replay; `docs/experiments/gate1_b2.md`)
-- [x] Freeze B2 coverage % — 79/79 (100.0%) in `configs/b2_coverage.json`; `no_contract`/`no_contract_tools` counted and reported
+- [x] Freeze B2 coverage % — `configs/b2_coverage.json` (InjecAgent 100%; MCPTox 8.1% / 37.2% weighted); `no_contract`/`no_contract_tools` counted and reported
 - [x] Document any divergence from ToolGate paper behavior honestly (`docs/experiments/gate1_b2.md`; code changes + test suite green)
 
 ## Phase 4 — Gate Build (Weeks 5–8) → Gate 2
@@ -121,7 +121,7 @@
 | Gate | Definition | Status |
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
-| Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — 79/79 coverage frozen (`configs/b2_coverage.json`); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/gate1_b2.md`) |
+| Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — InjecAgent 79/79; MCPTox 65 contracts (37.2% availability-weighted); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/gate1_b2.md`) |
 | Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 104 tests green; p95 ≤ 23 ms on gated calls; `docs/experiments/gate2_integration.md` |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [ ] |
 | Submission | Thesis + paper draft complete | [ ] |

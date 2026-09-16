@@ -329,7 +329,10 @@ def _pilot_contracts() -> dict[str, Contract]:
 
 def build_contracts() -> dict[str, Contract]:
     """Manual Appendix-G-style contract set for the evaluated tool subset."""
+    from intent_gate.baselines.toolgate.mcptox_contracts import build_mcptox_contracts
+
     contracts: dict[str, Contract] = _pilot_contracts()
     contracts.update({name: _read_only(*required) for name, required in _READ_ONLY_SPECS.items()})
     contracts.update(_side_effect_contracts())
+    contracts.update(build_mcptox_contracts())
     return contracts
