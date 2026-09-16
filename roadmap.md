@@ -58,8 +58,8 @@
 - [x] GateMiddleware integrated with `AgentLoop` (ReAct → gate → executor) — `agent/react.py` loop executes via `gate.execute`, tests in `tests/test_agent_loop_gate.py`
 - [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
 - [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
-- [ ] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — gated runner wired (`--gate none|ours|toolgate`, `harness/run_injecagent.py` / `harness/run_mcptox.py`), awaiting API run
-- [ ] Unit tests per blueprint Sec 14 + threshold sweep infra (`eval/sweep.py`)
+- [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/gate2_integration.md`)
+- [ ] Unit tests per blueprint Sec 14 + threshold sweep infra over the gated traces (`eval/sweep.py`)
 
 ## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze)
 
@@ -122,6 +122,6 @@
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
 | Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — 79/79 coverage frozen (`configs/b2_coverage.json`); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/gate1_b2.md`) |
-| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [ ] |
+| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 104 tests green; p95 ≤ 23 ms on gated calls; `docs/experiments/gate2_integration.md` |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [ ] |
 | Submission | Thesis + paper draft complete | [ ] |
