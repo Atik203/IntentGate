@@ -61,6 +61,7 @@ def main():
             "alpha": args.alpha,
             "embedding": backend.metadata,
         },
+        append=False,
     )
     policy_factory = build_policy_factory(
         args.gate,

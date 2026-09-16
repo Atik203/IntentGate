@@ -26,6 +26,7 @@ class GateMiddleware:
         benchmark_mode: bool = True,
         interactive_prompt=None,
         backend: EmbeddingBackend | None = None,
+        context: dict | None = None,
     ):
         self.contract = contract
         self.executor = executor  # callable(name, parameters) -> observation
@@ -36,12 +37,16 @@ class GateMiddleware:
         self.benchmark_mode = benchmark_mode
         self.interactive_prompt = interactive_prompt
         self.backend = backend or EmbeddingBackend()
+        self.context = dict(context or {})
         self._contract_vec = None
-        self._trace_extra: dict | None = None
 
     @property
     def run_metadata(self) -> dict:
         return {"embedding": self.backend.metadata}
+
+    def set_context(self, context: dict) -> None:
+        """Per-case trace context (case_id, split, risk, ...) merged into every record."""
+        self.context = dict(context or {})
 
     def check(self, call: ToolCall) -> GateResult:
         if self._contract_vec is None:
@@ -63,9 +68,7 @@ class GateMiddleware:
             would_escalate=(d == "escalate" and self.benchmark_mode),
             reason=reason,
         )
-        if self._trace_extra is None:
-            self._trace_extra = self.run_metadata
-        self.trace.log(call, result, extra=self._trace_extra)
+        self.trace.log(call, result, extra={**self.run_metadata, **self.context})
         return result
 
     def execute(self, call: ToolCall):

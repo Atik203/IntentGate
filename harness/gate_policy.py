@@ -32,6 +32,9 @@ class OursPolicy:
     def allows(self, call: ToolCall) -> bool:
         return self.gate.check(call).decision == "allow"
 
+    def set_context(self, context: dict) -> None:
+        self.gate.set_context(context)
+
 
 class ToolGatePolicy:
     name = "toolgate"

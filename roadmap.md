@@ -59,7 +59,7 @@
 - [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
 - [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
 - [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/gate2_integration.md`)
-- [ ] Unit tests per blueprint Sec 14 + threshold sweep infra over the gated traces (`eval/sweep.py`)
+- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/gate2_sweep.md`; 108 tests green) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
 
 ## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze)
 
