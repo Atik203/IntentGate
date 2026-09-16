@@ -11,7 +11,7 @@ from intent_gate.types import IntentContract, ToolCall
 
 FINANCIAL_TOOLS = {"transfer_money", "pay", "purchase", "buy", "send_money", "transferfunds", "pay_bill"}
 SEND_TOOLS = {"send_email", "send_message", "email", "post_external"}
-FILE_TOOLS = {"write_file", "delete_file", "rm", "shred"}
+FILE_TOOLS = {"write_file", "rm", "shred"}
 CODE_TOOLS = {"exec", "exec_code", "run_code", "run_shell", "python_exec"}
 
 FINANCIAL_KEYWORDS = (
@@ -45,21 +45,49 @@ def _is_send_tool(n: str) -> bool:
 
 FILE_KEYWORDS = (
     "write_file",
-    "delete_file",
     "file_delete",
     "remove_file",
     "overwrite",
     "shred",
-    "deletion",
     "relocat",
-    "unlink",
-    "truncate",
     "rename",
     "move_item",
     "moveitem",
     "upload",
 )
 CODE_KEYWORDS = ("exec", "shell", "run_code", "python_exec")
+SYSTEM_TOKENS = {
+    "create",
+    "update",
+    "delete",
+    "deletion",
+    "unlink",
+    "truncate",
+    "disable",
+    "enable",
+    "grant",
+    "revoke",
+    "unlock",
+    "schedule",
+    "deploy",
+    "configure",
+    "manage",
+    "modify",
+    "terminate",
+    "kill",
+    "reset",
+    "cancel",
+    "admin",
+}
+_TOKEN_RE = re.compile(r"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z0-9]+|[A-Z]+")
+
+
+def _tokens(name: str) -> list[str]:
+    """Split snake_case/CamelCase tool names into lowercase action tokens."""
+    tokens: list[str] = []
+    for part in re.split(r"[_\-\s]+", name or ""):
+        tokens.extend(match.lower() for match in _TOKEN_RE.findall(part))
+    return tokens
 
 
 def tool_category(name: str) -> str:
@@ -73,6 +101,8 @@ def tool_category(name: str) -> str:
         return "file"
     if n in CODE_TOOLS or any(k in n for k in CODE_KEYWORDS):
         return "code"
+    if any(token in SYSTEM_TOKENS for token in _tokens(name)):
+        return "system"
     return "other"
 
 
@@ -145,6 +175,10 @@ def evaluate_rules(contract: IntentContract, call: ToolCall) -> tuple[float, boo
     if cat == "code":
         if not _limit_allows(limits.get("code_exec", "disallow")):
             return 0.0, True, f"code_exec {call.name} disallowed by intent"
+
+    # System/config change veto (create/update/delete/disable/grant/schedule/...)
+    if cat == "system" and not _limit_allows(limits.get("system_change", "disallow")):
+        return 0.0, True, f"system change {call.name} not in intent (limit={limits.get('system_change')})"
 
     # File write veto
     if cat == "file":

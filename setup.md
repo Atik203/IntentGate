@@ -112,6 +112,7 @@ python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base
 
 ## Related docs
 
-- `blueprint.md` — design (single source of truth)
-- `roadmap.md` — phased tracker + current status
+- `docs/blueprint.md` — design (single source of truth)
+- `docs/experiments/README.md` — experiment hub (status, datasets, artifacts, reproduce commands)
+- `roadmap.md` — status tracker (Phases 0–8, Gates 0–3)
 - `README.md` — project overview

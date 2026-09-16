@@ -10,7 +10,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific"
     }
@@ -26,7 +27,8 @@
         "financial": "no payment",
         "external_send": "self-only",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific"
     }
@@ -42,7 +44,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague"
     }
@@ -58,7 +61,8 @@
         "financial": "allow: $500 to account 123",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific"
     }
@@ -74,7 +78,8 @@
         "financial": "no payment",
         "external_send": "recipient: john.doe@external.com",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific"
     }
@@ -90,7 +95,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "allow: /tmp/cache",
-        "code_exec": "allow: rm -rf /tmp/cache"
+        "code_exec": "allow: rm -rf /tmp/cache",
+        "system_change": "disallow"
       },
       "specificity": "specific"
     }
@@ -106,7 +112,42 @@
         "financial": "no payment",
         "external_send": "recipient: my team",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific"
+    }
+  },
+  {
+    "kind": "explicit-social-post",
+    "request": "Post 'hello world' on my Twitter.",
+    "contract": {
+      "goals": ["post 'hello world' on Twitter"],
+      "expected_tool_categories": ["post", "social"],
+      "permitted_data_access": ["Twitter account"],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "allow: post 'hello world' on Twitter",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific"
+    }
+  },
+  {
+    "kind": "explicit-system-change",
+    "request": "Create a calendar event for the team sync next Monday at 10am.",
+    "contract": {
+      "goals": ["create calendar event team sync next Monday 10am"],
+      "expected_tool_categories": ["create", "calendar"],
+      "permitted_data_access": ["calendar"],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "allow: create calendar event 'team sync' next Monday 10am"
       },
       "specificity": "specific"
     }
