@@ -53,11 +53,11 @@
 
 **Goal: working middleware — embed + rule + threshold + escalate + trace — wired to the agent loop.**
 
-- [ ] Real LLM intent parser (temp 0, JSON mode, 1 repair retry) replacing heuristic stand-in
-- [ ] Real embedding model (`all-MiniLM-L6-v2`) wired + model hash logged in every trace
-- [ ] GateMiddleware integrated with `AgentLoop` (ReAct → gate → executor)
-- [ ] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt
-- [ ] No-bypass enforcement test green (direct executor access fails in harness)
+- [x] Real LLM intent parser (temp 0, JSON mode, 1 repair retry) replacing heuristic stand-in — landed in Phase 2 (`parser/parser.py`, `docs/experiments/parser_spotcheck_v1.md`)
+- [x] Real embedding model (`all-MiniLM-L6-v2`) wired + model hash logged in every trace — `EmbeddingBackend.metadata` (model_id + probe hash + backend) on every JSONL record; contract embedded once per session, only the call per step
+- [x] GateMiddleware integrated with `AgentLoop` (ReAct → gate → executor) — `agent/react.py` loop executes via `gate.execute`, tests in `tests/test_agent_loop_gate.py`
+- [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
+- [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
 - [ ] 100-case integration run (InjecAgent + MCPTox); p95 latency measured
 - [ ] Unit tests per blueprint Sec 14 + threshold sweep infra (`eval/sweep.py`)
 
