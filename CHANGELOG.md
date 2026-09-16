@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Gated benchmark runner: `--gate {none,ours,toolgate}` for `harness/run_injecagent.py`, `harness/run_mcptox.py`, and the `scripts/run_*_ours.py` pilots; `harness/gate_policy.py` builds the policy from the trusted request before attacker content (ordering invariant), blocked attacker calls flip InjecAgent `succ`→`unsucc` and MCPTox → `blocked`, per-case `gate_events`/`gate_blocked` are written to the JSONL, and run-level model/embedding metadata goes to the gate trace.
 - Gate 2 wiring: `AgentLoop` is a real ReAct loop (stable tool-prompt prefix, `Final Answer`/`Action`/JSON parsing, step cap) whose `execute` is `GateMiddleware.execute`; `ToolRegistry.describe()` provides the cacheable tool block (`tests/test_agent_loop_gate.py`).
 - Trace provenance: `EmbeddingBackend.metadata` (model_id + functional probe hash + backend) logged on every JSONL record; `TraceLogger(metadata=...)` records run-level model/benchmark info; middleware caches the contract embedding per session (`score_call(contract_vec=...)`).
 - Escalate-band tests: benchmark mode -> block + `would_escalate`; demo mode -> prompt accept/decline paths (`tests/test_no_bypass.py`).
