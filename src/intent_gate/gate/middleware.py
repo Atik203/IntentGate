@@ -45,8 +45,8 @@ class GateMiddleware:
         return {"embedding": self.backend.metadata}
 
     def set_context(self, context: dict) -> None:
-        """Per-case trace context (case_id, split, risk, ...) merged into every record."""
-        self.context = dict(context or {})
+        """Merge per-case trace context (case_id, split, contract, ...) into every record."""
+        self.context.update(context or {})
 
     def check(self, call: ToolCall) -> GateResult:
         if self._contract_vec is None:

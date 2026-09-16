@@ -44,6 +44,13 @@ Per benchmark at the chosen operating point (τ=0.75):
   run-variance cases (the gated run proposed a call the B1 run did not), so the honest FPR number
   is the pilot column.
 
+## Post-fix update (v2)
+
+After the rule fixes (`docs/experiments/gate2_errors.md`) the same traces were regenerated and
+re-swept: at τ=0.75 the all-benchmark ASR drops 0.44 → 0.30 (InjecAgent 0.17 → 0.14, MCPTox
+0.53 → 0.35) while the pilot FPR stays at 4%. The τ=0.75 knee and the ranking of thresholds are
+unchanged.
+
 ## Caveats
 
 - MCPTox ground truth here is attack-influenced (`success` + `work_not_success`); success-only
