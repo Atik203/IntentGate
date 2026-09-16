@@ -674,5 +674,5 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 ---
 
-**Blueprint complete.** All 18 sections are internally consistent with `literature_reivew.md` (10 papers), `literature_review/index.md` (Master Matrix for 5 anchors + ToolGate as closest), and Idea 1 §1–12. The only net-new additions beyond your Idea text are: the Week 1–2 pilot as explicit Go/No-Go, the escalate band as FPR safety valve, the ToolGate coverage % reporting, and the threshold Pareto + error taxonomy as required figures — each flagged with rationale.
+**Blueprint complete.** All 18 sections are internally consistent with `literature_review.md` (10 papers), `literature_review/index.md` (Master Matrix for 5 anchors + ToolGate as closest), and Idea 1 §1–12. The only net-new additions beyond your Idea text are: the Week 1–2 pilot as explicit Go/No-Go, the escalate band as FPR safety valve, the ToolGate coverage % reporting, and the threshold Pareto + error taxonomy as required figures — each flagged with rationale.
 

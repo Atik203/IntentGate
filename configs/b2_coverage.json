@@ -1,0 +1,20 @@
+{
+  "benchmark": "InjecAgent (dh/ds, base+enhanced)",
+  "frozen_on": "2026-09-16",
+  "case_files": [
+    "data\\raw\\InjecAgent\\data\\test_cases_dh_base.json",
+    "data\\raw\\InjecAgent\\data\\test_cases_ds_base.json",
+    "data\\raw\\InjecAgent\\data\\test_cases_dh_enhanced.json",
+    "data\\raw\\InjecAgent\\data\\test_cases_ds_enhanced.json"
+  ],
+  "n_cases": 2108,
+  "evaluated_tools": 79,
+  "contracted_tools": 79,
+  "coverage": 1.0,
+  "missing_tools": [],
+  "extra_contracts": [
+    "read_file",
+    "transfer_money"
+  ],
+  "total_contracts": 81
+}

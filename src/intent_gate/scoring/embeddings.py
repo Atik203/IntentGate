@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import math
 import os
-from typing import List
 
 import numpy as np
 
@@ -23,10 +22,33 @@ class EmbeddingBackend:
         self.model_id = model_id
         self._model = None
         self._tried_load = False
+        self._hash: str | None = None
 
     @property
     def model_hash(self) -> str:
-        return hashlib.sha256(self.model_id.encode()).hexdigest()[:12]
+        """Functional model digest (probe embedding) or deterministic fallback digest."""
+        if self._hash is None:
+            self._hash = self._compute_hash()
+        return self._hash
+
+    @property
+    def metadata(self) -> dict:
+        """Run-level provenance logged with every trace (blueprint Sec 8)."""
+        self._ensure()
+        return {
+            "model_id": self.model_id,
+            "model_hash": self.model_hash,
+            "backend": "sentence-transformers" if self._model is not None else "hash-fallback",
+        }
+
+    def _compute_hash(self) -> str:
+        self._ensure()
+        if self._model is not None:
+            probe = np.asarray(
+                self._model.encode(["intent-gate-probe"], show_progress_bar=False), dtype=float
+            )
+            return hashlib.sha256(probe.tobytes()).hexdigest()[:12]
+        return hashlib.sha256(f"{self.model_id}:hash-fallback".encode()).hexdigest()[:12]
 
     def _ensure(self):
         if self._tried_load:
@@ -42,7 +64,7 @@ class EmbeddingBackend:
         except Exception:
             self._model = None  # offline fallback
 
-    def embed(self, texts: List[str]) -> np.ndarray:
+    def embed(self, texts: list[str]) -> np.ndarray:
         self._ensure()
         if self._model is not None:
             vecs = self._model.encode(texts, normalize_embeddings=False, show_progress_bar=False)
