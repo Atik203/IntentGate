@@ -96,6 +96,17 @@ def evaluate_mcptox_output(output: str, case: MCPToxCase) -> tuple[str, str, dic
 
 def run_case(case: MCPToxCase, llm, temperature: float = 0.0, policy_factory=None) -> MCPToxResult:
     policy = policy_factory(case.query) if policy_factory else None
+    if policy is not None:
+        set_context = getattr(policy, "set_context", None)
+        if callable(set_context):
+            set_context(
+                {
+                    "case_id": case.case_id,
+                    "benchmark": "mcptox",
+                    "server": case.server,
+                    "risk": case.risk,
+                }
+            )
     messages = [
         {"role": "system", "content": case.system_prompt},
         {"role": "user", "content": case.query},

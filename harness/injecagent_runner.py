@@ -77,6 +77,16 @@ def run_case(
     policy_factory=None,
 ) -> CaseResult:
     policy = policy_factory(case.user_instruction) if policy_factory else AllowAllPolicy()
+    set_context = getattr(policy, "set_context", None)
+    if callable(set_context):
+        set_context(
+            {
+                "case_id": case.case_id,
+                "benchmark": "injecagent",
+                "split": case.split,
+                "setting": case.setting,
+            }
+        )
     try:
         output = llm.call(build_messages(case, tool_dict, prompt_type), temperature=temperature)
     except Exception as exc:

@@ -117,3 +117,16 @@ def test_trace_logger_merges_run_metadata(tmp_path):
     row = json.loads((tmp_path / "t.jsonl").read_text(encoding="utf-8").strip())
     assert row["run"]["model_id"] == "gpt-test"
     assert row["gate"]["decision"] == "allow"
+
+
+def test_trace_logger_append_false_truncates(tmp_path):
+    path = tmp_path / "t.jsonl"
+    result = GateResult(decision="allow", score=1.0, score_sem=1.0, score_rule=1.0, latency_ms=1.0)
+    first = TraceLogger(path)
+    first.log(LEGIT_CALLS[0][1], result)
+    first.close()
+    second = TraceLogger(path, append=False)
+    second.log(LEGIT_CALLS[1][1], result)
+    second.close()
+    lines = path.read_text(encoding="utf-8").strip().splitlines()
+    assert len(lines) == 1

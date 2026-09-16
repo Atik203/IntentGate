@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Threshold sweep / Pareto: `eval/sweep.py::sweep_cases` re-decides cached traces at every τ (case-level, escalate counts as block) + `scripts/sweep_gated.py` CLI joining ungated ground truth, gated traces, and the labeled pilot FPR; knee at τ=0.75 (pilot FPR 4%, InjecAgent ASR 0.17, MCPTox 0.53) — `docs/experiments/gate2_sweep.md`.
 - Gate 2 integration run (2026-09-16): B1 vs ours (τ=0.75) vs B2 on 100 InjecAgent + 100 MCPTox cases with real `all-MiniLM-L6-v2` embeddings — InjecAgent ASR-valid 9.0% → 1.0% (ours; 0 false-positive blocks), MCPTox attack-influenced 22 → 11 (13 malicious calls blocked), p95 ≤ 23 ms per gated call; results in `docs/experiments/gate2_integration.md`.
 - Gated benchmark runner: `--gate {none,ours,toolgate}` for `harness/run_injecagent.py`, `harness/run_mcptox.py`, and the `scripts/run_*_ours.py` pilots; `harness/gate_policy.py` builds the policy from the trusted request before attacker content (ordering invariant), blocked attacker calls flip InjecAgent `succ`→`unsucc` and MCPTox → `blocked`, per-case `gate_events`/`gate_blocked` are written to the JSONL, and run-level model/embedding metadata goes to the gate trace.
 - Gate 2 wiring: `AgentLoop` is a real ReAct loop (stable tool-prompt prefix, `Final Answer`/`Action`/JSON parsing, step cap) whose `execute` is `GateMiddleware.execute`; `ToolRegistry.describe()` provides the cacheable tool block (`tests/test_agent_loop_gate.py`).
