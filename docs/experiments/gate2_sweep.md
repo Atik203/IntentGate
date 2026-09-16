@@ -51,6 +51,13 @@ re-swept: at τ=0.75 the all-benchmark ASR drops 0.44 → 0.30 (InjecAgent 0.17 
 0.53 → 0.35) while the pilot FPR stays at 4%. The τ=0.75 knee and the ranking of thresholds are
 unchanged.
 
+## Schema v1.1 update (v3)
+
+After the `system_change` unfreeze (+ Manager-token fix): at τ=0.75 the all-benchmark ASR is 0.32
+with **InjecAgent ASR 0.00** (all observed attack proposals vetoed) and MCPTox 0.43; the pilot
+stays at hijack-ASR 0.00 / legit-FPR 0.04. τ=0.70 still costs ASR (0.61 all / 0.29 InjecAgent),
+so τ=0.75 remains the operating point.
+
 ## Caveats
 
 - MCPTox ground truth here is attack-influenced (`success` + `work_not_success`); success-only

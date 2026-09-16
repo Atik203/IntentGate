@@ -42,7 +42,14 @@ def test_camelcase_benchmark_tools_are_categorized():
     assert tool_category("NortonIdentitySafeSharePassword") == "send"
     assert tool_category("GoogleCalendarGetEventsFromSharedCalendar") == "other"
     assert tool_category("AmazonViewSavedPaymentMethods") == "other"
-    assert tool_category("CiscoUmbrellaCreatePolicy") == "other"
+    assert tool_category("CiscoUmbrellaCreatePolicy") == "system"
+    assert tool_category("GitHubDeleteRepository") == "system"
+    assert tool_category("TodoistCreateTask") == "system"
+    assert tool_category("AugustSmartLockUnlockDoor") == "system"
+    assert tool_category("EpicFHIRManageAppointments") == "system"
+    assert tool_category("TwitterManagerSearchTweets") == "other"
+    assert tool_category("EvernoteManagerSearchNotes") == "other"
+    assert tool_category("TwitterManagerGetUserProfile") == "other"
 
 
 def test_camelcase_hijack_vetoed():
@@ -103,6 +110,7 @@ CLOSED_LIMITS = {
     "external_send": "disallow",
     "file_write": "disallow",
     "code_exec": "disallow",
+    "system_change": "disallow",
 }
 
 
@@ -118,7 +126,7 @@ def _contract(limits: dict) -> IntentContract:
 
 def test_destructive_file_tools_vetoed_when_file_write_closed():
     contract = _contract(CLOSED_LIMITS)
-    for name in ("secure_email_deletion", "security_file_relocation", "write_file", "DropboxMoveItem"):
+    for name in ("security_file_relocation", "write_file", "DropboxMoveItem"):
         _, _, s_rule, triggered, reason = score_call(contract, ToolCall(name=name, parameters={"item_path": "a"}))
         assert triggered and s_rule == 0.0, name
         assert reason
@@ -192,3 +200,35 @@ def test_file_write_without_named_scope_passes():
     )
     assert s_rule == 1.0
     assert not triggered
+
+
+def test_system_change_tool_vetoed_when_closed():
+    for name in (
+        "CiscoUmbrellaCreatePolicy",
+        "GitHubDeleteRepository",
+        "AugustSmartLockUnlockDoor",
+        "secure_email_deletion",
+        "delete_file",
+    ):
+        _, _, s_rule, triggered, reason = score_call(
+            _contract(CLOSED_LIMITS), ToolCall(name=name, parameters={})
+        )
+        assert triggered and s_rule == 0.0, name
+        assert "system change" in reason
+
+
+def test_system_change_tool_allowed_when_authorized():
+    limits = {**CLOSED_LIMITS, "system_change": "allow: create calendar event"}
+    _, _, s_rule, triggered, _ = score_call(
+        _contract(limits), ToolCall(name="GoogleCalendarCreateOrUpdateEvent", parameters={})
+    )
+    assert s_rule == 1.0
+    assert not triggered
+
+
+def test_financial_and_file_categories_take_precedence_over_system():
+    from intent_gate.scoring.rules import tool_category
+
+    assert tool_category("BankManagerTransferFunds") == "financial"
+    assert tool_category("write_file") == "file"
+    assert tool_category("GmailSendEmail") == "send"

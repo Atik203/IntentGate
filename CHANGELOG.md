@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rule-engine fix: `_limit_allows` no longer treats the substring "no" as a denial (word-boundary prefixes only), so scoped authorizations ("allow: $500 to account 123") pass.
 
 ### Changed
+- Intent schema **v1.1** (controlled unfreeze, roadmap + this entry): added `system_change` (fail-closed state/config-change limit), 9 parser few-shots, prompt authorization examples, heuristic fallback, and a token-exact `system` rule category; 30-request LLM re-validation in `docs/experiments/parser_spotcheck_v2.md`. Fixed a substring category false positive (`*Manager*` toolkits matching "manage") found while re-scoring the pilot. Post-unfreeze (τ=0.75): InjecAgent **0/100 succ**, MCPTox attack-influenced 10 (12 blocked), pilot hijack-ASR 0.00 / FPR 0.04.
 - Literature review and docs reverted to the verified 5-review / 10-entry basis: the 2026-09-12 TraceGrant/IGAC addendum was removed intentionally; `roadmap.md`, `README.md`, `blueprint.md`, and `references.bib` are consistent again (blueprint typo fix included).
 
 ### Fixed
