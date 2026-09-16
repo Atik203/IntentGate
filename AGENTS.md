@@ -32,7 +32,7 @@ data/  results/             # gitignored (benchmarks, JSONL traces)
 ```powershell
 .venv\Scripts\Activate.ps1          # activate venv
 pip install -e ".[dev]"             # install (first run downloads torch - slow)
-pytest -q                           # run tests (expect 26+ passing)
+pytest -q                           # run tests (expect 75 passing; data-dependent tests skip without clones)
 python scripts/check_parser.py      # parser spot-check (offline)
 python scripts/pilot_score_dist.py  # scorer pilot (offline)
 powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1
@@ -40,7 +40,7 @@ python harness/run_injecagent.py --cases <path> --gate ours --threshold 0.6
 ```
 
 - Lint: `ruff check .` (ruff configured in pyproject; not required to run every change, but keep lines <= 100).
-- There is no Makefile/CI config; keep it venv+pip+pytest only.
+- No Makefile; CI (`.github/workflows/tests.yml`) runs `pytest -q` on `dev`/`main` — keep the local flow venv+pip+pytest only.
 
 ## Code conventions
 
@@ -54,6 +54,7 @@ python harness/run_injecagent.py --cases <path> --gate ours --threshold 0.6
 8. **Deterministic.** Seed everything, `temperature=0` for parser/agent, pin model IDs, log hashes (embedding model, benchmark commits) in every result.
 9. **Scope discipline.** B2 contracts only for the *evaluated tool subset* (not all 353 MCPTox tools). Missing contract = `no_contract` counter, never silently allowed.
 10. **Blueprint-faithful naming.** Keep blueprint terms: `S_sem`, `S_rule`, `tau`, `delta`, `escalate`, `Gate N` milestones.
+11. **B2 contract keys = harness tool names.** Contracts are keyed by the `ToolCall` name (`<Toolkit><Tool>`, e.g. `GmailSendEmail`). `ToolGateChecker.coverage` is computed against the evaluated tool universe (`evaluated_tools`), never self-referentially; frozen numbers live in `configs/b2_coverage.json`.
 
 ## LLM model notes + cache-hit guidance
 
@@ -73,6 +74,7 @@ To maximize context cache hits (DeepSeek context caching, OpenAI automatic promp
 ## Workflow
 
 - Blueprint (`blueprint.md`) is the design source of truth; roadmap (`roadmap.md`) is the status source. If they conflict, flag it — don't silently pick one.
+- Doc sync: literature-review changes (`literature_review/`, `references.bib`) and design edits must update the affected docs (`blueprint.md`, `README.md`, `literature_review/index.md`) **and** `roadmap.md` + `CHANGELOG.md` in the same PR.
 - Check the roadmap before starting work: a `[ ]` item in the current phase is the next thing to do. Mark `[~]` while working, `[x]` when done + tested.
 - Before touching `src/` or `harness/`, run `pytest -q` and keep it green.
 - Do not commit `.env`, `data/raw/`, `results/*.jsonl`, `.venv/`, `*.egg-info/` (gitignore already covers these).

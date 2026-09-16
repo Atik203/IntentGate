@@ -12,7 +12,6 @@
 - [x] 5 anchor reviews in `literature_review/papers/` (AgentDojo, InjecAgent, MCPTox, ASB, ToolGate)
 - [x] Master blueprint Sec 0–18 (`blueprint.md` — single source of truth)
 - [x] Repo `README.md` (project overview, structure, evaluation plan, quick start)
-- [x] **2026-09-12 lit-review ADDENDUM (controlled unfreeze via roadmap + CHANGELOG):** added TraceGrant (arXiv 2608.21126v1 — request-derived POEC contract, 0% ASR on AgentDojo/ASB) and IGAC (SSRN 7195899 — server-side intent certificate/manifest narrowing) as `papers/06-` / `papers/07-`; revised Gap Map row 1 (old "None/Novel" claim superseded); narrowed C2/novelty = graded (embedding+veto, τ/δ, escalate) stateless zero-setup gate, evaluated adversarially as **two separate benchmark studies — InjecAgent (injection) and MCPTox (tool poisoning)** — each reported independently (never a combined cross-vector number), per supervisor instruction; neither vector is covered by TraceGrant (owns AgentDojo/ASB), ToolGate (task-completion only), or IGAC (no adversarial benchmark eval, 36-trial external subset only). Follow-up todo: audit remaining "first/None/Novel"/"cross-vector"/"pair" wording during Phase 7/8 drafting.
 
 ## Phase 1 — Project Structure Initialization — DONE (commit 3ff9e33)
 
@@ -38,17 +37,17 @@
 - [x] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/build_pilot_set.py` + `scripts/pilot_score_dist.py`
 - [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/gate0_pilot.md`); three rule-engine FPs found and fixed
 - [x] Freeze `intent_schema.json` (v1, 2026-09-11) + 7 few-shot examples; 30-request parser spot-check done (all LLM, over-blocking bug fixed; `docs/experiments/parser_spotcheck_v1.md`)
-- [x] `references.bib` started (verified figures only) → 12 entries (10 + TraceGrant/IGAC on 2026-09-12), `literature_review/index.md` frozen with controlled 2026-09-12 addendum
+- [x] `references.bib` started (verified figures only) → 10 entries, `literature_review/index.md` frozen
 
 ## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1
 
 **Goal: faithful minimal ToolGate reimpl (Appendix G) ready to run side-by-side — the comparison that defines the paper.**
 
-- [x] Author Hoare contracts for evaluated tool subset (InjecAgent 17 + MCPTox subset, NOT all 353)
-- [x] Symbolic world-state extended (`balance`, `files`, `permissions`, per-tool fields)
-- [ ] Validate B2 on ToolBench/MCP-Universe subset (~50 tasks) — fidelity check
-- [x] Freeze B2 coverage %; `no_contract` counted and reported (gap visible, not hidden)
-- [x] Document any divergence from ToolGate paper behavior honestly (code changes + test suite green)
+- [x] Author Hoare contracts for evaluated tool subset (InjecAgent evaluated universe: 79 user+attacker tools across dh/ds base+enhanced — NOT all 353; MCPTox subset still pending)
+- [x] Symbolic world-state extended (`balance`, `files`, `permissions`, per-tool fields) + snapshot/rollback on post violations
+- [x] Validate B2 — ToolBench not cloned: blueprint Sec 10 fallback used (manual contract review vs official tool schemas + recorded-call replay; `docs/experiments/gate1_b2.md`)
+- [x] Freeze B2 coverage % — 79/79 (100.0%) in `configs/b2_coverage.json`; `no_contract`/`no_contract_tools` counted and reported
+- [x] Document any divergence from ToolGate paper behavior honestly (`docs/experiments/gate1_b2.md`; code changes + test suite green)
 
 ## Phase 4 — Gate Build (Weeks 5–8) → Gate 2
 
@@ -79,7 +78,6 @@
 **Goal: only if Phase 5 finishes with buffer. Core deliverable = injection + poisoning only.**
 
 - [ ] (Optional) 20-case multi-turn drift pilot (AgentDojo subset) — include as "preliminary" or defer
-- [ ] (Optional) **AgentDojo subset comparison vs TraceGrant** (2026-09-12 addendum): TraceGrant reports 0% ASR / 70–83% utility on AgentDojo 949 + ASB 400. If the thesis wants a direct head-to-head on shared terrain, run our gate (or the B2 ToolGate reimpl) on an AgentDojo subset using the SAME utility/ASR pairing — gives reviewers a TraceGrant-comparison point. Do NOT claim AgentDojo/ASB novelty; that space is taken.
 - [ ] (Optional) 20-case paraphrase-robustness mini-pilot (defense-aware paraphrase)
 - [ ] Decide: drift pilot in thesis (preliminary) or future work — one figure max
 
@@ -99,7 +97,7 @@
 **Goal: workshop/Findings-tier submission; journal expansion optional.**
 
 - [ ] Workshop/Findings outline (2-column short paper, ~4-8 pages)
-- [ ] Related work: **three-way gate framing (ToolGate vs TraceGrant vs IGAC vs Ours)** — "same gate placement / different policy source + state + eval" (blueprint Sec 18); ToolGate "same gate, opposite policy source" framing (blueprint Sec 18); TraceGrant rebuttal #1 (request-derived precedent, owns AgentDojo/ASB, no graded score/escalation, no InjecAgent/MCPTox); IGAC as server-side supporting thread
+- [ ] Related work: ToolGate "same gate, opposite policy source" framing (blueprint Sec 18)
 - [ ] Results section: ASR/FPR/latency/setup-cost tables + Pareto + error taxonomy
 - [ ] Reviewer #2 checklist (blueprint Sec 18) cleared item by item
 - [ ] Reproducibility package: pip wrapper + contracts + logs + one-slide "ToolGate vs Ours" table
@@ -109,7 +107,7 @@
 
 ## Success Criteria (blueprint Sec 16 — falsifiable)
 
-- [ ] ASR_ours < ASR_B1 on InjecAgent and on MCPTox, judged per benchmark (separate comparisons; 95% CI non-overlapping, McNemar p < 0.05)
+- [ ] ASR_ours < ASR_B1 on both InjecAgent and MCPTox, 95% CI non-overlapping (McNemar p < 0.05)
 - [ ] FPR_ours < 10% at chosen τ (or <5% hard-block, escalate counted separately)
 - [ ] Setup cost: 0 contracts for ours vs. documented manual count for B2 on same tool set
 - [ ] Latency overhead p95 < 100ms per tool call on CPU
@@ -123,7 +121,7 @@
 | Gate | Definition | Status |
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
-| Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [ ] |
+| Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — 79/79 coverage frozen (`configs/b2_coverage.json`); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/gate1_b2.md`) |
 | Gate 2 | Gate integrated; unit tests green; p95 latency measured | [ ] |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [ ] |
 | Submission | Thesis + paper draft complete | [ ] |

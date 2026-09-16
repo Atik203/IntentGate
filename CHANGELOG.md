@@ -21,7 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LLM intent parser v1: JSON mode + one repair retry + fail-closed fallbacks (`IntentParser._parse_llm`), `build_parser()` factory, `response_format` support in `LLMClient`. Authorization rule + 4 extra few-shots fix over-blocking of explicit user side effects. Schema frozen v1 (`configs/intent_schema.json`); 30-request spot-check all-LLM (`docs/experiments/parser_spotcheck_v1.md`).
 - Rule-engine fix: `_limit_allows` no longer treats the substring "no" as a denial (word-boundary prefixes only), so scoped authorizations ("allow: $500 to account 123") pass.
 
+### Changed
+- Literature review and docs reverted to the verified 5-review / 10-entry basis: the 2026-09-12 TraceGrant/IGAC addendum was removed intentionally; `roadmap.md`, `README.md`, `blueprint.md`, and `references.bib` are consistent again (blueprint typo fix included).
+
 ### Fixed
+- ToolGate B2: real Hoare pre/postconditions keyed by harness tool names (`<Toolkit><Tool>`, e.g. `GmailSendEmail`), world-state effects with rollback on post violations, and coverage computed against the evaluated InjecAgent tool universe — frozen in `configs/b2_coverage.json` (`docs/experiments/gate1_b2.md`); `no_contract_tools` now tracked.
 - Untracked generated `src/intent_gate.egg-info/` and `pdfs/InjectAgent.pdf` (both covered by `.gitignore`).
 - Corrected `literature_review.md` filename in README/blueprint; marked gitignored local-only paths.
 - Rule-engine category false positives found by the Gate 0 pilot: CamelCase benchmark tools now categorized via action keywords; read/search email tools no longer vetoed as "external send"; "shared calendar" no longer vetoed as sensitive sharing.
