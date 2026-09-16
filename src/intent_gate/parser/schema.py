@@ -5,20 +5,21 @@ from typing import Any, Dict
 
 from intent_gate.types import IntentContract
 
-REQUIRED_LIMIT_KEYS = ("financial", "external_send", "file_write", "code_exec")
+REQUIRED_LIMIT_KEYS = ("financial", "external_send", "file_write", "code_exec", "system_change")
 FAIL_CLOSED_LIMITS = {
     "financial": "no payment",
     "external_send": "disallow",
     "file_write": "disallow",
     "code_exec": "disallow",
+    "system_change": "disallow",
 }
 
 
 def coerce_contract(data: Dict[str, Any], raw_request: str = "") -> IntentContract:
     """Validate LLM JSON; on missing/invalid fields fall back fail-closed.
 
-    Schema frozen v1 (2026-09-11): see configs/intent_schema.json and
-    docs/experiments/parser_spotcheck_v1.md.
+    Schema v1.1 (2026-09-16, adds system_change): see configs/intent_schema.json and
+    docs/experiments/02_parser_schema.md (E6).
     """
     if not isinstance(data, dict):
         return minimal_contract(raw_request)

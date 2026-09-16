@@ -26,8 +26,11 @@ IntentGate\
 ├── CHANGELOG.md                   # Keep a Changelog; updated per PR
 ├── LICENSE                        # MIT
 ├── AGENTS.md                      # instructions for AI coding agents (+ LLM cache guidance)
-├── blueprint.md                   # single source of truth (design, Sec 0–18)
 ├── roadmap.md                     # phased tracker (Phases 0–8, Gates 0–3, success criteria)
+├── docs\
+│   ├── README.md                  # docs hub (where everything lives + status snapshot)
+│   ├── blueprint.md               # single source of truth (design, Sec 0–18, indexed)
+│   └── experiments\               # experiment record: README hub + 01–04 reports (E1–E10)
 ├── pyproject.toml                 # intent-gate package (pip install -e .)
 ├── .github\                       # PR/issue templates + CI (pytest on dev/main)
 ├── configs\                       # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
@@ -68,8 +71,9 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 
 - **Index:** [`literature_review/index.md`](literature_review/index.md) — Master Matrix (5 verified 2026-08-24), Legend, Quick Triage, Gap Map, Verification Log
 - **Papers:** 5 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
-- **Blueprint:** [`blueprint.md`](blueprint.md) — Phase 1–5, Sections 0–18 (design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique)
+- **Blueprint:** [`docs/blueprint.md`](docs/blueprint.md) — Phase 1–5, Sections 0–18 (indexed with anchors): design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
+- **Docs hub:** [`docs/README.md`](docs/README.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E10, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
 
 All 5 papers verified via full arXiv html (not snippets).
 
@@ -90,7 +94,7 @@ All 5 papers verified via full arXiv html (not snippets).
 
 ---
 
-## Evaluation Plan (abridged from `blueprint.md:Section 9`)
+## Evaluation Plan (abridged from `docs/blueprint.md:Section 9`)
 
 - **B1:** Unprotected ReAct (no gate) — raw vulnerability floor
 - **B2:** ToolGate reimplementation (Hoare `{P}T{Q}` per Appendix G, symbolic world-state) — validated on ToolBench/MCP-Universe subset before adversarial runs
@@ -118,13 +122,13 @@ python harness/run_mcptox.py --gate ours --snapshot v1 --report results/mcptox.j
 python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --report results/comparison.json
 ```
 
-> See `blueprint.md:Section 12` for 16-week roadmap (Weeks 1–2 pilot → Weeks 3–4 B2 → Weeks 5–8 gate → Weeks 9–12 full evaluation → Weeks 13–16 writing) and `blueprint.md:Section 13` for exact build order.
+> See `docs/blueprint.md:Section 12` for 16-week roadmap (Weeks 1–2 pilot → Weeks 3–4 B2 → Weeks 5–8 gate → Weeks 9–12 full evaluation → Weeks 13–16 writing) and `docs/blueprint.md:Section 13` for exact build order.
 
 ---
 
 ## Publication Target
 
-Realistic: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, USENIX-adjacent) — Q2 journal equivalent (e.g., _Journal of Information Security and Applications_, _Applied Intelligence_) is feasible with rigorous ASR/FPR/latency/setup-cost reporting and error taxonomy (see `blueprint.md:Section 18` Reviewer #2 checklist).
+Realistic: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, USENIX-adjacent) — Q2 journal equivalent (e.g., _Journal of Information Security and Applications_, _Applied Intelligence_) is feasible with rigorous ASR/FPR/latency/setup-cost reporting and error taxonomy (see `docs/blueprint.md:Section 18` Reviewer #2 checklist).
 
 ---
 
