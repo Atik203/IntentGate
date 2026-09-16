@@ -6,6 +6,50 @@
 
 ---
 
+> **Design source of truth.** Sections 0–18 define the research design, pipeline, evaluation and
+> risks. Status lives in [`roadmap.md`](../roadmap.md); measured results live in
+> [`experiments/`](experiments/README.md). If this document and the roadmap disagree, flag it.
+
+## Index
+
+**Foundations**
+- [Sec 0 — Research design decisions & assumptions](#sec0)
+- [Sec 1 — Executive summary](#sec1)
+- [Sec 2 — Research motivation](#sec2)
+- [Sec 3 — Problem statement](#sec3)
+- [Sec 4 — Complete system overview](#sec4)
+
+**Method**
+- [Sec 5 — Detailed pipeline](#sec5) · [Comp 0 parser](#sec5-p0) · [Comp 1 agent](#sec5-p1) · [Comp 2 gate middleware](#sec5-p2) · [Comp 3 ToolGate B2](#sec5-p3) · [Comp 4 embeddings/rules](#sec5-p4) · [Orchestrator](#sec5-orch)
+- [Sec 6 — Complete data flow](#sec6)
+- [Sec 7 — Models & tools](#sec7)
+- [Sec 8 — Dataset plan](#sec8)
+
+**Evaluation & risk**
+- [Sec 9 — Evaluation strategy](#sec9)
+- [Sec 10 — Edge cases & failure handling](#sec10)
+- [Sec 11 — Risk assessment](#sec11)
+- [Sec 12 — Month-by-month roadmap](#sec12)
+
+**Delivery**
+- [Sec 13 — Implementation order](#sec13)
+- [Sec 14 — Supervisor explanation](#sec14)
+- [Sec 15 — Team explanation](#sec15)
+- [Sec 16 — Expected research outcome](#sec16)
+- [Sec 17 — Future extensions](#sec17)
+- [Sec 18 — Final critical review (Reviewer #2)](#sec18)
+
+> **Key invariants (read these first):** ordering invariant — the intent is parsed before any
+> attacker content ([Sec 5](#sec5), [Sec 10](#sec10)); scorer `S = α·S_sem + (1−α)·S_rule` with a
+> hard veto ([Sec 5 Comp 2](#sec5-p2)); allow / block / **escalate** band, default τ = 0.75,
+> δ = 0.1 ([Sec 5](#sec5), [Sec 9](#sec9)); B2 is the *same gate with manual Hoare contracts*
+> ([Sec 5 Comp 3](#sec5-p3)) and its coverage must be reported, never hidden
+> ([Sec 5 Comp 3](#sec5-p3), [Sec 9](#sec9)).
+
+---
+
+<a id="sec0"></a>
+
 ## Section 0 — Research Design Decisions & Assumptions
 
 **Why this problem was selected.** By 2026, LLM agents have shifted from "chat" to "action" — they book, pay, run code, modify files, and call third-party tools via MCP-style protocols. Every benchmark in our review shows the same pattern: once an agent has tool permissions, a hijacked tool call succeeds at scale — AgentDojo (NeurIPS 2024) 629 cases, InjecAgent (ACL Findings 2024) 1,054 cases with GPT-4 vulnerable 24% → 47% enhanced, MCPTox (AAAI 2026) 72.8% ASR on live servers with <3% refusal, ASB (ICLR 2025) 84.3% max ASR. The attack paths differ (injected output, poisoned tool description, multi-turn drift) but converge to one observable: the agent executes an action the user never intended. The defense literature is split — benchmarks reveal the vulnerability and propose no defense; defenses are tested only on their own threat model. The only published gate that intercepts at the action itself is ToolGate (Jan 2026, arXiv), but it requires hand-authored Hoare contracts per tool and has never been tested on any adversarial benchmark. That leaves a clean, falsifiable question for a 4–5 month thesis: can a gate derived *automatically* from the user's own request match formal contract gating without its setup cost, and does it hold across injection + poisoning?
@@ -48,6 +92,8 @@
 
 ---
 
+<a id="sec1"></a>
+
 ## Section 1 — Executive Summary (for a new team member, zero AI background)
 
 Imagine you tell an AI assistant: "Find me the cheapest flight to Berlin next Friday and hold it — don't pay yet."
@@ -63,6 +109,8 @@ Our fix: before *every* tool call is actually executed, a tiny gatekeeper asks: 
 We build that gate as a pip-installable Python wrapper that sits between any agent and its tools — no model retraining. And we build the fair test: we reimplement the closest published gate (ToolGate, which needs hand-written rules per tool) and test *both* gates on the same attack benchmarks (1,054 injection cases + 1,348 poisoning cases) to see if automatic intent beats manual contracts.
 
 ---
+
+<a id="sec2"></a>
 
 ## Section 2 — Research Motivation
 
@@ -88,6 +136,8 @@ We build that gate as a pip-installable Python wrapper that sits between any age
 
 ---
 
+<a id="sec3"></a>
+
 ## Section 3 — Problem Statement
 
 **Current problem.** An LLM agent given tool permissions can be induced — via injected text in tool outputs, poisoned tool metadata at registration, or gradual multi-turn drift — to execute a tool call that diverges from the user's original intent, causing financial, privacy, or system harm. Existing guardrails either cover one vector or require manual per-tool contracts and have never been tested against the adversarial benchmarks that demonstrate the problem.
@@ -107,6 +157,8 @@ We build that gate as a pip-installable Python wrapper that sits between any age
 **Expected contribution.** A working, evaluated gate + a reproducible adversarial evaluation of contract-style gating that the community can reuse (see Section 2, C1+C2).
 
 ---
+
+<a id="sec4"></a>
 
 ## Section 4 — Complete System Overview
 
@@ -173,7 +225,17 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 ---
 
+<a id="sec5"></a>
+
 ## Section 5 — Detailed Pipeline
+
+> **Key — how to read Sec 5.** Comp 0 (parser) is the only LLM call that sees the trusted request
+> and nothing else; Comp 2 is our contribution (embedding similarity + hard-rule veto →
+> `allow` / `block` / `escalate`); Comp 3 is baseline B2 (manual Hoare contracts, same placement);
+> Comp 4 is shared embedding/rule infrastructure. The **ordering invariant** (parse before any
+> attacker content) is load-bearing for the whole trust argument.
+
+<a id="sec5-p0"></a>
 
 ### Component 0 — Intent Parser (Trusted, Once-Per-Session)
 
@@ -187,6 +249,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 - **Recovery:** (a) conservative default: underspecified fields default to `disallow` for high-risk side effects (fail-closed); (b) retry once with repair prompt, then fall back to minimal contract `{goals: [raw request], side_effect_limits: all disallow}`; (c) log warning, include raw request in embedding as fallback signal.
 - **What happens if removed:** Gate degrades to raw-request embedding similarity (ablation A3) — still functional but less precise; this ablation is planned.
 
+<a id="sec5-p1"></a>
+
 ### Component 1 — Agent Scaffold (Unmodified)
 
 - **Purpose:** Provide a standard tool-using agent to attack and to protect — not a contribution, just the substrate.
@@ -196,6 +260,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 - **Implementation:** LangChain ReAct or minimal MCP client; backbone interchangeable (Qwen/Llama/GPT via API). Keep agent prompt *unmodified* between B1 (no gate) and gated conditions — only the middleware differs, so measured delta is gate effect alone.
 - **Failure cases:** Agent proposes malformed tool call; agent loops infinitely.
 - **Recovery:** Schema validation before gate; hard step cap (e.g., 15 tool calls) per benchmark harness.
+
+<a id="sec5-p2"></a>
 
 ### Component 2 — Action Gate Middleware (Core Contribution)
 
@@ -211,6 +277,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 - **Alternative implementation:** LLM-as-judge scorer — rejected as primary (prompt-injectable, nondeterministic, higher latency/cost); may be added as ablation A4 for comparison.
 - **What happens if removed:** System is B1 (unprotected ReAct) — this is the baseline, not a failure.
 
+<a id="sec5-p3"></a>
+
 ### Component 3 — ToolGate Reimplementation (Baseline B2)
 
 - **Purpose:** Faithful minimal reimplementation of ToolGate's Hoare-contract mechanism (Appendix G) for fair adversarial comparison — the paper's own evaluation never does this.
@@ -222,6 +290,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 - **Recovery:** (a) log as `no_contract` and count in setup-cost metric; do not silently allow — treat as allow with flag so ToolGate's coverage gap is visible; (b) minimal world-state (only fields needed for evaluated tools).
 - **What happens if removed:** No B2 comparison — loses the core "auto vs. manual" claim. This is why weeks 1–4 are allocated to it.
 
+<a id="sec5-p4"></a>
+
 ### Component 4 — Embedding & Rule Infrastructure (Shared)
 
 - **Purpose:** Provide fast, deterministic scoring substrate.
@@ -229,6 +299,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 - **Failure cases:** Model load OOM, embedding drift across versions.
 - **Recovery:** ONNX quantized fallback, pin model version, log model hash in results.
 - **Upgrade path:** Swap to `bge-base` or LLM embeddings if semantic quality is limiting — ablation will reveal.
+
+<a id="sec5-orch"></a>
 
 ### Orchestrator / Harness
 
@@ -239,6 +311,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 - **Recovery:** Use released static snapshot / recorded tool definitions; note in limitations that live-server dynamics may differ.
 
 ---
+
+<a id="sec6"></a>
 
 ## Section 6 — Complete Data Flow
 
@@ -295,6 +369,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 ---
 
+<a id="sec7"></a>
+
 ## Section 7 — Models & Tools
 
 | Component | Choice (Primary) | Alternative / Fallback | Why Selected | Limitations & Upgrade Path |
@@ -322,6 +398,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 ---
 
+<a id="sec8"></a>
+
 ## Section 8 — Dataset Plan
 
 | Dataset | Role | Source | Size | License/Access | Preprocessing Needed | Known Limitations |
@@ -347,7 +425,14 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 ---
 
+<a id="sec9"></a>
+
 ## Section 9 — Evaluation Strategy
+
+> **Key — metrics.** ASR (attacks that pass), FPR (legit calls blocked), escalation rate, latency
+> p95, setup cost (contracts authored), utility retention. B1 = unprotected ReAct, B2 = ToolGate
+> reimplementation, Ours = intent gate — identical prompts for all three. τ/δ sweeps are reported
+> as a Pareto curve, never a single tuned point.
 
 **Evaluation pipeline (end-to-end):**
 
@@ -392,7 +477,14 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 ---
 
+<a id="sec10"></a>
+
 ## Section 10 — Edge Cases & Failure Handling
+
+> **Key — ordering invariant.** Intent parsing runs *only* on the raw user request, before tool
+> definitions or any attacker content is loaded (`harness/common.py::OrderingGuard`; tests in
+> `tests/test_gate_ordering.py`). If this breaks, the trust model collapses — treat parser/ordering
+> changes as security-relevant.
 
 | Failure Scenario | Detection | Prevention | Mitigation | Recovery/Fallback |
 |---|---|---|---|---|
@@ -407,6 +499,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 | **Adaptive attacker who knows gate exists** (knows threshold, tries to stay above it) | Not in primary evaluation (adaptive is a stronger threat model) | Scope primary claim to static attacks (InjecAgent/MCPTox as published) | Acknowledge as limitation; propose adaptive pilot as future work (paraphrase hijack to maximize semantic similarity while keeping malicious params) | If time allows (stretch), run 20-case adaptive paraphrase pilot |
 
 ---
+
+<a id="sec11"></a>
 
 ## Section 11 — Risk Assessment
 
@@ -426,7 +520,13 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 ---
 
+<a id="sec12"></a>
+
 ## Section 12 — Month-by-Month Roadmap (Aug 2026 – Jan 2027, 5 Months / 16 Weeks)
+
+> **Key — 16-week shape.** W1–2 foundation + pilot (Gate 0) → W3–4 B2 (Gate 1) → W5–8 gate build
+> + integration (Gate 2) → W9–12 full evaluation (Gate 3) → W13–16 writing/submission. Current
+> status and checkboxes: [`roadmap.md`](../roadmap.md).
 
 *Designed for a 3–4 month thesis core + 1 month buffer/writing, matching Idea §8 Feasibility High (4–5 months) and §10 Evaluation Plan. This is the single source of truth for planning — the 10-month example timeline does not apply.*
 
@@ -457,6 +557,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 ---
 
+<a id="sec13"></a>
+
 ## Section 13 — Implementation Order
 
 **Exact build sequence, with dependency reasoning:**
@@ -483,6 +585,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 **Critical milestones (mapped to Section 12):** Gate 0 = steps 1–4 complete (pilot passes); Gate 1 = step 5 complete (B2 validated); Gate 2 = steps 6–8 complete (integration); Gate 3 = steps 9–10 complete (results freeze).
 
 ---
+
+<a id="sec14"></a>
 
 ## Section 14 — Supervisor Explanation
 
@@ -523,6 +627,8 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 > This is the exact cross-benchmark behavior we measure on InjecAgent (injected output) and MCPTox (poisoned description).
 
 ---
+
+<a id="sec15"></a>
 
 ## Section 15 — Team Explanation (Beginner-Friendly)
 
@@ -591,7 +697,13 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 ---
 
+<a id="sec16"></a>
+
 ## Section 16 — Expected Research Outcome
+
+> **Key — success criteria (falsifiable).** ASR_ours < ASR_B1 on both benchmarks (95% CI
+> non-overlapping, McNemar p < 0.05); FPR < 10% at the chosen τ; 0 contracts vs the documented B2
+> count; latency p95 < 100 ms; B2 runs and is documented with coverage %.
 
 **Expected technical improvements (hypotheses, not promises):** On InjecAgent+MCPTox, meaningful ASR reduction vs. B1 (unprotected) — e.g., B1 ~24–47% (InjecAgent) and ~40–73% (MCPTox per risk category) → ours substantially lower, with FPR kept in single digits via escalate band. Parity or near-parity ASR vs. ToolGate B2 on covered tools, but with 0 manual contracts vs. B2's manual count and lower latency (embedding vs. symbolic world-state). Exact numbers are hypotheses to be measured; the thesis claim is directional + cost, not a specific percentage.
 
@@ -620,6 +732,8 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 ---
 
+<a id="sec17"></a>
+
 ## Section 17 — Future Extensions
 
 **MSc/PhD research:** Formalize multi-turn drift as intent divergence over a trajectory, not just single-call consistency — requires sequence-aware scoring and perhaps learned threshold adaptation. A PhD-scope extension could pursue formal guarantees for the gate (e.g., bound FPR given embedding concentration) or adaptive thresholding via online learning from escalate feedback.
@@ -634,7 +748,13 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 ---
 
+<a id="sec18"></a>
+
 ## Section 18 — Final Critical Review (Reviewer #2 Mode)
+
+> **Key — Reviewer #2 checklist.** The adversarial questions and answers ("how is this different
+> from ToolGate?", "isn't this just embeddings + if-statements?", adaptive attacks, live-vs-snapshot,
+> vague requests) are the publication-readiness gate — keep them updated as results land.
 
 **Challenging every assumption, as an adversarial reviewer would:**
 

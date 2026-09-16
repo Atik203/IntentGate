@@ -6,7 +6,7 @@ Instructions for AI coding agents (opencode, Claude Code, Cursor, etc.) working 
 
 IntentGate = thesis project. A model-agnostic **middleware action gate** for tool-using LLM agents: it derives an *intent contract* from the user's original request (once, before any attacker content), scores every proposed `tool_call` against it (embedding similarity + hard rule veto), and decides `allow / block / escalate`.
 
-- **Blueprint (single source of truth):** `blueprint.md` — design Sec 0–18
+- **Blueprint (single source of truth):** `docs/blueprint.md` — design Sec 0–18 (indexed with anchors)
 - **Status tracker:** `roadmap.md` — Phases 0–8, Gates 0–3, success criteria. **Update its checkboxes in the same commit that completes a task.**
 - **Setup for humans:** `setup.md`
 
@@ -24,6 +24,7 @@ harness/                    # run_injecagent.py, run_mcptox.py, compare_b2.py, c
 scripts/                    # pilot_score_dist.py, check_parser.py, clone_benchmarks.ps1
 configs/                    # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
 tests/                      # pytest; fixtures/ has labeled hijack+legit cases
+docs/                       # README hub + blueprint.md (indexed design truth) + experiments/ (E1-E10 reports)
 data/  results/             # gitignored (benchmarks, JSONL traces)
 ```
 
@@ -73,8 +74,8 @@ To maximize context cache hits (DeepSeek context caching, OpenAI automatic promp
 
 ## Workflow
 
-- Blueprint (`blueprint.md`) is the design source of truth; roadmap (`roadmap.md`) is the status source. If they conflict, flag it — don't silently pick one.
-- Doc sync: literature-review changes (`literature_review/`, `references.bib`) and design edits must update the affected docs (`blueprint.md`, `README.md`, `literature_review/index.md`) **and** `roadmap.md` + `CHANGELOG.md` in the same PR.
+- Blueprint (`docs/blueprint.md`) is the design source of truth; roadmap (`roadmap.md`) is the status source. If they conflict, flag it — don't silently pick one.
+- Doc sync: literature-review changes (`literature_review/`, `references.bib`) and design edits must update the affected docs (`docs/blueprint.md`, `README.md`, `literature_review/index.md`) **and** `roadmap.md` + `CHANGELOG.md` in the same PR. Experiment results go in `docs/experiments/` following its template (At a glance → Goal → Setup → Results → Artifacts → Limitations → Supervisor Q&A).
 - Check the roadmap before starting work: a `[ ]` item in the current phase is the next thing to do. Mark `[~]` while working, `[x]` when done + tested.
 - Before touching `src/` or `harness/`, run `pytest -q` and keep it green.
 - Do not commit `.env`, `data/raw/`, `results/*.jsonl`, `.venv/`, `*.egg-info/` (gitignore already covers these).

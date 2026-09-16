@@ -19,7 +19,7 @@ def coerce_contract(data: Dict[str, Any], raw_request: str = "") -> IntentContra
     """Validate LLM JSON; on missing/invalid fields fall back fail-closed.
 
     Schema v1.1 (2026-09-16, adds system_change): see configs/intent_schema.json and
-    docs/experiments/parser_spotcheck_v2.md.
+    docs/experiments/02_parser_schema.md (E6).
     """
     if not isinstance(data, dict):
         return minimal_contract(raw_request)
