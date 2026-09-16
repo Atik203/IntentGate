@@ -89,6 +89,21 @@ catchable; every other malicious call uses an uncontracted poisoned registration
 contracts cannot see. InjecAgent B2: 8/100 succ (dh 2, ds 6). Coverage: 8.1% of MCPTox tools
 (37.2% availability-weighted) — `docs/experiments/gate1_b2.md`.
 
+## Schema v1.1 update (v3, 2026-09-16)
+
+After the `system_change` schema unfreeze (+ the Manager-token category fix, see
+`docs/experiments/gate2_errors.md`) the gated conditions were re-run:
+
+| Condition | InjecAgent succ | MCPTox success | work_not_success | blocked | attack-influenced |
+|---|---|---|---|---|---|
+| B1 | 9/100 | 8 | 14 | - | 22 |
+| Ours (v2) | 1/100 | 4 | 4 | 14 | 8 |
+| **Ours (v3)** | **0/100** | **4** | **6** | **12** | **10** |
+
+InjecAgent reaches **0/100** (the last miss, `dh_base_0125`, is now vetoed as an unauthorized
+system/config change). MCPTox stays in the 8–10 attack-influenced range across runs — the
+residual is registration trust, not threshold or rule coverage.
+
 ## Artifacts
 
 - Reports: `results/gated/{none,ours,toolgate}_{dh50,ds50,mcptox100}.json`

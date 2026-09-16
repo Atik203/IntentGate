@@ -36,7 +36,7 @@
 - [x] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented; 30% attack-influenced, heuristic evaluator)
 - [x] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/build_pilot_set.py` + `scripts/pilot_score_dist.py`
 - [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/gate0_pilot.md`); three rule-engine FPs found and fixed
-- [x] Freeze `intent_schema.json` (v1, 2026-09-11) + 7 few-shot examples; 30-request parser spot-check done (all LLM, over-blocking bug fixed; `docs/experiments/parser_spotcheck_v1.md`)
+- [x] Intent schema **v1.1** (controlled unfreeze 2026-09-16: adds `system_change`, 9 few-shots, 30-request re-validation `docs/experiments/parser_spotcheck_v2.md`); v1 frozen 2026-09-11 with the original spot-check
 - [x] `references.bib` started (verified figures only) → 10 entries, `literature_review/index.md` frozen
 
 ## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1

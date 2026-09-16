@@ -156,10 +156,10 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 **Stage-by-stage explanation:**
 
-- **Intent Parser:** The only LLM call that sees *only* the user's original request (trusted). It outputs a structured, auditable contract — e.g., `goals: ["find cheapest flight", "hold without payment"], tool_categories: ["search", "read"], data_scopes: ["flight results"], side_effect_limits: {financial: "no payment", external_send: "disallow", file_write: "disallow"}`. Frozen for the session so attacker content cannot mutate it.
+- **Intent Parser:** The only LLM call that sees *only* the user's original request (trusted). It outputs a structured, auditable contract — e.g., `goals: ["find cheapest flight", "hold without payment"], tool_categories: ["search", "read"], data_scopes: ["flight results"], side_effect_limits: {financial: "no payment", external_send: "disallow", file_write: "disallow", code_exec: "disallow", system_change: "disallow"}`. Frozen for the session so attacker content cannot mutate it.
 - **Agent Reasoning:** Unmodified ReAct/MCP agent. Proposes tool calls as usual. The gate is transparent to the agent except for the observation it gets back (success vs. blocked).
 - **Action Gate — Semantic Scorer:** Embeds the contract and the proposed call (name + parameters + naturalized description) with a sentence-embedding model; cosine similarity is the soft signal. Catches paraphrased hijacks ("transfer $500 to activate tool" vs. "pay").
-- **Action Gate — Rule Engine:** Hard constraints that never rely on embeddings: e.g., if `side_effect_limits.financial == "no payment"` then any `transfer_money` / `pay` / `purchase` is auto-block regardless of similarity; `external_send` to non-allowlisted recipient is auto-escalate. This is the deterministic safety net.
+- **Action Gate — Rule Engine:** Hard constraints that never rely on embeddings: e.g., if `side_effect_limits.financial == "no payment"` then any `transfer_money` / `pay` / `purchase` is auto-block regardless of similarity; `external_send` to non-allowlisted recipient is auto-block (critical veto). This is the deterministic safety net.
 - **Decision:** `S = α·semantic + (1-α)·rule_compliance` (or rule as veto). `if S ≥ τ → allow; elif S ≥ τ-δ → escalate; else block`. τ is the single tuned hyperparameter; we report sweep. Escalate is critical to keep FPR low — borderline legitimate multi-step plans ask rather than silently block.
 - **ToolGate Baseline (B2):** Same placement, but policy is manual Hoare contracts per tool + symbolic world-state (per ToolGate Appendix G). Allows direct comparison: "same gate, different policy source" — auto intent vs. manual contracts — on identical adversarial benchmarks.
 
@@ -178,10 +178,10 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 ### Component 0 — Intent Parser (Trusted, Once-Per-Session)
 
 - **Purpose:** Convert vague natural language request into a structured, auditable intent contract *before* any untrusted content is seen.
-- **Responsibilities:** Extract `goals`, `expected_tool_categories`, `permitted_data_access`, `side_effect_limits` (financial, external_send, file_write, code_exec, irreversible). Normalize to a fixed JSON schema (see Section 4).
+- **Responsibilities:** Extract `goals`, `expected_tool_categories`, `permitted_data_access`, `side_effect_limits` (financial, external_send, file_write, code_exec, system_change; schema v1.1 2026-09-16). Normalize to a fixed JSON schema (see Section 4).
 - **Input:** Raw user request string only. No tool outputs, no history.
 - **Output:** `intent_contract: JSON` + `contract_embedding`.
-- **Prompt strategy:** Constrained JSON generation with schema + 3 few-shot examples (single-goal, multi-goal, vague). Temperature 0, with JSON schema validation and one retry on parse failure.
+- **Prompt strategy:** Constrained JSON generation with schema + 9 few-shot examples (single-goal, multi-goal, vague, explicit authorization for financial/send/code/post/system-change). Temperature 0, with JSON schema validation and one retry on parse failure.
 - **Dependencies:** None upstream; downstream gate depends on it. Must be frozen — attacker content never re-invokes it.
 - **Failure cases:** (a) vague request → underspecified contract; (b) LLM returns invalid JSON; (c) multi-goal request where parser drops a goal.
 - **Recovery:** (a) conservative default: underspecified fields default to `disallow` for high-risk side effects (fail-closed); (b) retry once with repair prompt, then fall back to minimal contract `{goals: [raw request], side_effect_limits: all disallow}`; (c) log warning, include raw request in embedding as fallback signal.
