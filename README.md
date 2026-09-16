@@ -113,9 +113,9 @@ git clone https://github.com/ethz-spylab/agentdojo       # stretch
 pip install -e .  # pip wrapper around agent tool executor
 
 # 3. Run evaluation (Weeks 9–12)
-python harness/run_injecagent.py --gate ours --threshold 0.6 --split enhanced
-python harness/run_mcptox.py --gate ours --snapshot v1 --report asr_fpr_latency.json
-python harness/compare_b2.py --baseline toolgate --report comparison.json
+python harness/run_injecagent.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --gate ours --threshold 0.6
+python harness/run_mcptox.py --gate ours --snapshot v1 --report results/mcptox.json
+python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --report results/comparison.json
 ```
 
 > See `blueprint.md:Section 12` for 16-week roadmap (Weeks 1–2 pilot → Weeks 3–4 B2 → Weeks 5–8 gate → Weeks 9–12 full evaluation → Weeks 13–16 writing) and `blueprint.md:Section 13` for exact build order.
@@ -164,4 +164,4 @@ Full reviews: [`literature_review/papers/`](literature_review/papers/)
 
 ---
 
-_Last updated: 2026-09-06 — blueprint is the single source of truth, roadmap.md tracks status._
+_Last updated: 2026-09-16 — blueprint is the single source of truth, roadmap.md tracks status._
