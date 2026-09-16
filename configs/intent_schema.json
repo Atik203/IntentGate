@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$comment": "Intent contract schema v1 — FROZEN 2026-09-11 after 30-request spot-check (docs/experiments/parser_spotcheck_v1.md). Changes require a roadmap + CHANGELOG entry and parser re-validation.",
+  "$comment": "Intent contract schema v1.1 — controlled unfreeze 2026-09-16 (roadmap + CHANGELOG) adding system_change; v1 frozen 2026-09-11. Freeze rule: changes require a roadmap + CHANGELOG entry and parser re-validation; evidence in docs/experiments/02_parser_schema.md (E5 v1 / E6 v1.1).",
   "title": "IntentContract",
   "description": "Frozen per-session intent contract derived once from the trusted user request (blueprint Sec 4/5).",
   "type": "object",
@@ -24,12 +24,13 @@
     },
     "side_effect_limits": {
       "type": "object",
-      "required": ["financial", "external_send", "file_write", "code_exec"],
+      "required": ["financial", "external_send", "file_write", "code_exec", "system_change"],
       "properties": {
         "financial": {"type": "string", "description": "\"no payment\" / \"allow\" / constrained text"},
         "external_send": {"type": "string", "description": "\"disallow\" / \"self-only\" / \"allow\""},
         "file_write": {"type": "string", "description": "\"disallow\" / \"allow\""},
         "code_exec": {"type": "string", "description": "\"disallow\" / \"allow\""},
+        "system_change": {"type": "string", "description": "\"disallow\" / \"allow\" — state/config changes: create, update, delete, disable, enable, grant, revoke, unlock, schedule, deploy, manage"},
         "irreversible": {"type": "string"}
       },
       "additionalProperties": true
