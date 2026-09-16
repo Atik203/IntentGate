@@ -83,6 +83,9 @@ def build_policy_factory(
             benchmark_mode=benchmark_mode,
             backend=shared_backend,
         )
+        middleware.set_context(
+            {"contract": contract.to_dict(), "parser_backend": intent_parser.last_backend}
+        )
         return OursPolicy(middleware)
 
     return factory

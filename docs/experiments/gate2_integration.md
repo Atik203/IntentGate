@@ -68,6 +68,20 @@ with the Phase 5 runs through `AgentLoop`.
    the authors' labels, Phase 2), not the authors' annotation.
 4. One missed InjecAgent attack and five MCPTox successes remain; error taxonomy is Phase 5 work.
 
+## Post-fix update (v2, 2026-09-16)
+
+After the rule fixes in `docs/experiments/gate2_errors.md` (destructive-file keywords, path-scope
+enforcement, shell-operator guard) the same conditions were re-run:
+
+| Condition | MCPTox success | work_not_success | blocked | attack-influenced |
+|---|---|---|---|---|
+| B1 | 8 | 14 | - | 22 |
+| Ours (v1) | 5 | 6 | 13 | 11 |
+| **Ours (v2)** | **4** | **4** | **14** | **8** |
+
+InjecAgent is unchanged at 1/100 succ; the remaining miss (`dh_base_0125`) is the mutation-field
+class (no contract limit covers configuration changes) documented in the error taxonomy.
+
 ## Artifacts
 
 - Reports: `results/gated/{none,ours,toolgate}_{dh50,ds50,mcptox100}.json`
