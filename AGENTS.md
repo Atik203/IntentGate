@@ -32,7 +32,7 @@ data/  results/             # gitignored (benchmarks, JSONL traces)
 ```powershell
 .venv\Scripts\Activate.ps1          # activate venv
 pip install -e ".[dev]"             # install (first run downloads torch - slow)
-pytest -q                           # run tests (expect 75 passing; data-dependent tests skip without clones)
+pytest -q                           # run tests (expect 91 passing; data-dependent tests skip without clones)
 python scripts/check_parser.py      # parser spot-check (offline)
 python scripts/pilot_score_dist.py  # scorer pilot (offline)
 powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1

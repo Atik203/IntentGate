@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Gate 2 wiring: `AgentLoop` is a real ReAct loop (stable tool-prompt prefix, `Final Answer`/`Action`/JSON parsing, step cap) whose `execute` is `GateMiddleware.execute`; `ToolRegistry.describe()` provides the cacheable tool block (`tests/test_agent_loop_gate.py`).
+- Trace provenance: `EmbeddingBackend.metadata` (model_id + functional probe hash + backend) logged on every JSONL record; `TraceLogger(metadata=...)` records run-level model/benchmark info; middleware caches the contract embedding per session (`score_call(contract_vec=...)`).
+- Escalate-band tests: benchmark mode -> block + `would_escalate`; demo mode -> prompt accept/decline paths (`tests/test_no_bypass.py`).
 - Professional repo docs: `LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, this changelog.
 - GitHub PR/issue templates and CI workflow running `pytest -q` on `dev` and `main`.
 - `.gitattributes` for consistent line endings across Windows/macOS/Linux.

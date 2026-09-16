@@ -9,9 +9,10 @@ from intent_gate.types import GateResult, ToolCall
 
 
 class TraceLogger:
-    def __init__(self, path: str | Path = "results/gate_trace.jsonl"):
+    def __init__(self, path: str | Path = "results/gate_trace.jsonl", metadata: dict | None = None):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.metadata = dict(metadata or {})
         self._fh = self.path.open("a", encoding="utf-8")
 
     def log(self, call: ToolCall, result: GateResult, extra: dict | None = None):
@@ -29,6 +30,8 @@ class TraceLogger:
                 "latency_ms": result.latency_ms,
             },
         }
+        if self.metadata:
+            record["run"] = self.metadata
         if extra:
             record.update(extra)
         self._fh.write(json.dumps(record, default=str) + "\n")

@@ -9,8 +9,9 @@ import time
 
 from intent_gate.gate.decisions import decide
 from intent_gate.gate.trace import TraceLogger
+from intent_gate.scoring.embeddings import EmbeddingBackend
 from intent_gate.scoring.scorer import score_call
-from intent_gate.types import Decision, GateResult, IntentContract, ToolCall
+from intent_gate.types import GateResult, IntentContract, ToolCall
 
 
 class GateMiddleware:
@@ -24,6 +25,7 @@ class GateMiddleware:
         delta: float = 0.1,
         benchmark_mode: bool = True,
         interactive_prompt=None,
+        backend: EmbeddingBackend | None = None,
     ):
         self.contract = contract
         self.executor = executor  # callable(name, parameters) -> observation
@@ -33,10 +35,22 @@ class GateMiddleware:
         self.delta = delta
         self.benchmark_mode = benchmark_mode
         self.interactive_prompt = interactive_prompt
+        self.backend = backend or EmbeddingBackend()
+        self._contract_vec = None
+        self._trace_extra: dict | None = None
+
+    @property
+    def run_metadata(self) -> dict:
+        return {"embedding": self.backend.metadata}
 
     def check(self, call: ToolCall) -> GateResult:
+        if self._contract_vec is None:
+            self._contract_vec = self.backend.embed([self.contract.contract_text()])[0]
         t0 = time.perf_counter()
-        s, s_sem, s_rule, triggered, reason = score_call(self.contract, call, alpha=self.alpha)
+        s, s_sem, s_rule, triggered, reason = score_call(
+            self.contract, call, backend=self.backend, alpha=self.alpha,
+            contract_vec=self._contract_vec,
+        )
         latency_ms = (time.perf_counter() - t0) * 1000.0
         d = decide(s, tau=self.tau, delta=self.delta)
         result = GateResult(
@@ -49,7 +63,9 @@ class GateMiddleware:
             would_escalate=(d == "escalate" and self.benchmark_mode),
             reason=reason,
         )
-        self.trace.log(call, result)
+        if self._trace_extra is None:
+            self._trace_extra = self.run_metadata
+        self.trace.log(call, result, extra=self._trace_extra)
         return result
 
     def execute(self, call: ToolCall):
