@@ -59,12 +59,18 @@ def build_policy_factory(
     delta: float = 0.1,
     alpha: float = 0.7,
     benchmark_mode: bool = True,
+    state_factory=None,
 ) -> Callable[[str], OursPolicy | ToolGatePolicy] | None:
     """Returns ``factory(trusted_request) -> policy``; None for the unprotected condition."""
     if gate == "none":
         return None
     if gate == "toolgate":
-        return lambda user_request: ToolGatePolicy()
+
+        def toolgate_factory(user_request: str) -> ToolGatePolicy:
+            state = state_factory(user_request) if state_factory else None
+            return ToolGatePolicy(ToolGateChecker(world_state=state))
+
+        return toolgate_factory
     if gate != "ours":
         raise ValueError(f"unknown gate {gate!r}")
 

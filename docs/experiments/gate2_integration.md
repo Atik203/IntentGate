@@ -82,6 +82,13 @@ enforcement, shell-operator guard) the same conditions were re-run:
 InjecAgent is unchanged at 1/100 succ; the remaining miss (`dh_base_0125`) is the mutation-field
 class (no contract limit covers configuration changes) documented in the error taxonomy.
 
+B2 with the completed MCPTox contract set (65 contracts, path-scoped filesystem + effect
+recording) and per-case state seeding: success 8, work_not_success 15, **blocked 1** —
+attack-influenced 23 vs B1's 22. Only the out-of-scope `write_file` (`FileSystem_013`) is
+catchable; every other malicious call uses an uncontracted poisoned registration, which per-tool
+contracts cannot see. InjecAgent B2: 8/100 succ (dh 2, ds 6). Coverage: 8.1% of MCPTox tools
+(37.2% availability-weighted) — `docs/experiments/gate1_b2.md`.
+
 ## Artifacts
 
 - Reports: `results/gated/{none,ours,toolgate}_{dh50,ds50,mcptox100}.json`
