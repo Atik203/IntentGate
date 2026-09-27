@@ -84,14 +84,14 @@
 - Budget: ≈20.7k agent calls + ≈13.8k parser calls (ours + ablations) on `gpt-4o-mini` (est. $15–35, ~4–8 h with 3-way file-level parallelism).
 
 **Stage 0 — pre-run engineering (must land before the freeze):**
-- [ ] Gate every proposed call (user + attacker), not only attack-relevant ones — per-call decision/latency in `gate_events` (FPR proxy + full latency samples)
-- [ ] Wire ablations A1–A3 (`--ablation semantic-only|rule-only|raw-request`), ablation tag in trace metadata
-- [ ] Exact McNemar (+ continuity-corrected variant) and seeded bootstrap CI (10k) in `eval/stats.py`, with tests
-- [ ] τ×δ sweep grid (τ ∈ {0.40–0.80 step 0.05} × δ ∈ {0.05, 0.10, 0.15}) + escalate share per cell
-- [ ] Token/cost logging captured per run
-- [ ] `scripts/run_phase5.py` orchestrator: resume, `--jobs` parallelism, retry/backoff, `--max-calls` guard, lock/manifest, `--check` integrity mode
-- [ ] `scripts/report_phase5.py` reporter: tables, breakdowns (risk/tool/split/setting), stratification, CIs/McNemar, τ×δ Pareto, latency/utility, cost-vs-ASR
-- [ ] Smoke runs (`--limit 5`) green for every condition before the freeze
+- [x] Gate every proposed call (user + attacker), not only attack-relevant ones — per-call decision/latency in `gate_events` (FPR proxy + full latency samples)
+- [x] Wire ablations A1–A3 (`--ablation semantic-only|rule-only|raw-request`), ablation tag in trace metadata
+- [x] Exact McNemar (+ continuity-corrected variant) and seeded bootstrap CI (10k) in `eval/stats.py`, with tests
+- [x] τ×δ sweep grid (τ ∈ {0.40–0.80 step 0.05} × δ ∈ {0.05, 0.10, 0.15}) + escalate share per cell
+- [x] Token/cost logging captured per run
+- [x] `scripts/run_phase5.py` orchestrator: resume, `--jobs` parallelism, retry/backoff, `--max-calls` guard, lock/manifest, `--check` integrity mode
+- [x] `scripts/report_phase5.py` reporter: tables, breakdowns (risk/tool/split/setting), stratification, CIs/McNemar, τ×δ Pareto, latency/utility, cost-vs-ASR
+- [x] Smoke runs (5 cases per condition) green before the freeze — events/latency/cost/ablation paths verified
 
 **Stage 1 — freeze + full runs:**
 - [ ] Write `configs/phase5_lock.json` + `results/phase5/manifest.json` (requires clean tree)
