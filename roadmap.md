@@ -65,30 +65,52 @@
 
 **Goal: complete, reproducible results. Nothing gets rewritten after this.**
 
-**Freeze before starting:** intent schema v1.1 · B2 contracts + `configs/b2_coverage.json` · runner `--gate none|ours|toolgate` · defaults τ=0.75, δ=0.1, α=0.7. Any change after the first full run = new freeze + full re-run.
+**Freeze before starting:** intent schema v1.1 · B2 contracts + `configs/b2_coverage.json` · runner `--gate none|ours|toolgate` · defaults τ=0.75, δ=0.1, α=0.7. The orchestrator writes a lock + manifest (git SHA, config hashes, model IDs, embedding hash) before the first full run; any code/config change after that = new freeze + full re-run.
 
-**Run matrix** (identical prompts/tool blocks/model for every condition; seed 42):
+**Decisions (locked 2026-09-16):** InjecAgent runs **base + enhanced (2,108 cases: dh 510 + ds 544 each)**; MCPTox = 1,348 snapshot cases. Ablations A1–A3 run on the **full matrix** (A4 is trace-derived). Utility = **proxies from the runs** (InjecAgent valid-rate + user-tool calls allowed; MCPTox ignored share). No LLM judge for MCPTox in Phase 5 (heuristic evaluator documented; report both `success` and attack-influenced).
 
-| Condition | InjecAgent — 1,054 cases (dh+ds × base+enhanced) | MCPTox — 1,348 snapshot cases |
+**Run matrix** (identical prompts/tool blocks/model, seed 42, one run per cell):
+
+| Condition | InjecAgent 2,108 (dh/ds × base/enhanced) | MCPTox 1,348 |
 |---|---|---|
 | B1 — none (unprotected) | full | full |
 | B2 — toolgate (manual contracts) | full | full |
 | Ours — intent gate, τ=0.75 | full | full |
+| A1 — semantic-only | full | full |
+| A2 — rule-only | full | full |
+| A3 — raw-request embedding | full | full |
 
-- Runner: `harness/run_injecagent.py`, `harness/run_mcptox.py`; run one case-file/setting at a time so failures are resumable; each run writes report JSON + per-case JSONL + gate-trace JSONL (S, S_sem, S_rule, decision, latency, contract, embedding hash, `model_id`).
-- Budget: ≈6.6k agent calls + ≈2.1k parser calls (ours) on `gpt-4o-mini` (est. $10–20, ~2–4 h wall-clock); log tokens/cost per run; artifacts under `results/phase5/`.
+- 30 file-level runs, resumable; each writes report JSON + per-case JSONL + trace/gate events (S, S_sem, S_rule, decision, latency, contract, embedding hash, `model_id`, tokens/cost). Artifacts: `results/phase5/`.
+- Budget: ≈20.7k agent calls + ≈13.8k parser calls (ours + ablations) on `gpt-4o-mini` (est. $15–35, ~4–8 h with 3-way file-level parallelism).
 
-- [ ] Full runs B1 vs B2 vs Ours on the matrix above (all 6 file-level runs per condition)
-- [ ] Integrity check per run: case counts, valid rates, `no_contract` counts, parser backends, model/embedding hashes present in every trace
-- [ ] τ ∈ {0.40–0.80 step 0.05} × δ ∈ {0.05, 0.10, 0.15} sweep → ASR–FPR Pareto from cached traces (no re-runs; `scripts/sweep_gated.py`)
-- [ ] Ablations A1–A4 + optional A5 — A1 semantic-only (no rule veto) · A2 rule-only (no embeddings) · A3 raw-request embedding vs structured contract · A4 hard-block only vs escalate-as-block · A5 B2 with seeded file state (baseline sensitivity)
-- [ ] Breakdowns: MCPTox per-risk-category (10) · InjecAgent per-tool (user vs attacker tools) · per split (dh/ds) and setting (base/enhanced)
-- [ ] Stratification: vague vs specific contracts (`specificity`) for FPR; `no_contract` share for B2; escalate share at each τ
-- [ ] Statistics: bootstrap 95% CI (10k resamples) on ASR/FPR + paired McNemar B1 vs ours per case, per benchmark (report CIs and p-values, never a single point)
-- [ ] Error taxonomy: ~50 sampled failures per benchmark, classes {FPR case, false negative, B2 coverage, over-strict}, with contract + score evidence (`scripts/error_taxonomy.py` at scale)
-- [ ] Latency: p50/p95 per call and per case from traces (target p95 < 100 ms) + benign-task utility retention
+**Stage 0 — pre-run engineering (must land before the freeze):**
+- [ ] Gate every proposed call (user + attacker), not only attack-relevant ones — per-call decision/latency in `gate_events` (FPR proxy + full latency samples)
+- [ ] Wire ablations A1–A3 (`--ablation semantic-only|rule-only|raw-request`), ablation tag in trace metadata
+- [ ] Exact McNemar (+ continuity-corrected variant) and seeded bootstrap CI (10k) in `eval/stats.py`, with tests
+- [ ] τ×δ sweep grid (τ ∈ {0.40–0.80 step 0.05} × δ ∈ {0.05, 0.10, 0.15}) + escalate share per cell
+- [ ] Token/cost logging captured per run
+- [ ] `scripts/run_phase5.py` orchestrator: resume, `--jobs` parallelism, retry/backoff, `--max-calls` guard, lock/manifest, `--check` integrity mode
+- [ ] `scripts/report_phase5.py` reporter: tables, breakdowns (risk/tool/split/setting), stratification, CIs/McNemar, τ×δ Pareto, latency/utility, cost-vs-ASR
+- [ ] Smoke runs (`--limit 5`) green for every condition before the freeze
+
+**Stage 1 — freeze + full runs:**
+- [ ] Write `configs/phase5_lock.json` + `results/phase5/manifest.json` (requires clean tree)
+- [ ] 15 main runs: B1/B2/Ours × {dh_base, ds_base, dh_enhanced, ds_enhanced, mcptox}
+- [ ] 15 ablation runs: A1/A2/A3 × {dh_base, ds_base, dh_enhanced, ds_enhanced, mcptox}
+- [ ] Integrity check (`--check`): case counts, valid rates, parser backends, hashes, `no_contract` counts
+
+**Stage 2 — analysis:**
+- [ ] τ×δ Pareto (all + per benchmark) from cached traces; escalate share
+- [ ] Bootstrap 95% CI + paired McNemar per benchmark (B1 vs ours; ours vs B2)
+- [ ] Breakdowns: MCPTox per risk (10) · InjecAgent per attacker tool + per user tool · per split (dh/ds) and setting (base/enhanced)
+- [ ] Stratification: vague vs specific FPR proxy; B2 `no_contract` share
+- [ ] Error taxonomy: ~50 sampled failures per benchmark ({FPR case, false negative, B2 coverage, over-strict}) with contract + score evidence
+- [ ] Latency p50/p95 per call and per case; utility proxies; cost-vs-ASR
 - [ ] Headline figures: results table, Pareto curve, setup-cost bar (0 vs 144 contracts), latency table, cost-vs-ASR table
-- [ ] Gate 3 freeze: tag the commit, freeze `docs/experiments/05_phase5_full_evaluation.md`, update roadmap + CHANGELOG (no edits to results after this point)
+
+**Stage 3 — Gate 3 freeze:**
+- [ ] `docs/experiments/05_phase5_full_evaluation.md` (E11–E17: matrix, Pareto, ablations, breakdowns, stats, taxonomy, latency/utility; limitations + supervisor Q&A)
+- [ ] Roadmap + CHANGELOG updated, commit tagged, PR to `dev`; no results edits after this point
 
 ## Phase 6 — Stretch & Hardening (Weeks 13–14)
 
