@@ -3,6 +3,9 @@
 > This folder is the **experiment record** for the thesis. Each report is self-contained: setup,
 > commands, datasets, results, artifacts, limitations and a supervisor Q&A block. Start here, then
 > open the report for the experiment you need.
+>
+> **New to the project?** Read [`../team_guide.md`](../team_guide.md) first — it explains the
+> project and summarizes these results in plain words.
 
 **Current state (2026-09-16):** Gate 0 ✅ · Gate 1 ✅ · Gate 2 ✅ · Gate 3 (results freeze) ⏳ Phase 5.
 
