@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from harness.adapters.mcptox import MCPToxCase
+from harness.gate_policy import decide_call
 from intent_gate.types import ToolCall
 
 SENSITIVE_RE = (
@@ -117,10 +118,10 @@ def run_case(case: MCPToxCase, llm, temperature: float = 0.0, policy_factory=Non
         return MCPToxResult(case_id=case.case_id, label="error", error=str(exc))
     label, called, args, indicators = evaluate_mcptox_output(output or "", case)
     gate_events: list = []
-    if policy is not None and called and label in ("success", "work_not_success"):
-        allowed = policy.allows(ToolCall(name=called, parameters=args))
-        gate_events.append({"name": called, "allowed": allowed})
-        if not allowed:
+    if policy is not None and called:
+        event = decide_call(policy, ToolCall(name=called, parameters=args))
+        gate_events.append(event)
+        if label in ("success", "work_not_success") and not event["allowed"]:
             label = "blocked"
     return MCPToxResult(
         case_id=case.case_id,

@@ -43,3 +43,33 @@ def test_build_policy_factory_ours_parses_trusted_request():
     assert isinstance(policy, OursPolicy)
     assert not policy.allows(ToolCall(name="exec_code", parameters={"code": "rm -rf /"}))
     assert not policy.allows(ToolCall(name="transfer_money", parameters={"amount": 500}))
+
+
+def test_decide_records_carry_latency_and_decision(tmp_path):
+    allow_event = AllowAllPolicy().decide(ToolCall(name="x", parameters={}))
+    assert allow_event["allowed"] is True and "latency_ms" in allow_event
+
+    gate = GateMiddleware(FLIGHT_CONTRACT, lambda name, params: "ok", TraceLogger(tmp_path / "t.jsonl"))
+    ours_event = OursPolicy(gate).decide(ToolCall(name="search_flights", parameters={"to": "Berlin"}))
+    assert {"name", "allowed", "decision", "S", "S_sem", "S_rule", "latency_ms"} <= set(ours_event)
+
+
+def test_allow_all_policy_decide_allows_everything():
+    event = AllowAllPolicy().decide(ToolCall(name="transfer_money", parameters={"amount": 500}))
+    assert event["allowed"] is True
+    assert event["decision"] == "allow"
+
+
+def test_toolgate_decide_marks_no_contract_and_violations():
+    policy = ToolGatePolicy()
+    unknown = policy.decide(ToolCall(name="count_messages", parameters={}))
+    assert unknown["allowed"] is True and unknown["no_contract"] is True
+
+    violation = policy.decide(
+        ToolCall(
+            name="BankManagerTransferFunds",
+            parameters={"from_account_number": "1", "to_account_number": "2", "amount": 100},
+        )
+    )
+    assert violation["allowed"] is False and violation["decision"] == "block"
+    assert violation["reason"]

@@ -119,13 +119,12 @@ class IntentParser:
         return coerce_contract(data, raw_request=user_request)
 
 
-def build_parser(offline: bool | None = None, model_id: str | None = None) -> IntentParser:
+def build_parser(offline: bool | None = None, model_id: str | None = None, llm=None) -> IntentParser:
     """Factory: LLM parser when an API key is available, else offline heuristic."""
     if offline is None:
         offline = not os.getenv("OPENAI_API_KEY")
     model_id = model_id or os.getenv("PARSER_MODEL_ID", "gpt-4o-mini")
-    llm = None
-    if not offline:
+    if llm is None and not offline:
         from intent_gate.agent.base import LLMClient
 
         llm = LLMClient(model_id=model_id)
