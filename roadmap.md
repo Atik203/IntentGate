@@ -81,7 +81,17 @@
 | A3 — raw-request embedding | full | full |
 
 - 30 file-level runs, resumable; each writes report JSON + per-case JSONL + trace/gate events (S, S_sem, S_rule, decision, latency, contract, embedding hash, `model_id`, tokens/cost). Artifacts: `results/phase5/`.
-- Budget: ≈20.7k agent calls + ≈13.8k parser calls (ours + ablations) on `gpt-4o-mini` (est. $15–35, ~4–8 h with 3-way file-level parallelism).
+- Budget: ~4–8 h with 3-way file-level parallelism. **Cost chart** (34,560 LLM calls total; smoke rates ≈ $0.0005/call agent-only, ≈ $0.00074/call for ours with parser):
+
+| Group | Cases | Calls | Est. cost |
+|---|---|---|---|
+| Main matrix — B1 (agent) | 3,456 | 3,456 | ≈ $1.7 |
+| Main matrix — B2 (agent) | 3,456 | 3,456 | ≈ $1.7 |
+| Main matrix — Ours (agent + parser) | 3,456 | 6,912 | ≈ $2.6 |
+| Ablations A1–A3 (agent + parser each) | 10,368 | 20,736 | ≈ $7.7 |
+| **Total** | 20,736 | **34,560** | **≈ $14 (plan $15–20 with MCPTox long prompts + rerun margin)** |
+
+Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,432 parser); MCPTox 1,348 × 6 = 8,088 agent (+5,392 parser). `scripts/run_phase5.py --dry-run` prints the live estimate.
 
 **Stage 0 — pre-run engineering (must land before the freeze):**
 - [x] Gate every proposed call (user + attacker), not only attack-relevant ones — per-call decision/latency in `gate_events` (FPR proxy + full latency samples)
