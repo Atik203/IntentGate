@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rule-engine fix: `_limit_allows` no longer treats the substring "no" as a denial (word-boundary prefixes only), so scoped authorizations ("allow: $500 to account 123") pass.
 
 ### Changed
+- Roadmap Phase 5: added the **cost chart** (34,560 LLM calls total; per-group estimates from smoke rates, ≈ $14 with $15–20 budget incl. rerun margin).
 - Docs moves: `setup.md` → `docs/setup.md` and `references.bib` → `docs/references.bib` (all links updated; test-count and citation pointers refreshed).
 - Roadmap Phase 5 expanded into a detailed evaluation plan: freeze-before-start list, run matrix (3 conditions × 2 benchmarks × settings, resumable file-level runs, budget estimate), analysis checklist (Pareto sweep, ablations A1–A5, breakdowns, stratification, bootstrap CI + McNemar, scaled taxonomy, latency/utility), headline figures, and the Gate 3 freeze step.
 - Docs restructure: `blueprint.md` → `docs/blueprint.md` (indexed ToC, anchors, key callouts); new `docs/README.md` and `docs/experiments/README.md` hubs; 10 experiment notes merged into 4 indexed reports (01 gate-0 foundation, 02 parser/schema, 03 B2 ToolGate, 04 gate-2 gated eval) with datasets, artifacts, reproduce commands, and supervisor Q&A (merge map in `docs/experiments/README.md`).
