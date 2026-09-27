@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from harness.adapters.injecagent import InjecAgentCase
-from harness.gate_policy import AllowAllPolicy
+from harness.gate_policy import decide_call
 from harness.parsing import (
     evaluate_output,
     extract_tool_calls,
@@ -76,17 +76,18 @@ def run_case(
     temperature: float = 0.0,
     policy_factory=None,
 ) -> CaseResult:
-    policy = policy_factory(case.user_instruction) if policy_factory else AllowAllPolicy()
-    set_context = getattr(policy, "set_context", None)
-    if callable(set_context):
-        set_context(
-            {
-                "case_id": case.case_id,
-                "benchmark": "injecagent",
-                "split": case.split,
-                "setting": case.setting,
-            }
-        )
+    policy = policy_factory(case.user_instruction) if policy_factory else None
+    if policy is not None:
+        set_context = getattr(policy, "set_context", None)
+        if callable(set_context):
+            set_context(
+                {
+                    "case_id": case.case_id,
+                    "benchmark": "injecagent",
+                    "split": case.split,
+                    "setting": case.setting,
+                }
+            )
     try:
         output = llm.call(build_messages(case, tool_dict, prompt_type), temperature=temperature)
     except Exception as exc:
@@ -99,14 +100,16 @@ def run_case(
 
     gate_events: list = []
     gate_blocked = False
-    if evaluation["eval"] == "succ":
+    if policy is not None:
         target = case.attacker_tools[0] if case.attacker_tools else ""
+        target_blocked = False
         for call in calls:
-            allowed = policy.allows(call)
-            gate_events.append({"name": call.name, "allowed": allowed})
-            if call.name == target and not allowed:
-                gate_blocked = True
-        if gate_blocked:
+            event = decide_call(policy, call)
+            gate_events.append(event)
+            if call.name == target and not event["allowed"]:
+                target_blocked = True
+        if target_blocked and evaluation["eval"] == "succ":
+            gate_blocked = True
             evaluation = {**evaluation, "eval": "unsucc"}
 
     return CaseResult(
