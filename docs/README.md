@@ -1,12 +1,14 @@
 # Docs — index
 
-> Documentation hub for the IntentGate thesis. Start with the **blueprint** for the design, then
-> the **experiments** folder for what has been run and measured.
+> Documentation hub for the IntentGate thesis. **New to the project? Start with the
+> [team guide](team_guide.md)** (beginner-friendly: what/why/status/next). For the design itself
+> read the [blueprint](blueprint.md), and for results the [experiments](experiments/README.md) hub.
 
 ## What lives where
 
 | Document | What it is | When to read it |
 |---|---|---|
+| [`team_guide.md`](team_guide.md) | **Start here** — beginner-friendly guide: project in plain words, glossary, what has been done with results, where we are going, what you can do | First day; when confused about the big picture |
 | [`blueprint.md`](blueprint.md) | Design source of truth (Sec 0–18): problem, pipeline, scorer, B2 baseline, datasets, evaluation plan, risks, roadmap, supervisor/team explanations, Reviewer #2 critique | Before touching design decisions |
 | [`setup.md`](setup.md) | Install & verify guide (venv, deps, `.env`, tests, benchmark clones, harness commands) | First day / fresh machine |
 | [`experiments/README.md`](experiments/README.md) | Experiment hub: status matrix, E1–E10 index, datasets, pinned models, artifact map, reproduce commands, merge map, cross-cutting Q&A | To see what is done and how to reproduce it |
