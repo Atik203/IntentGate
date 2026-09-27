@@ -21,6 +21,11 @@ def main():
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--risk", default=None, help="filter to one risk category")
     ap.add_argument("--gate", choices=["none", "ours", "toolgate"], default="none")
+    ap.add_argument(
+        "--ablation",
+        choices=["none", "semantic-only", "rule-only", "raw-request"],
+        default="none",
+    )
     ap.add_argument("--tau", type=float, default=0.6)
     ap.add_argument("--delta", type=float, default=0.1)
     ap.add_argument("--alpha", type=float, default=0.7)
@@ -28,6 +33,8 @@ def main():
     ap.add_argument("--out", default="results/mcptox_ours")
     ap.add_argument("--trace", default="")
     args = ap.parse_args()
+    if args.ablation != "none" and args.gate != "ours":
+        ap.error("--ablation requires --gate ours")
 
     from dotenv import load_dotenv
 
@@ -39,6 +46,7 @@ def main():
     from harness.mcptox_runner import run_cases
     from intent_gate.agent.base import LLMClient
     from intent_gate.baselines.toolgate.world_state import seed_from_request
+    from intent_gate.eval.cost import estimate_usage_cost
     from intent_gate.gate.trace import TraceLogger
     from intent_gate.parser.parser import build_parser
     from intent_gate.scoring.embeddings import EmbeddingBackend
@@ -47,6 +55,9 @@ def main():
         ROOT / "data/raw/mcptox/response_all.json", limit=args.limit, seed=args.seed, risk=args.risk
     )
     llm = LLMClient(model_id=model_name)
+    parser_llm = (
+        LLMClient(model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini")) if args.gate == "ours" else None
+    )
     out_dir = (ROOT / args.out).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -61,19 +72,21 @@ def main():
             "tau": args.tau,
             "delta": args.delta,
             "alpha": args.alpha,
+            "ablation": args.ablation,
             "embedding": backend.metadata,
         },
         append=False,
     )
     policy_factory = build_policy_factory(
         args.gate,
-        parser=build_parser(model_id=os.getenv("PARSER_MODEL_ID")),
+        parser=build_parser(llm=parser_llm),
         backend=backend,
         trace=trace,
         tau=args.tau,
         delta=args.delta,
         alpha=args.alpha,
         state_factory=seed_from_request,
+        ablation=args.ablation,
     )
 
     def progress(result, case):
@@ -92,12 +105,21 @@ def main():
         {
             "model_name": model_name,
             "gate": args.gate,
+            "ablation": args.ablation,
             "tau": args.tau,
             "delta": args.delta,
             "embedding": backend.metadata,
             "evaluator": "heuristic (payload/sensitive-path; see harness/mcptox_runner.py)",
             "snapshot": "AAAI26-7C02 downloaded 2026-09-11 (static)",
         }
+    )
+    agent_cost = estimate_usage_cost(llm.usage)
+    parser_cost = estimate_usage_cost(parser_llm.usage) if parser_llm else None
+    summary["usage"] = {"agent": llm.usage, "parser": parser_llm.usage if parser_llm else None}
+    summary["estimated_cost_usd"] = (
+        round((agent_cost or 0.0) + (parser_cost or 0.0), 4)
+        if (agent_cost is not None or parser_cost is not None)
+        else None
     )
     summary_file = out_dir / "summary.json"
     summary_file.write_text(json.dumps(summary, indent=2), encoding="utf-8")
