@@ -10,6 +10,9 @@ This project builds a **model-agnostic middleware gate** that derives an _intent
 
 ## Setup
 
+New to the project? Start with **[`docs/team_guide.md`](docs/team_guide.md)** — a beginner-friendly
+explanation of the project, what has been done, and where it is going.
+
 Install and verify in ~5 minutes: see **[`docs/setup.md`](docs/setup.md)** (venv + `pip install -e ".[dev]"` + `.env` + `pytest -q` + smoke-test scripts).
 
 ---
@@ -74,7 +77,7 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 - **Papers:** 5 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
 - **Blueprint:** [`docs/blueprint.md`](docs/blueprint.md) — Phase 1–5, Sections 0–18 (indexed with anchors): design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
-- **Docs hub:** [`docs/README.md`](docs/README.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E10, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
+- **Docs hub:** [`docs/README.md`](docs/README.md) · **Team guide (start here):** [`docs/team_guide.md`](docs/team_guide.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E10, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
 
 All 5 papers verified via full arXiv html (not snippets). BibTeX: [`docs/references.bib`](docs/references.bib).
 

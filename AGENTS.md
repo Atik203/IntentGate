@@ -24,7 +24,7 @@ harness/                    # run_injecagent.py, run_mcptox.py, compare_b2.py, c
 scripts/                    # pilot_score_dist.py, check_parser.py, clone_benchmarks.ps1
 configs/                    # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
 tests/                      # pytest; fixtures/ has labeled hijack+legit cases
-docs/                       # README hub + setup.md + blueprint.md (indexed design truth) + references.bib + experiments/ (E1-E10)
+docs/                       # team_guide.md (start here) + README hub + setup.md + blueprint.md (indexed) + references.bib + experiments/ (E1-E10)
 data/  results/             # gitignored (benchmarks, JSONL traces)
 ```
 
