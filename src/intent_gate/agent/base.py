@@ -1,12 +1,11 @@
 """LLM provider interface - API first (GPT-4o-mini / Qwen OpenAI-compatible, blueprint Sec 7).
 
 Keep the agent prompt IDENTICAL across B1/B2/ours: only the middleware differs.
+Tracks token usage per client for the Phase 5 cost reports.
 """
 from __future__ import annotations
 
 import os
-
-from intent_gate.parser.prompts import build_messages  # reuse chat plumbing
 
 
 class LLMClient:
@@ -17,6 +16,9 @@ class LLMClient:
         self._base_url = base_url
         self._api_key = api_key
         self._client = None
+        self.calls = 0
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
 
     def _ensure(self):
         if self._client is None:
@@ -33,7 +35,22 @@ class LLMClient:
         resp = self._client.chat.completions.create(
             model=self.model_id, messages=messages, temperature=temperature, **kwargs
         )
+        self.calls += 1
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            self.prompt_tokens += int(getattr(usage, "prompt_tokens", 0) or 0)
+            self.completion_tokens += int(getattr(usage, "completion_tokens", 0) or 0)
         return resp.choices[0].message.content or ""
+
+    @property
+    def usage(self) -> dict:
+        return {
+            "model_id": self.model_id,
+            "calls": self.calls,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "total_tokens": self.prompt_tokens + self.completion_tokens,
+        }
 
     def chat(self, system: str, user: str) -> str:
         return self.call([{"role": "system", "content": system}, {"role": "user", "content": user}])

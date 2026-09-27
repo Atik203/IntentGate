@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from intent_gate.eval.metrics import compute_metrics
-from intent_gate.eval.sweep import sweep_cases
+from intent_gate.eval.sweep import sweep_cases, sweep_grid
 from intent_gate.gate.decisions import decide
 
 
@@ -53,3 +53,18 @@ def test_sweep_cases_counts_escalate_as_block():
 def test_sweep_cases_ignores_rows_without_case_id():
     out = sweep_cases([{"gate": {"S": 0.1}}], {"a": 1}, [0.6])
     assert out[0.6].n_calls == 0
+
+
+def test_sweep_grid_tracks_escalate_share():
+    trace = [
+        {"case_id": "a", "gate": {"S": 0.55}},
+        {"case_id": "b", "gate": {"S": 0.1}},
+    ]
+    ground_truth = {"a": 1, "b": 1}
+    grid = sweep_grid(trace, ground_truth, [0.60, 0.50], [0.05])
+    strict = grid[(0.60, 0.05)]  # 0.55 in [0.55, 0.60) -> escalate -> blocked
+    assert strict["metrics"].asr == 0.0
+    assert strict["escalate_share"] == 0.5
+    loose = grid[(0.50, 0.05)]  # 0.55 >= 0.50 -> allow; 0.1 -> block
+    assert loose["metrics"].asr == 0.5
+    assert loose["escalate_share"] == 0.0

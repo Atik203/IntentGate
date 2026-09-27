@@ -20,6 +20,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cases", required=True, help="InjecAgent test_cases_*.json path")
     ap.add_argument("--gate", choices=["none", "ours", "toolgate"], default="none")
+    ap.add_argument(
+        "--ablation",
+        choices=["none", "semantic-only", "rule-only", "raw-request"],
+        default="none",
+    )
     ap.add_argument("--threshold", type=float, default=0.6)
     ap.add_argument("--delta", type=float, default=0.1)
     ap.add_argument("--alpha", type=float, default=0.7)
@@ -30,6 +35,8 @@ def main():
     ap.add_argument("--jsonl", default="")
     ap.add_argument("--trace", default="")
     args = ap.parse_args()
+    if args.ablation != "none" and args.gate != "ours":
+        ap.error("--ablation requires --gate ours")
 
     from dotenv import load_dotenv
 
@@ -40,6 +47,7 @@ def main():
     from harness.injecagent_runner import build_tool_dict, run_cases
     from intent_gate.agent.base import LLMClient
     from intent_gate.baselines.toolgate.world_state import seed_from_request
+    from intent_gate.eval.cost import estimate_usage_cost
     from intent_gate.gate.trace import TraceLogger
     from intent_gate.parser.parser import build_parser
     from intent_gate.scoring.embeddings import EmbeddingBackend
@@ -50,6 +58,9 @@ def main():
         load_tool_definitions(ROOT / "data/raw/InjecAgent/data/tools.json")
     )
     llm = LLMClient(model_id=model_name)
+    parser_llm = (
+        LLMClient(model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini")) if args.gate == "ours" else None
+    )
 
     report_path = (ROOT / args.report).resolve()
     jsonl_path = Path(args.jsonl) if args.jsonl else report_path.with_suffix(".jsonl")
@@ -65,31 +76,42 @@ def main():
             "tau": args.threshold,
             "delta": args.delta,
             "alpha": args.alpha,
+            "ablation": args.ablation,
             "embedding": backend.metadata,
         },
         append=False,
     )
     policy_factory = build_policy_factory(
         args.gate,
-        parser=build_parser(model_id=os.getenv("PARSER_MODEL_ID")),
+        parser=build_parser(llm=parser_llm),
         backend=backend,
         trace=trace,
         tau=args.threshold,
         delta=args.delta,
         alpha=args.alpha,
         state_factory=seed_from_request,
+        ablation=args.ablation,
     )
     summary, _ = run_cases(cases, llm, tool_dict, policy_factory=policy_factory, jsonl_path=jsonl_path)
     trace.close()
+
+    agent_cost = estimate_usage_cost(llm.usage)
+    parser_cost = estimate_usage_cost(parser_llm.usage) if parser_llm else None
+    total_cost = None
+    if agent_cost is not None or parser_cost is not None:
+        total_cost = round((agent_cost or 0.0) + (parser_cost or 0.0), 4)
 
     report = {
         "benchmark": "injecagent",
         "cases": args.cases,
         "model_id": model_name,
         "gate": args.gate,
+        "ablation": args.ablation,
         "tau": args.threshold,
         "delta": args.delta,
         "embedding": backend.metadata,
+        "usage": {"agent": llm.usage, "parser": parser_llm.usage if parser_llm else None},
+        "estimated_cost_usd": total_cost,
         **summary,
     }
     report_path.parent.mkdir(parents=True, exist_ok=True)
