@@ -2,6 +2,9 @@
 
 How to install and run the project locally. Tested on Windows (PowerShell 7+); commands for macOS/Linux noted inline.
 
+> **New to the project?** Read [`team_guide.md`](team_guide.md) first — it explains what the
+> project is, what has already been done, and what the commands below are for.
+
 ---
 
 ## 1. Prerequisites
@@ -112,6 +115,7 @@ python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base
 
 ## Related docs
 
+- `team_guide.md` — start here (beginner-friendly project + status + next steps)
 - `blueprint.md` — design (single source of truth)
 - `experiments/README.md` — experiment hub (status, datasets, artifacts, reproduce commands)
 - `references.bib` — BibTeX citation basis (10 verified papers)
