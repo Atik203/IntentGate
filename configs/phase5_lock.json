@@ -1,0 +1,60 @@
+{
+  "created": "2026-10-11T13:44:48.131912+00:00",
+  "git_sha": "307487fbe24e790f0c84f7f7aa49057ba6598e23",
+  "git_dirty": false,
+  "configs": {
+    "configs/intent_schema.json": "b94d5031c2954b105714161e0b929188db59afdb117fe034c61bf29c6fb476a8",
+    "configs/parser_fewshots.json": "89738bb56a4ff06ad3d55cdb62690eec81e010e8d1b3028d329f953ae9cfacbb",
+    "configs/thresholds.yaml": "591610bf8f98a0bd7791a6845439231265744fdb80a05f384f6ff4562002c4d8",
+    "configs/models.yaml": "c3f4b1280dcf70cdc4b10ecf61bb8e847c94a07edb3102abc7ea007bf5590186",
+    "configs/b2_coverage.json": "3709b6a306444b6684f2ed4936d7ee74df423aac440573eec85d6a05ccffee15"
+  },
+  "models": {
+    "agent": "gpt-4o-mini",
+    "parser": "gpt-4o-mini",
+    "embedding": {
+      "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+      "model_hash": "4588b3f9e962",
+      "backend": "sentence-transformers"
+    }
+  },
+  "settings": {
+    "tau": 0.75,
+    "delta": 0.1,
+    "alpha": 0.7,
+    "seed": 42
+  },
+  "matrix": [
+    "b1_test_cases_dh_base",
+    "b1_test_cases_ds_base",
+    "b1_test_cases_dh_enhanced",
+    "b1_test_cases_ds_enhanced",
+    "b1_mcptox",
+    "b2_test_cases_dh_base",
+    "b2_test_cases_ds_base",
+    "b2_test_cases_dh_enhanced",
+    "b2_test_cases_ds_enhanced",
+    "b2_mcptox",
+    "ours_test_cases_dh_base",
+    "ours_test_cases_ds_base",
+    "ours_test_cases_dh_enhanced",
+    "ours_test_cases_ds_enhanced",
+    "ours_mcptox",
+    "a1_semantic_only_test_cases_dh_base",
+    "a1_semantic_only_test_cases_ds_base",
+    "a1_semantic_only_test_cases_dh_enhanced",
+    "a1_semantic_only_test_cases_ds_enhanced",
+    "a1_semantic_only_mcptox",
+    "a2_rule_only_test_cases_dh_base",
+    "a2_rule_only_test_cases_ds_base",
+    "a2_rule_only_test_cases_dh_enhanced",
+    "a2_rule_only_test_cases_ds_enhanced",
+    "a2_rule_only_mcptox",
+    "a3_raw_request_test_cases_dh_base",
+    "a3_raw_request_test_cases_ds_base",
+    "a3_raw_request_test_cases_dh_enhanced",
+    "a3_raw_request_test_cases_ds_enhanced",
+    "a3_raw_request_mcptox"
+  ],
+  "limit": null
+}
