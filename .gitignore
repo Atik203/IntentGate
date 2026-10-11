@@ -8,6 +8,9 @@ literature_review.md
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+*.egg-info/
+node_modules/
+config.bat
 
 # secrets / local env
 .env

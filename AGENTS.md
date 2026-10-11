@@ -25,7 +25,8 @@ scripts/                    # pilot_score_dist.py, check_parser.py, clone_benchm
 configs/                    # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
 tests/                      # pytest; fixtures/ has labeled hijack+legit cases
 docs/                       # team_guide.md (start here) + README hub + setup.md + blueprint.md (indexed) + references.bib + experiments/ (E1-E10)
-data/  results/             # gitignored (benchmarks, JSONL traces)
+data/                      # README.md tracked; raw/ gitignored (bootstrap via scripts/clone_benchmarks.ps1)
+results/                   # TRACKED on purpose: teammates read results/ instead of re-running evals
 ```
 
 ## Commands (Windows/PowerShell, pwsh)
@@ -36,7 +37,8 @@ pip install -e ".[dev]"             # install (first run downloads torch - slow)
 pytest -q                           # run tests (expect 158 passing; data-dependent tests skip without clones)
 python scripts/check_parser.py      # parser spot-check (offline)
 python scripts/pilot_score_dist.py  # scorer pilot (offline)
-powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1
+powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1   # bootstrap data/raw at pinned commits
+powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1 -VerifyOnly   # health check, no downloads
 python harness/run_injecagent.py --cases <path> --gate ours --threshold 0.6
 ```
 
@@ -78,7 +80,10 @@ To maximize context cache hits (DeepSeek context caching, OpenAI automatic promp
 - Doc sync: literature-review changes (`literature_review/`, `docs/references.bib`) and design edits must update the affected docs (`docs/blueprint.md`, `README.md`, `literature_review/index.md`) **and** `roadmap.md` + `CHANGELOG.md` in the same PR. Experiment results go in `docs/experiments/` following its template (At a glance → Goal → Setup → Results → Artifacts → Limitations → Supervisor Q&A).
 - Check the roadmap before starting work: a `[ ]` item in the current phase is the next thing to do. Mark `[~]` while working, `[x]` when done + tested.
 - Before touching `src/` or `harness/`, run `pytest -q` and keep it green.
-- Do not commit `.env`, `data/raw/`, `results/*.jsonl`, `.venv/`, `*.egg-info/` (gitignore already covers these).
+- **Never commit:** `.env`, `data/raw/`, `.venv/`, `node_modules/`, `config.bat`. These are gitignored.
+- **`results/` IS tracked on purpose.** 120 result files live in git so teammates read published numbers instead of re-running evals (each run costs real LLM tokens). Commit new run outputs; cite the benchmark pins from `configs/benchmark_versions.yaml` in the results log (blueprint Sec 8).
+- **`data/raw/` is never committed** (~440 MB of third-party benchmarks). Teammates fetch it with `scripts/clone_benchmarks.ps1`, which clones at the exact pinned commits. Only `data/README.md` is tracked.
+- **Do not commit `src/*.egg-info/`** — it is a `pip install -e .` build artifact. 5 files are currently tracked from an earlier commit; they should be untracked (`git rm -r --cached src/intent_gate.egg-info`) and the path added to `.gitignore`.
 - Security-relevant code paths (parser ordering, no-bypass, veto logic) have dedicated tests — add/extend them with any change.
 
 ## Branching (5-member team)
