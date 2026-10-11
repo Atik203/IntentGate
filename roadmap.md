@@ -81,15 +81,18 @@
 | A3 — raw-request embedding | full | full |
 
 - 30 file-level runs, resumable; each writes report JSON + per-case JSONL + trace/gate events (S, S_sem, S_rule, decision, latency, contract, embedding hash, `model_id`, tokens/cost). Artifacts: `results/phase5/`.
-- Budget: ~4–8 h with 3-way file-level parallelism. **Cost chart** (34,560 LLM calls total; smoke rates ≈ $0.0005/call agent-only, ≈ $0.00074/call for ours with parser):
+- Budget was ~4–8 h with 3-way file-level parallelism; actual: **~5.6 h**. **Cost chart** (34,560 LLM calls total; actuals from the frozen run 2026-10-12 — list-price estimate vs billed):
 
-| Group | Cases | Calls | Est. cost |
-|---|---|---|---|
-| Main matrix — B1 (agent) | 3,456 | 3,456 | ≈ $1.7 |
-| Main matrix — B2 (agent) | 3,456 | 3,456 | ≈ $1.7 |
-| Main matrix — Ours (agent + parser) | 3,456 | 6,912 | ≈ $2.6 |
-| Ablations A1–A3 (agent + parser each) | 10,368 | 20,736 | ≈ $7.7 |
-| **Total** | 20,736 | **34,560** | **≈ $14 (plan $15–20 with MCPTox long prompts + rerun margin)** |
+| Group | Cases | Calls | List-price actual | Billed share* |
+|---|---|---|---|---|
+| Main matrix — B1 (agent) | 3,456 | 3,456 | $1.33 | |
+| Main matrix — B2 (agent) | 3,456 | 3,456 | $1.33 | |
+| Main matrix — Ours (agent + parser) | 3,456 | 6,912 | $2.20 | |
+| Ablations A1–A3 (agent + parser each) | 10,368 | 20,736 | $6.60 | |
+| **Total** | 20,736 | **34,560** | **$11.46** | **$9.64** |
+
+\*Billed total from the OpenAI dashboard; per-group billed splits aren't reported — the ~16%
+gap vs list is automatic prompt caching (byte-identical system/tool prefixes).
 
 Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,432 parser); MCPTox 1,348 × 6 = 8,088 agent (+5,392 parser). `scripts/run_phase5.py --dry-run` prints the live estimate.
 
