@@ -530,7 +530,7 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 
 *Designed for a 3–4 month thesis core + 1 month buffer/writing, matching Idea §8 Feasibility High (4–5 months) and §10 Evaluation Plan. This is the single source of truth for planning — the 10-month example timeline does not apply.*
 
-**Compute:** No GPU training needed. Dev on laptop + API; optional single 24GB VRAM if local LLM. API budget ~$50. ToolGate reimpl is Python logic, not model training.
+**Compute:** No GPU training needed. Dev on laptop + API; optional single 24GB VRAM if local LLM. API budget ~$50 (Phase 5 spent $9.64 billed of $11.46 list on 34,560 calls). ToolGate reimpl is Python logic, not model training.
 
 | Period | Objectives | Development | Experiments | Deliverables |
 |---|---|---|---|---|
@@ -707,6 +707,12 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 **Expected technical improvements (hypotheses, not promises):** On InjecAgent+MCPTox, meaningful ASR reduction vs. B1 (unprotected) — e.g., B1 ~24–47% (InjecAgent) and ~40–73% (MCPTox per risk category) → ours substantially lower, with FPR kept in single digits via escalate band. Parity or near-parity ASR vs. ToolGate B2 on covered tools, but with 0 manual contracts vs. B2's manual count and lower latency (embedding vs. symbolic world-state). Exact numbers are hypotheses to be measured; the thesis claim is directional + cost, not a specific percentage.
 
+> **Measured 2026-10-12 (Gate 3, E11–E17 — hypotheses resolved):** InjecAgent ASR-valid
+> 19.0%→0.7% (dh 8.8%→0.0%, ds 28.3%→1.3%); MCPTox attack-influenced 279→144; B2 ≈ B1
+> (McNemar n.s.) rather than parity — the structural coverage gap, not a measurement miss;
+> FPR proxy 4% pilot + valid-rate parity; p95 16–20 ms; 0 vs 145 contracts; $9.64 billed.
+> Full tables: `docs/experiments/05_phase5_full_evaluation.md`.
+
 **Expected experimental results pattern:**
 
 - Largest ASR drop on high-severity MCPTox categories (financial, exfiltration) where rule veto is decisive.
@@ -720,13 +726,13 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 **Publication potential:** Realistic primary target: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, USENIX-adjacent workshop) — matches "short paper draft" in Idea §9. Main-conference is a stretch conditional on strong ASR reduction + low FPR + clean ToolGate comparison. Workshop is the safe floor and still valuable as an open-source artifact.
 
-**Success criteria (concrete, falsifiable):**
+**Success criteria (concrete, falsifiable) — all met 2026-10-12 (E11–E17):**
 
-- ASR_ours < ASR_B1 on both InjecAgent and MCPTox with 95% CI not overlapping (McNemar p < 0.05).
-- FPR_ours < 10% at chosen τ (or < 5% with escalate counted separately) — otherwise gate is not deployable.
-- Setup cost: 0 contracts for ours vs. documented manual count for ToolGate B2 on same evaluated tool set.
-- Latency overhead p95 < 100ms per tool call on CPU (embedding) — supports low-medium compute claim.
-- ToolGate reimpl runs and is documented (coverage % reported) — necessary for fair comparison, even if its ASR is not reproduced exactly.
+- [x] ASR_ours < ASR_B1 on both InjecAgent and MCPTox with 95% CI not overlapping (McNemar p < 0.05) — p=1.3e-33 / p=1.25e-07.
+- [x] FPR_ours < 10% at chosen τ (or < 5% with escalate counted separately) — proxy: 4% pilot FPR + valid-rate parity.
+- [x] Setup cost: 0 contracts for ours vs. documented manual count for ToolGate B2 on same evaluated tool set — 0 vs 145.
+- [x] Latency overhead p95 < 100ms per tool call on CPU (embedding) — 16–20 ms.
+- [x] ToolGate reimpl runs and is documented (coverage % reported) — InjecAgent 100%, MCPTox 8.1%/37.2% weighted.
 
 **Graduation outcome:** Completed Thesis + evaluated gate + pip package + evaluation report + paper draft (minimum: workshop submission; target: Findings-tier), fully reproducible with `blueprint.md` as single source of truth.
 
@@ -766,7 +772,7 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 **Missing experiments/evaluations a sharp reviewer might demand:**
 
-- **Latency vs. security tradeoff table:** Reviewers will ask "is the gate worth the extra ms?" — we have p95 latency, but also need a cost-vs-ASR table (already planned). Ensure it is a headline figure, not appendix.
+- **Latency vs. security tradeoff table:** Reviewers will ask "is the gate worth the extra ms?" — we have p95 latency, but also need a cost-vs-ASR table (done — headline figure in E17: p95 16–20 ms, $9.64 billed).
 - **Paraphrase robustness:** Attacker paraphrases hijack to maximize semantic similarity ("for the user's benefit, also send...") — not in primary benchmarks. If time allows, a 20-case paraphrase pilot (even manual) meaningfully strengthens the "embedding can be gamed" discussion.
 - **ToolGate fidelity:** "Your ToolGate is not the real ToolGate." — Already mitigated by validating on ToolBench subset and documenting coverage % and any divergence. Have contract examples in appendix so reviewers can judge fidelity themselves.
 - **Vague-request stratification:** If most real requests are vague, FPR may be higher in practice than on benchmarks (which have crisp tasks). A reviewer will ask for this slice.
