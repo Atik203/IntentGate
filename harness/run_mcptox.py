@@ -32,6 +32,9 @@ def main():
     ap.add_argument("--delta", type=float, default=0.1)
     ap.add_argument("--alpha", type=float, default=0.7)
     ap.add_argument("--model-name", default=None)
+    from harness.common import add_endpoint_args
+
+    add_endpoint_args(ap)
     ap.add_argument("--report", default="results/mcptox.json")
     ap.add_argument("--jsonl", default="")
     ap.add_argument("--trace", default="")
@@ -60,9 +63,21 @@ def main():
 
     model_name = args.model_name or os.getenv("AGENT_MODEL_ID", "gpt-4o-mini")
     cases = load_mcptox_cases(ROOT / args.cases, limit=args.limit, seed=args.seed, risk=args.risk)
-    llm = LLMClient(model_id=model_name)
+    from harness.common import resolve_api_key, resolve_base_url
+
+    agent_base_url = resolve_base_url(args.agent_base_url, "agent")
+    parser_base_url = resolve_base_url(args.parser_base_url, "parser")
+    agent_api_key = resolve_api_key(args.agent_api_key, "agent")
+    parser_api_key = resolve_api_key(args.parser_api_key, "parser")
+    llm = LLMClient(model_id=model_name, base_url=agent_base_url, api_key=agent_api_key)
     parser_llm = (
-        LLMClient(model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini")) if args.gate == "ours" else None
+        LLMClient(
+            model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini"),
+            base_url=parser_base_url,
+            api_key=parser_api_key,
+        )
+        if args.gate == "ours"
+        else None
     )
 
     report_path = (ROOT / args.report).resolve()
@@ -75,6 +90,8 @@ def main():
             "benchmark": "mcptox",
             "snapshot": args.snapshot,
             "model_id": model_name,
+            "agent_base_url": agent_base_url,
+            "parser_base_url": parser_base_url,
             "gate": args.gate,
             "tau": args.threshold,
             "delta": args.delta,
@@ -111,6 +128,8 @@ def main():
         "cases": args.cases,
         "snapshot": args.snapshot,
         "model_id": model_name,
+        "agent_base_url": agent_base_url,
+        "parser_base_url": parser_base_url,
         "gate": args.gate,
         "ablation": args.ablation,
         "tau": args.threshold,
