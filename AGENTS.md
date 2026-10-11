@@ -34,7 +34,7 @@ results/                   # TRACKED on purpose: teammates read results/ instead
 ```powershell
 .venv\Scripts\Activate.ps1          # activate venv
 pip install -e ".[dev]"             # install (first run downloads torch - slow)
-pytest -q                           # run tests (expect 158 passing; data-dependent tests skip without clones)
+pytest -q                           # run tests (expect 170 passing; data-dependent tests skip without clones)
 python scripts/check_parser.py      # parser spot-check (offline)
 python scripts/pilot_score_dist.py  # scorer pilot (offline)
 powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1   # bootstrap data/raw at pinned commits

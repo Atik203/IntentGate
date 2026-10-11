@@ -340,7 +340,7 @@ without spending much API budget.
 **Why.** The final run must be reproducible and cheap to analyze; doing this first avoids
 re-running expensive jobs.
 
-**What was added (all tested, 158 automatic tests pass):**
+**What was added (all tested, 170 automatic tests pass):**
 
 - Runners now record **every** proposed call (decision, score, latency) — needed to measure false
   alarms and speed honestly.
@@ -361,6 +361,33 @@ each): gate events, latency, ablations and cost tracking all work.
 **Where.** The Phase 5 plan and cost chart are in [`../roadmap.md`](../roadmap.md) (Phase 5
 section); the run commands are in [§7](#help).
 
+<a id="done-gate3"></a>
+
+### 4.8 Gate 3: the frozen full results (Phase 5 Stages 1–3)
+
+**What.** The full matrix ran 2026-10-12 under the freeze (`configs/phase5_lock.json`,
+30 jobs, 20,736 cases, seed 42): B1 / B2 / ours plus ablations A1–A3, then the reporter
+(statistics, Pareto, breakdowns) and the error taxonomy. Integrity `--check` passed 30/30.
+
+**Result (frozen — these numbers never change).**
+
+| Benchmark | B1 (no gate) | Our gate | B2 (ToolGate reimpl) |
+|---|---|---|---|
+| InjecAgent attack success | 354 / 2,108 (19.0%) | **13 / 2,108 (0.7%)** | 321 (17.2% — statistically identical to B1) |
+| MCPTox attack-influenced | 279 / 1,348 | **144 / 1,348 (140 blocked)** | 271 (10 blocked) |
+| Legitimate throughput | — | **unchanged** (valid-rate parity every slice) | — |
+| Gate latency (p95, CPU) | — | **16–20 ms** (target < 100 ms) | — |
+
+Both drops are significant (McNemar p=1.3e-33 on InjecAgent, p=1.25e-07 on MCPTox, confidence
+intervals non-overlapping); B2 is not (p=1.00 / 0.33). Ablations: meaning-only (A1) matches the
+full gate, rules-only (A2) barely beats unprotected — **the semantics do the detecting, the
+rules do the vetoing**. The 13 remaining InjecAgent failures are all near-miss reads scored
+just above the threshold with no rule to trip — the same boundary as Gate 2, now measured.
+
+**Cost.** Billed **$9.64** (estimate was $11.46; identical prompts get cached-input discount).
+
+**Where.** [`experiments/05_phase5_full_evaluation.md`](experiments/05_phase5_full_evaluation.md) (E11–E17).
+
 ---
 
 <a id="now"></a>
@@ -372,12 +399,12 @@ section); the run commands are in [§7](#help).
 | Gate 0 | Harness trusted + scorer pilot passes | ✅ 2026-09-11 |
 | Gate 1 | Manual-rule baseline (B2) implemented, coverage frozen | ✅ 2026-09-16 |
 | Gate 2 | Gate integrated; tests green; speed measured | ✅ 2026-09-16 |
-| **Gate 3** | **Full evaluation results frozen** | ⏳ Phase 5 — blocked on API credit |
+| **Gate 3** | **Full evaluation results frozen** | ✅ 2026-10-12 — InjecAgent 19.0%→0.7%, MCPTox 279→144 |
 
-**What exists today:** a working gate, a fair baseline, tested tooling for the final evaluation,
-and documented evidence for every number above. **What is blocked:** the full Phase 5 run needs
-about **34,560 model calls ≈ $14 (budget $15–20 with margin)** in OpenAI credit. Everything else
-is ready, smoke-tested, and committed.
+**What exists today:** a working gate, a fair baseline, the frozen full-suite results (E11–E17),
+and documented evidence for every number above. **What it cost:** the 30-job matrix ran
+**34,560 model calls, billed $9.64** (list-price estimate $11.46 — prompt caching saved ~16%).
+No further big runs are needed before Phase 6 pilots.
 
 ---
 
@@ -390,9 +417,9 @@ is ready, smoke-tested, and committed.
 | Stage | What happens | Status |
 |---|---|---|
 | Stage 0 | Tooling: orchestrator, reporter, ablations, stats, cost | ✅ done |
-| Stage 1 | Freeze code/configs → run the 30-job matrix → integrity check | ⏳ needs credit |
-| Stage 2 | Analysis: Pareto curve, confidence intervals, significance tests, breakdowns, error taxonomy, latency, utility | ⏳ |
-| Stage 3 | **Gate 3 freeze**: write the results report, update roadmap + changelog, tag the commit, open PR | ⏳ |
+| Stage 1 | Freeze code/configs → run the 30-job matrix → integrity check | ✅ done 2026-10-12 (30/30, `--check` passed, billed $9.64) |
+| Stage 2 | Analysis: Pareto curve, confidence intervals, significance tests, breakdowns, error taxonomy, latency, utility | ✅ done — `results/phase5/report.json` + taxonomies |
+| Stage 3 | **Gate 3 freeze**: write the results report, update roadmap + changelog, tag the commit, open PR | ✅ done — [`experiments/05_phase5_full_evaluation.md`](experiments/05_phase5_full_evaluation.md), tag `gate3-freeze` |
 
 The matrix: **6 conditions** (no gate, ToolGate baseline, our gate, and three ablations) × **5
 dataset files** (4 InjecAgent splits/settings + the MCPTox snapshot) = 30 jobs. Runs are resumable:
@@ -429,7 +456,7 @@ reproducibility.
 You do **not** need to understand the code to help. Safe tasks (no API cost):
 
 1. **Set up your machine** — follow [`setup.md`](setup.md) (about 10 minutes; the first install
-   downloads a model, so be patient). Then run `pytest -q`; you should see **158 passed**.
+   downloads a model, so be patient). Then run `pytest -q`; you should see **170 passed**.
 2. **Read one experiment report** — start with
    [`experiments/01_gate0_foundation.md`](experiments/01_gate0_foundation.md). If anything is
    unclear, that is a documentation bug: report it.
@@ -445,9 +472,10 @@ You do **not** need to understand the code to help. Safe tasks (no API cost):
    scripts exist (`scripts/report_phase5.py`, `scripts/error_taxonomy.py`); a human should sanity
    check the output tables.
 
-**Things that cost money (ask before running):** any command that calls the LLM API — full matrix
-runs, ablations, smoke runs beyond a few cases. The current blocker is OpenAI credit; once it is
-topped up, the paid run is one command:
+**Things that cost money (ask before running):** any command that calls the LLM API — full
+matrix re-runs, new ablations, smoke runs beyond a few cases. The frozen matrix already ran
+(billed $9.64); do not re-run it — read `results/phase5/` instead. New paid work means a new
+freeze. The one command that ran it was:
 
 ```powershell
 python scripts/run_phase5.py --freeze     # lock code + configs (must be a clean tree)
@@ -472,11 +500,12 @@ runner code. The orchestrator refuses to run if these changed after the freeze.
 | [`setup.md`](setup.md) | Install & verify guide | First day |
 | [`team_guide.md`](team_guide.md) | This guide | Start here |
 | [`blueprint.md`](blueprint.md) | The design document (Sections 0–18, indexed) | When you need the *why* behind a design choice |
-| [`experiments/README.md`](experiments/README.md) | Experiment hub: status, index E1–E10, datasets, artifacts, commands | To find a specific result |
+| [`experiments/README.md`](experiments/README.md) | Experiment hub: status, index E1–E17, datasets, artifacts, commands | To find a specific result |
 | [`experiments/01_gate0_foundation.md`](experiments/01_gate0_foundation.md) | Baseline + pilot (E1–E4) | Understanding the trust checks |
 | [`experiments/02_parser_schema.md`](experiments/02_parser_schema.md) | Parser & contract schema (E5–E6) | Parser questions |
 | [`experiments/03_b2_toolgate.md`](experiments/03_b2_toolgate.md) | ToolGate baseline (E7) | Baseline-fairness questions |
-| [`experiments/04_gate2_gated_eval.md`](experiments/04_gate2_gated_eval.md) | Gated evaluation + sweep + errors (E8–E10) | The main results |
+| [`experiments/04_gate2_gated_eval.md`](experiments/04_gate2_gated_eval.md) | Gated evaluation + sweep + errors (E8–E10) | The development slices behind the frozen results |
+| [`experiments/05_phase5_full_evaluation.md`](experiments/05_phase5_full_evaluation.md) | Frozen full-matrix results (E11–E17) | **The main results — cite these** |
 | [`../roadmap.md`](../roadmap.md) | Live status (Phases 0–8, Gates 0–3) | Every week |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | What changed, newest first | Before opening a PR |
 | [`references.bib`](references.bib) | BibTeX for the 10 reviewed papers | Writing/citing |
@@ -493,7 +522,7 @@ runner code. The orchestrator refuses to run if these changed after the freeze.
 | `src/intent_gate/eval/` | Metrics, statistics, sweeps, cost estimation |
 | `harness/` | Benchmark runners (`--gate none|ours|toolgate`) and adapters |
 | `scripts/` | Pilot, parser check, coverage freeze, Phase 5 orchestrator + reporter |
-| `tests/` | 158 automatic tests (run with `pytest -q`) |
+| `tests/` | 170 automatic tests (run with `pytest -q`) |
 | `configs/` | Frozen schema, few-shot examples, thresholds, model pins, coverage numbers |
 
 ---
@@ -512,7 +541,7 @@ runner code. The orchestrator refuses to run if these changed after the freeze.
 paraphrases). Combining them keeps attacks out while allowing slight rewordings.
 
 **What is the difference between our gate and the published ToolGate?** Both stand at the same
-door. ToolGate needs a human to write a rule per tool (144 rules in our evaluation). Ours writes
+door. ToolGate needs a human to write a rule per tool (145 rules in our evaluation). Ours writes
 its own "note" from the user's request, so it needs zero rules and works for brand-new tools.
 
 **Why are there two benchmarks?** They represent the two ways the agent is attacked: hidden text
@@ -536,8 +565,9 @@ In automated runs nobody can answer, so escalate is treated as blocked (and coun
 **Can I run things without paying?** Yes: `pytest -q`, `python scripts/check_parser.py --offline`,
 `python scripts/run_phase5.py --dry-run`, and reading/reporting on existing logged traces.
 
-**Who runs the paid jobs?** Whoever holds the API credit. Currently the full run waits for a
-small credit top-up (≈ $15–20). The command is one line (see [§7](#help)) and is resumable.
+**Who runs the paid jobs?** Whoever holds the API credit. The frozen matrix is done ($9.64);
+new paid jobs (Phase 6 pilots) are one resumable command each (see [§7](#help)). Never re-run
+the frozen matrix — its outputs are committed in `results/phase5/`.
 
 **I think I found a mistake in the documentation.** That is valuable — open an issue with the
 file name and the sentence. Docs are part of the deliverable.
