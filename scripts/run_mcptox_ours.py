@@ -30,6 +30,9 @@ def main():
     ap.add_argument("--delta", type=float, default=0.1)
     ap.add_argument("--alpha", type=float, default=0.7)
     ap.add_argument("--model-name", default=None)
+    from harness.common import add_endpoint_args
+
+    add_endpoint_args(ap)
     ap.add_argument("--out", default="results/mcptox_ours")
     ap.add_argument("--trace", default="")
     args = ap.parse_args()
@@ -54,9 +57,21 @@ def main():
     cases = load_mcptox_cases(
         ROOT / "data/raw/mcptox/response_all.json", limit=args.limit, seed=args.seed, risk=args.risk
     )
-    llm = LLMClient(model_id=model_name)
+    from harness.common import resolve_api_key, resolve_base_url
+
+    llm = LLMClient(
+        model_id=model_name,
+        base_url=resolve_base_url(args.agent_base_url, "agent"),
+        api_key=resolve_api_key(args.agent_api_key, "agent"),
+    )
     parser_llm = (
-        LLMClient(model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini")) if args.gate == "ours" else None
+        LLMClient(
+            model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini"),
+            base_url=resolve_base_url(args.parser_base_url, "parser"),
+            api_key=resolve_api_key(args.parser_api_key, "parser"),
+        )
+        if args.gate == "ours"
+        else None
     )
     out_dir = (ROOT / args.out).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)

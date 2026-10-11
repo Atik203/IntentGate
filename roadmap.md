@@ -138,9 +138,11 @@ read `results/phase5/` instead.**
 All Phase 5 evidence is gpt-4o-mini (n=1). Re-run a ~200-case subset (B1 + ours) on two new
 backbones and compare ASR *deltas*, never absolutes.
 
-- [ ] Wire `--agent-base-url` / `--parser-base-url` through `harness/run_injecagent.py` +
-      `harness/run_mcptox.py` (`LLMClient` already accepts `base_url`; `.env` `QWEN_*` vars
-      are currently unread) + tests
+- [x] Wire `--agent-base-url` / `--parser-base-url` through `harness/run_injecagent.py` +
+      `harness/run_mcptox.py` (+ `--agent-api-key` / `--parser-api-key`, same flags on the
+      `run_*_ours.py` pilots; `LLMClient` already accepts `base_url`; env fallback
+      `AGENT_BASE_URL`→legacy `QWEN_BASE_URL` for agent, `PARSER_BASE_URL` for parser) + tests
+      (`tests/test_runner_endpoints.py`, 7 tests)
 - [ ] Pull `qwen3.5:4b` (**not** `:latest` — 6.6–7.6 GB won't fit 6 GB VRAM); set Ollama
       `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
       verify served ctx via `ollama show`; keep MiniLM embeddings on CPU
