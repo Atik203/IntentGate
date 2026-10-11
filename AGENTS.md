@@ -55,7 +55,7 @@ python harness/run_injecagent.py --cases <path> --gate ours --threshold 0.6
 6. **Ordering invariant.** Intent parsing happens *before* tool definitions/attacker content load (`harness/common.py` `OrderingGuard`). Never pass tool outputs to the parser.
 7. **Same agent prompt across B1/B2/ours.** Only the middleware differs; measured delta = gate effect.
 8. **Deterministic.** Seed everything, `temperature=0` for parser/agent, pin model IDs, log hashes (embedding model, benchmark commits) in every result.
-9. **Scope discipline.** B2 contracts only for the *evaluated tool subset* (not all 353 MCPTox tools). Missing contract = `no_contract` counter, never silently allowed.
+9. **Scope discipline.** B2 contracts only for the *evaluated tool subset* (not all 801 MCPTox registered tools). Missing contract = `no_contract` counter, never silently allowed.
 10. **Blueprint-faithful naming.** Keep blueprint terms: `S_sem`, `S_rule`, `tau`, `delta`, `escalate`, `Gate N` milestones.
 11. **B2 contract keys = harness tool names.** Contracts are keyed by the `ToolCall` name (`<Toolkit><Tool>`, e.g. `GmailSendEmail`). `ToolGateChecker.coverage` is computed against the evaluated tool universe (`evaluated_tools`), never self-referentially; frozen numbers live in `configs/b2_coverage.json`.
 
