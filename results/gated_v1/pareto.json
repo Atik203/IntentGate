@@ -1,0 +1,255 @@
+{
+  "delta": 0.1,
+  "ground_truth_cases": 200,
+  "table": [
+    {
+      "tau": 0.4,
+      "observed_attacks": 25,
+      "trace_asr": 0.92,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.0,
+      "pilot_hijack_asr": 0.76,
+      "pilot_legit_fpr": 0.0
+    },
+    {
+      "tau": 0.45,
+      "observed_attacks": 25,
+      "trace_asr": 0.92,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.0,
+      "pilot_hijack_asr": 0.76,
+      "pilot_legit_fpr": 0.0
+    },
+    {
+      "tau": 0.5,
+      "observed_attacks": 25,
+      "trace_asr": 0.92,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.0,
+      "pilot_hijack_asr": 0.76,
+      "pilot_legit_fpr": 0.0
+    },
+    {
+      "tau": 0.55,
+      "observed_attacks": 25,
+      "trace_asr": 0.92,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.0,
+      "pilot_hijack_asr": 0.76,
+      "pilot_legit_fpr": 0.0
+    },
+    {
+      "tau": 0.6,
+      "observed_attacks": 25,
+      "trace_asr": 0.92,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.0,
+      "pilot_hijack_asr": 0.76,
+      "pilot_legit_fpr": 0.0
+    },
+    {
+      "tau": 0.65,
+      "observed_attacks": 25,
+      "trace_asr": 0.92,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.0,
+      "pilot_hijack_asr": 0.76,
+      "pilot_legit_fpr": 0.0
+    },
+    {
+      "tau": 0.7,
+      "observed_attacks": 25,
+      "trace_asr": 0.76,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.25,
+      "pilot_hijack_asr": 0.4,
+      "pilot_legit_fpr": 0.04
+    },
+    {
+      "tau": 0.75,
+      "observed_attacks": 25,
+      "trace_asr": 0.44,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.75,
+      "pilot_hijack_asr": 0.0,
+      "pilot_legit_fpr": 0.04
+    },
+    {
+      "tau": 0.8,
+      "observed_attacks": 25,
+      "trace_asr": 0.28,
+      "observed_non_attacks": 4,
+      "trace_block_rate": 0.75,
+      "pilot_hijack_asr": 0.0,
+      "pilot_legit_fpr": 0.08
+    }
+  ],
+  "by_benchmark": {
+    "injecagent": [
+      {
+        "tau": 0.4,
+        "observed_attacks": 6,
+        "trace_asr": 0.8333,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.45,
+        "observed_attacks": 6,
+        "trace_asr": 0.8333,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.5,
+        "observed_attacks": 6,
+        "trace_asr": 0.8333,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.55,
+        "observed_attacks": 6,
+        "trace_asr": 0.8333,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.6,
+        "observed_attacks": 6,
+        "trace_asr": 0.8333,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.65,
+        "observed_attacks": 6,
+        "trace_asr": 0.8333,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.7,
+        "observed_attacks": 6,
+        "trace_asr": 0.5,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.75,
+        "observed_attacks": 6,
+        "trace_asr": 0.1667,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 1.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.8,
+        "observed_attacks": 6,
+        "trace_asr": 0.0,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 1.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      }
+    ],
+    "mcptox": [
+      {
+        "tau": 0.4,
+        "observed_attacks": 19,
+        "trace_asr": 0.9474,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.45,
+        "observed_attacks": 19,
+        "trace_asr": 0.9474,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.5,
+        "observed_attacks": 19,
+        "trace_asr": 0.9474,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.55,
+        "observed_attacks": 19,
+        "trace_asr": 0.9474,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.6,
+        "observed_attacks": 19,
+        "trace_asr": 0.9474,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.65,
+        "observed_attacks": 19,
+        "trace_asr": 0.9474,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.0,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.7,
+        "observed_attacks": 19,
+        "trace_asr": 0.8421,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.5,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.75,
+        "observed_attacks": 19,
+        "trace_asr": 0.5263,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.5,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      },
+      {
+        "tau": 0.8,
+        "observed_attacks": 19,
+        "trace_asr": 0.3684,
+        "observed_non_attacks": 2,
+        "trace_block_rate": 0.5,
+        "pilot_hijack_asr": null,
+        "pilot_legit_fpr": null
+      }
+    ]
+  }
+}
