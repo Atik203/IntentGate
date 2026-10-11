@@ -272,13 +272,35 @@ def build_manifest(args) -> dict:
     }
 
 
-def verify_manifest(manifest: dict) -> list[str]:
+def verify_manifest(manifest: dict, jobs: list[Job], args) -> list[str]:
+    """Refuse a run that does not reproduce the frozen experiment.
+
+    Config edits are caught by hashes, but a different --conditions / --benchmarks /
+    --limit / --tau / --delta / --alpha / --seed selection would silently run a different
+    matrix than the one frozen. That must fail loudly, never drift.
+    """
     problems = []
     if manifest.get("git_dirty"):
         problems.append("manifest was created from a dirty working tree")
     for path, digest in (manifest.get("configs") or {}).items():
         if not (ROOT / path).exists() or _sha256(ROOT / path) != digest:
             problems.append(f"config changed since freeze: {path}")
+    frozen_settings = manifest.get("settings") or {}
+    for key in ("tau", "delta", "alpha", "seed"):
+        if frozen_settings.get(key) != getattr(args, key):
+            problems.append(
+                f"setting changed since freeze: {key} "
+                f"(frozen={frozen_settings.get(key)} now={getattr(args, key)})"
+            )
+    if manifest.get("limit") != args.limit:
+        problems.append(f"limit changed since freeze: frozen={manifest.get('limit')} now={args.limit}")
+    frozen_matrix = manifest.get("matrix") or []
+    now_matrix = [job.name for job in jobs]
+    if now_matrix != frozen_matrix:
+        problems.append(
+            f"matrix changed since freeze: frozen {len(frozen_matrix)} jobs, "
+            f"now {len(now_matrix)} jobs (--conditions/--benchmarks must match the freeze)"
+        )
     return problems
 
 
@@ -393,11 +415,12 @@ def main():
             print("no manifest; run --freeze first")
             raise SystemExit(1)
         manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        problems = verify_manifest(manifest)
+        problems = verify_manifest(manifest, jobs, args)
         if problems:
             print("refusing to run - freeze violated:")
             for problem in problems:
                 print(f"  - {problem}")
+            print("re-freeze with matching flags, or match the freeze flags exactly")
             raise SystemExit(1)
         pending = [job for job in jobs if args.force or not job.report.exists()]
         resumed = [
@@ -408,7 +431,7 @@ def main():
         if resumed:
             skipped = sum(_count_jsonl_lines(job.jsonl) for job in resumed)
             print(f"resuming {len(resumed)} partially-written job(s); ~{skipped} cases already done")
-        total_cases = sum(job.n_cases for job in jobs)
+        total_cases = sum(job.n_cases for job in pending)
         print(f"running {len(pending)}/{len(jobs)} jobs (jobs={args.jobs}, cases={total_cases})")
         monitor = ProgressMonitor(pending, total_cases)
         monitor.start()
