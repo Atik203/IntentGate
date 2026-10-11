@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Phase 6 P0-1 endpoint wiring:** `--agent-base-url` / `--parser-base-url` (+ `--agent-api-key` / `--parser-api-key`) on both harness runners and the `run_*_ours.py` pilots; CLI > env (`AGENT_BASE_URL`→legacy `QWEN_BASE_URL` for agent, `PARSER_BASE_URL` for parser — parser stays on default unless overridden); base URLs logged in trace/report metadata (keys never logged). `.env.example` documents all six vars; local `.env` gained empty placeholders. 7 tests (`tests/test_runner_endpoints.py`).
 - **Gate 3 freeze (E11–E17, `docs/experiments/05_phase5_full_evaluation.md`):** 30-job frozen matrix (20,736 cases, τ=0.75) — InjecAgent 19.0%→0.7%, MCPTox 279→144; B2 ≈ B1 (n.s.) vs ours p<1e-6; p95 16–20 ms; $11.46 list / $9.64 billed.
 - **Phase 5 run infrastructure:** case-level `--resume` (7 tests), live `tqdm` bar over flushed JSONLs (`mininterval=30`), `--max-calls` 30k→40k, freeze-integrity guard against matrix/limit/settings drift (5 tests); `tqdm` declared in deps.
 - **Benchmark bootstrap rewrite:** `clone_benchmarks.ps1` as pinned verify-and-repair from `configs/benchmark_versions.yaml` (`-VerifyOnly`/`-Force`/`-Only`); `data/README.md` as teammate entry point.
