@@ -59,7 +59,7 @@
 - [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
 - [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
 - [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/04_gate2_gated_eval.md`)
-- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
+- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green at the time, 158 today) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
 
 ## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze)
 
@@ -171,6 +171,6 @@ Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,4
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
 | Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — InjecAgent 79/79; MCPTox 65 contracts (37.2% availability-weighted); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/03_b2_toolgate.md`) |
-| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green; p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
+| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green then (158 today); p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [ ] |
 | Submission | Thesis + paper draft complete | [ ] |
