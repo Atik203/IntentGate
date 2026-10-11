@@ -84,7 +84,7 @@ Environment/install: [`../setup.md`](../setup.md).
 
 ```powershell
 .venv\Scripts\Activate.ps1                     # Python 3.12, deps installed
-pytest -q                                      # 158 tests (data-dependent tests skip without clones)
+pytest -q                                      # 170 tests (data-dependent tests skip without clones)
 python scripts/freeze_b2_coverage.py           # E7 coverage freeze (offline)
 python harness/run_mcptox.py --gate ours --threshold 0.75 --limit 100 --seed 42 --report results/gated/ours_mcptox100.json   # E8 (API key)
 python scripts/sweep_gated.py --b1 results/gated/none_dh50.jsonl ... --trace results/gated/ours_dh50_trace.jsonl ...        # E9 (offline)

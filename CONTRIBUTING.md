@@ -70,14 +70,14 @@ chore(ci): run pytest on pull requests
 
 ## Security and secrets
 
-- Never commit `.env`, API keys, `data/raw/`, or `results/*.jsonl` (gitignored; verify with `git status`).
+- Never commit `.env`, API keys, or `data/raw/` (gitignored; verify with `git status`).
 - Benchmark attack payloads are research artifacts — never run them outside the sandbox.
 - Report vulnerabilities per `SECURITY.md`, not in public issues.
 
 ## Experiment discipline
 
 - One variable per experiment; lock benchmark commit hashes and model IDs in the results log.
-- Raw results stay in `results/` (gitignored); summarize only the final tables/figures in PRs and papers.
+- `results/` is tracked on purpose (teammates read results instead of re-running evals) — commit run outputs with the code that produced them; Phase 5+ numbers are frozen and must never be edited in place.
 - If a result invalidates a blueprint assumption, flag it in the PR and to the team — do not silently adapt results.
 
 ## Code of Conduct

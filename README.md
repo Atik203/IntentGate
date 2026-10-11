@@ -34,7 +34,7 @@ IntentGate\
 │   ├── setup.md                   # install + verify instructions (venv, pip, .env, tests)
 │   ├── blueprint.md               # single source of truth (design, Sec 0–18, indexed)
 │   ├── references.bib             # BibTeX citation basis (10 verified papers)
-│   └── experiments\               # experiment record: README hub + 01–04 reports (E1–E10)
+│   └── experiments\               # experiment record: README hub + 01–05 reports (E1–E17)
 ├── pyproject.toml                 # intent-gate package (pip install -e .)
 ├── .github\                       # PR/issue templates + CI (pytest on dev/main)
 ├── configs\                       # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
@@ -77,7 +77,7 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 - **Papers:** 5 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
 - **Blueprint:** [`docs/blueprint.md`](docs/blueprint.md) — Phase 1–5, Sections 0–18 (indexed with anchors): design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
-- **Docs hub:** [`docs/README.md`](docs/README.md) · **Team guide (start here):** [`docs/team_guide.md`](docs/team_guide.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E10, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
+- **Docs hub:** [`docs/README.md`](docs/README.md) · **Team guide (start here):** [`docs/team_guide.md`](docs/team_guide.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E17, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
 
 All 5 papers verified via full arXiv html (not snippets). BibTeX: [`docs/references.bib`](docs/references.bib).
 
