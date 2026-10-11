@@ -104,7 +104,12 @@ class ProgressMonitor:
         self._bar = None
         if tqdm is not None:
             self._bar = tqdm(
-                total=total_cases, unit="case", dynamic_ncols=True, desc="phase5", leave=True
+                total=total_cases,
+                unit="case",
+                dynamic_ncols=True,
+                desc="phase5",
+                leave=True,
+                mininterval=30.0,
             )
 
     def start(self) -> None:
