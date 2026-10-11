@@ -7,7 +7,7 @@
 > **New to the project?** Read [`../team_guide.md`](../team_guide.md) first — it explains the
 > project and summarizes these results in plain words.
 
-**Current state (2026-09-16):** Gate 0 ✅ · Gate 1 ✅ · Gate 2 ✅ · Gate 3 (results freeze) ⏳ Phase 5.
+**Current state (2026-10-12):** Gate 0 ✅ · Gate 1 ✅ · Gate 2 ✅ · Gate 3 ✅ (results frozen — Phase 5 full matrix).
 
 ## Gate status
 
@@ -16,7 +16,7 @@
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | ✅ 2026-09-11 | `01_gate0_foundation.md` (E1–E4) |
 | Gate 1 | B2 reimpl validated (coverage reported) | ✅ 2026-09-16 | `03_b2_toolgate.md` (E7) |
 | Gate 2 | Gate integrated; unit tests green; p95 latency measured | ✅ 2026-09-16 | `04_gate2_gated_eval.md` (E8–E10) |
-| Gate 3 | Full-suite results freeze | ⏳ Phase 5 | roadmap Phase 5 |
+| Gate 3 | Full-suite results freeze | ✅ 2026-10-12 | `05_phase5_full_evaluation.md` (E11–E17) |
 
 ## Experiment index
 
@@ -32,9 +32,16 @@
 | E8 | **Gated integration run** | 100 InjecAgent + 100 MCPTox × 3 conditions | **InjecAgent 9/100 → 0/100; MCPTox 22 → 10 attacked; p95 ≤ 23 ms** | [04](04_gate2_gated_eval.md#e8) |
 | E9 | **Threshold sweep / Pareto** | cached traces, τ 0.40–0.80 | knee at **τ = 0.75** (pilot FPR 4%) | [04](04_gate2_gated_eval.md#e9) |
 | E10 | Error taxonomy + rule fixes | 11 → 9 failures | all residual = registration trust | [04](04_gate2_gated_eval.md#e10) |
+| E11 | **Phase 5 headline matrix** | 2,108 InjecAgent + 1,348 MCPTox × 6 conditions | **InjecAgent 19.0% → 0.7%; MCPTox 279 → 144; B2 ≈ B1** | [05](05_phase5_full_evaluation.md#e11--headline-matrix-ours-vs-baselines) |
+| E12 | Ablations A1–A3 (full matrix) | same | A1 ≥ ours; A2 ≈ B1 (rules alone ~no-op on ds); A3 ≈ ours | [05](05_phase5_full_evaluation.md#e12--ablations-a1a3-full-matrix) |
+| E13 | τ×δ Pareto (full traces) | 27 cells × 2 benchmarks | knee re-confirmed at τ=0.75; escalate ~20% | [05](05_phase5_full_evaluation.md#e13--τδ-pareto-full-traces) |
+| E14 | Bootstrap CI + McNemar | ds_enhanced + MCPTox | ours p=1.3e-33 / 1.25e-07; B2 n.s. | [05](05_phase5_full_evaluation.md#e14--paired-stats-bootstrap-95-ci--mcnemar-vs-b1-primary-slices) |
+| E15 | Breakdowns + stratification + coverage | per risk/tool/split | CredLeak 0.130 → 0.017; FPR via valid-rate parity | [05](05_phase5_full_evaluation.md#e15--breakdowns-stratification-coverage) |
+| E16 | Full-scale error taxonomy | 13 InjecAgent + MCPTox residuals | all rule=1.0, S just above τ (near-miss reads) | [05](05_phase5_full_evaluation.md#e16--error-taxonomy-residual-failures-with-score-evidence) |
+| E17 | Latency / utility / cost | per-call traces + usage | p95 16–20 ms; $11.46 list / $9.64 billed | [05](05_phase5_full_evaluation.md#e17--latency-utility-cost) |
 
-Status legend: all E1–E10 are **done**; Phase 5 adds full-suite runs (E11+), ablations A1–A5,
-bootstrap CIs + McNemar, and the final Pareto over full traces.
+Status legend: E1–E10 were development-set evidence; **E11–E17 are the frozen full-suite
+results**. Phase 6 adds preliminary pilots (E18+), never rewrites E11–E17.
 
 ## Datasets & versions
 
@@ -68,6 +75,7 @@ bootstrap CIs + McNemar, and the final Pareto over full traces.
 | `results/gated/*_trace.jsonl` | per-call gate traces (S, S_sem, S_rule, decision, latency, contract) | same |
 | `results/gated/pareto.json` | E9 sweep table (all + per benchmark) | `scripts/sweep_gated.py` |
 | `results/gated/error_taxonomy.json` | E10 failure records + contracts | `scripts/error_taxonomy.py` |
+| `results/phase5/` | E11–E17 reports + JSONL + traces + `report.json/md` + taxonomies + manifest | `scripts/run_phase5.py`, `scripts/report_phase5.py`, `scripts/error_taxonomy.py` |
 | `results/gated_v1/` | pre-fix snapshot kept for comparison | manual copy |
 
 ## Reproduce (quick)
@@ -104,13 +112,14 @@ No content was dropped in the merge; each old section maps to a named section in
 ## Cross-cutting supervisor Q&A
 
 **Q: What is the one-line status of the project?**
-A: The gate is built and runs end-to-end: on 100 InjecAgent cases it took attack success from 9% to
-0% with zero false-positive blocks and ≤23 ms p95 overhead; on 100 MCPTox cases it halved
-attack-influenced calls; B2 (manual-contract baseline) is implemented with frozen coverage.
+A: Gate 3 frozen: on the full suites ours takes InjecAgent ASR-valid 19.0% → 0.7% and MCPTox
+attack-influenced 279 → 144 (both McNemar p < 1e-6 vs B1), B2 is statistically indistinguishable
+from unprotected, valid-rate parity holds, p95 ≤ 20 ms, billed $9.64. Thesis Chapters 4–5 and
+the paper draft now write from E11–E17.
 
 **Q: Which results are final vs development?**
-A: Everything here is development-set evidence (50–100 case slices, fixed seed, τ pre-chosen at
-Gate 0). Phase 5 produces the final numbers on the full suites with CIs and significance tests.
+A: E11–E17 are final (full suites, frozen 2026-10-12, Gate 3). E1–E10 were development-set
+evidence (50–100 case slices) that motivated the design; they are superseded, not repeated.
 
 **Q: Why InjecAgent + MCPTox and not AgentDojo/ASB?**
 A: They are the two vectors where the closest gate (ToolGate) was never tested, and they are the
