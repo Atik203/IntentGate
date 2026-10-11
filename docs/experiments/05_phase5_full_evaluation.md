@@ -140,11 +140,11 @@ ablation both fail to move the needle where it matters.
 - **Utility:** valid-rate parity B1 vs ours on every slice (Δ ≤ 0.6 pp); user-tool calls
   allowed at B1-like levels; MCPTox ignored share 0.7478 (B2) vs ours ≈ 0.747 (no clean-call
   loss).
-- **Cost:** list-price estimate **$11.46** (agent $7.99 + parser $3.46, `cost.py` rates
-  verified against the live OpenAI pricing page 2026-10-12: mini $0.15/$0.60);
-  **actual billed $9.64** — ~16% below list, attributable to automatic prompt caching
-  (byte-identical system/tool prefixes). Both under the $15–20 budget. Per-job costs in
-  every report (`estimated_cost_usd`); ours ≈ 1.55× B1 per case (parser call).
+- **Cost:** list-price **$11.46** (agent $7.99 + parser $3.46; `cost.py` rates verified
+  against the live OpenAI pricing page 2026-10-12: mini $0.15/$0.60); **billed $9.64** —
+  ~16% below list via automatic prompt caching. Per-group list actuals: B1 $1.33 · B2 $1.33 ·
+  ours $2.20 · A1 $2.21 · A2 $2.19 · A3 $2.20 (34,560 calls, ~5.6 h wall at `--jobs 3`).
+  Per-job costs in every report (`estimated_cost_usd`); ours ≈ 1.55× B1 per case (parser call).
 
 ### Success criteria (blueprint Sec 16) — verdict
 

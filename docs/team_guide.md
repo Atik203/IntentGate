@@ -425,15 +425,15 @@ The matrix: **6 conditions** (no gate, ToolGate baseline, our gate, and three ab
 dataset files** (4 InjecAgent splits/settings + the MCPTox snapshot) = 30 jobs. Runs are resumable:
 if one fails, the orchestrator retries and skips finished jobs.
 
-**Cost chart** (from the live dry-run):
+**Cost chart** (actuals from the frozen run 2026-10-12, ~5.6 h wall-clock at `--jobs 3`):
 
-| Group | Cases | Calls | Est. cost |
+| Group | Cases | Calls | List-price actual |
 |---|---|---|---|
-| B1 (unprotected) | 3,456 | 3,456 | ≈ $1.7 |
-| B2 (ToolGate reimpl) | 3,456 | 3,456 | ≈ $1.7 |
-| Ours (gate; agent + parser calls) | 3,456 | 6,912 | ≈ $2.6 |
-| Ablations A1–A3 (each agent + parser) | 10,368 | 20,736 | ≈ $7.7 |
-| **Total** | 20,736 | **34,560** | **≈ $14 (plan $15–20)** |
+| B1 (unprotected) | 3,456 | 3,456 | $1.33 |
+| B2 (ToolGate reimpl) | 3,456 | 3,456 | $1.33 |
+| Ours (gate; agent + parser calls) | 3,456 | 6,912 | $2.20 |
+| Ablations A1–A3 (each agent + parser) | 10,368 | 20,736 | $6.60 |
+| **Total** | 20,736 | **34,560** | **$11.46 list / $9.64 billed** |
 
 ### After Phase 5
 
