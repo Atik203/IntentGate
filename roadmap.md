@@ -122,13 +122,50 @@ Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,4
 - [ ] `docs/experiments/05_phase5_full_evaluation.md` (E11–E17: matrix, Pareto, ablations, breakdowns, stats, taxonomy, latency/utility; limitations + supervisor Q&A)
 - [ ] Roadmap + CHANGELOG updated, commit tagged, PR to `dev`; no results edits after this point
 
-## Phase 6 — Stretch & Hardening (Weeks 13–14)
+## Phase 6 — Strengthening & Hardening (Weeks 13–14)
 
-**Goal: only if Phase 5 finishes with buffer. Core deliverable = injection + poisoning only.**
+**Goal: turn the thesis's two most attackable claims into evidence. Rule: never touch frozen
+Phase 5 numbers — all new work gets E18+ numbers framed as preliminary.**
 
-- [ ] (Optional) 20-case multi-turn drift pilot (AgentDojo subset) — include as "preliminary" or defer
-- [ ] (Optional) 20-case paraphrase-robustness mini-pilot (defense-aware paraphrase)
+**P0 — defends the load-bearing claims (do these first, in parallel):**
+
+- [ ] **Second-backbone pilot (model-agnostic claim).** All Phase 5 evidence is gpt-4o-mini
+      (n=1). Re-run a ~200-case subset (B1 + ours) on two new backbones — (a) local
+      `qwen3.5:4b` via Ollama OpenAI-compat endpoint, free (**not** `:latest` — that tag is
+      6.6–7.6 GB and will not fit 6 GB VRAM; the 4b tag is ~2.5–3 GB); (b) `gpt-6-luna`
+      via API (~$0.50). Design: vary the *agent*, hold the *parser* on gpt-4o-mini
+      (`PARSER_MODEL_ID`) so the variable is isolated; compare ASR *deltas* (B1→ours), not
+      absolutes. Needs: `--agent-base-url`/`--parser-base-url` flags on both runners
+      (`LLMClient` already accepts `base_url`; the CLIs just don't pass it — `.env`
+      `QWEN_*` vars are currently unread). Gotchas: set Ollama `num_ctx` ≥ 16384 (default
+      is 4k and **silently truncates** our long tool-definition prompts, despite the model's
+      256K native window); keep MiniLM embeddings on CPU; expect higher `invalid` rates from
+      the 4B model — fine as long as B1 and ours share it.
+- [ ] **B2 strawman defense (coverage-vs-performance curve).** Reviewers will call 8.1%
+      MCPTox coverage a strawman. Contract top tools by availability until weighted coverage
+      hits ~60–70%, re-run B2 on MCPTox, report where ours still wins and where it doesn't.
+      Mostly engineering (`freeze_b2_coverage.py` + contract code exist); ~$2 of calls.
+
+**P1 — cheap, high signal (cached traces + manual work):**
+
+- [ ] **Intent-mimicry probe (E18).** Phrase attacks to mimic the user's intent language;
+      measure how far `S_sem` inflates toward τ=0.75. Tests Assumption 2 under an adaptive
+      attacker, not just the static pilot. Offline re-score of cached traces — nearly free.
+- [ ] **Escalate precision study (E19).** Hand-label ~50 escalated cases: truly ambiguous or
+      gate noise? Turns the escalate band from mechanism into measured claim. Manual, no cost.
+- [ ] **Statistical discipline.** Post-hoc power analysis on n=2,108/1,348 + multiple-comparison
+      correction across the 10-risk breakdowns. Free, reviewers check it.
+
+**P2 — if buffer remains:**
+
+- [ ] Parser ablation (heuristic vs LLM parser on one condition — what the LLM parser buys)
+- [ ] Live-server MCPTox slice (addresses the static-snapshot limitation, blueprint Sec 8)
+- [ ] 20-case paraphrase-robustness mini-pilot (defense-aware paraphrase)
+- [ ] 20-case multi-turn drift pilot (AgentDojo subset) — include as "preliminary" or defer
 - [ ] Decide: drift pilot in thesis (preliminary) or future work — one figure max
+
+**Suggested split (5 members):** one per P0 item · one on intent-mimicry · one on
+escalate-precision + stats · one on Gate 3 writeup + Ch 5 draft.
 
 ## Phase 7 — Thesis Writing (Weeks 13–16)
 
