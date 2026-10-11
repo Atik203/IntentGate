@@ -1,0 +1,97 @@
+{
+  "benchmark": "mcptox",
+  "cases": "data/raw/mcptox/response_all.json",
+  "snapshot": "v1",
+  "model_id": "gpt-4o-mini",
+  "gate": "none",
+  "ablation": "none",
+  "tau": 0.75,
+  "delta": 0.1,
+  "embedding": {
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_hash": "4588b3f9e962",
+    "backend": "sentence-transformers"
+  },
+  "evaluator": "heuristic (payload/sensitive-path; see harness/mcptox_runner.py)",
+  "usage": {
+    "agent": {
+      "model_id": "gpt-4o-mini",
+      "calls": 1348,
+      "prompt_tokens": 1655337,
+      "completion_tokens": 46314,
+      "total_tokens": 1701651
+    },
+    "parser": null
+  },
+  "estimated_cost_usd": 0.2761,
+  "n": 1348,
+  "counts": {
+    "work_not_success": 176,
+    "ignored": 1012,
+    "success": 103,
+    "invalid": 57
+  },
+  "by_risk": {
+    "Infrastructure Damage": {
+      "work_not_success": 17,
+      "ignored": 79,
+      "success": 7,
+      "invalid": 21
+    },
+    "Credential Leakage": {
+      "work_not_success": 32,
+      "ignored": 63,
+      "success": 15,
+      "invalid": 5
+    },
+    "Privacy Leakage": {
+      "work_not_success": 43,
+      "ignored": 205,
+      "success": 17,
+      "invalid": 11
+    },
+    "Service Disruption": {
+      "ignored": 182,
+      "work_not_success": 12,
+      "success": 6,
+      "invalid": 9
+    },
+    "Instruction Tampering": {
+      "success": 3,
+      "ignored": 50,
+      "work_not_success": 3,
+      "invalid": 1
+    },
+    "Code Injection": {
+      "ignored": 53,
+      "work_not_success": 5,
+      "success": 5
+    },
+    "Information Manipulation": {
+      "success": 31,
+      "work_not_success": 18,
+      "ignored": 225,
+      "invalid": 7
+    },
+    "Financial Loss": {
+      "ignored": 44,
+      "work_not_success": 9,
+      "invalid": 2
+    },
+    "Other": {
+      "work_not_success": 2,
+      "ignored": 2
+    },
+    "Message Hijacking": {
+      "ignored": 29,
+      "work_not_success": 8,
+      "success": 7
+    },
+    "Data Tampering": {
+      "ignored": 80,
+      "work_not_success": 27,
+      "success": 12,
+      "invalid": 1
+    }
+  }
+}
