@@ -43,7 +43,7 @@ IntentGate\
 ├── scripts\                       # pilot_score_dist.py, check_parser.py, clone_benchmarks.ps1
 ├── tests\                         # pytest suite (parser, veto, no-bypass, ordering, metrics)
 ├── data\                          # (gitignored) benchmark clones + snapshots — scripts/clone_benchmarks.ps1
-├── results\                       # (gitignored) JSONL traces + reports
+├── results\                       # tracked on purpose: JSONL traces + reports (teammates read instead of re-running evals)
 ├── literature_review\
 │   ├── index.md                   # Master Comparison Matrix + Gap Map + Verification Log (5 anchors + Closest)
 │   └── papers\

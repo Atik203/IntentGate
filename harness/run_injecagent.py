@@ -34,6 +34,11 @@ def main():
     ap.add_argument("--report", default="results/injecagent.json")
     ap.add_argument("--jsonl", default="")
     ap.add_argument("--trace", default="")
+    ap.add_argument(
+        "--resume",
+        action="store_true",
+        help="skip cases already present in --jsonl and append (interruptible long runs)",
+    )
     args = ap.parse_args()
     if args.ablation != "none" and args.gate != "ours":
         ap.error("--ablation requires --gate ours")
@@ -79,7 +84,7 @@ def main():
             "ablation": args.ablation,
             "embedding": backend.metadata,
         },
-        append=False,
+        append=args.resume,
     )
     policy_factory = build_policy_factory(
         args.gate,
@@ -92,7 +97,14 @@ def main():
         state_factory=seed_from_request,
         ablation=args.ablation,
     )
-    summary, _ = run_cases(cases, llm, tool_dict, policy_factory=policy_factory, jsonl_path=jsonl_path)
+    summary, _ = run_cases(
+        cases,
+        llm,
+        tool_dict,
+        policy_factory=policy_factory,
+        jsonl_path=jsonl_path,
+        resume=args.resume,
+    )
     trace.close()
 
     agent_cost = estimate_usage_cost(llm.usage)
