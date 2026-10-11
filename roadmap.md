@@ -125,11 +125,13 @@ Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,4
 - [x] `docs/experiments/05_phase5_full_evaluation.md` (E11–E17: matrix, Pareto, ablations, breakdowns, stats, taxonomy, latency/utility; limitations + supervisor Q&A)
 - [x] Roadmap + CHANGELOG updated, commit tagged, PR to `dev`; no results edits after this point
 
-## Phase 6 — Strengthening & Hardening (Weeks 13–14)
+## Phase 6 — Strengthening & Hardening (Weeks 13–14) — ACTIVE from 2026-10-12
 
 **Goal: turn the thesis's two most attackable claims into evidence. Rule: never touch frozen
 Phase 5 numbers — all new work gets E18+ numbers framed as preliminary.**
-**Status: parked until the team says go (Phase 5/Gate 3 complete 2026-10-12).**
+**Status: ACTIVE — Phase 5/Gate 3 frozen and merged to `main`. Teammates start here:
+branch from `dev` (`feat/phase6-<topic>`), PR back to `dev`. Do not re-run the frozen matrix —
+read `results/phase5/` instead.**
 
 ### P0-1 — Second-backbone pilot / E18 (model-agnostic claim)
 
