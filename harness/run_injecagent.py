@@ -31,6 +31,9 @@ def main():
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--model-name", default=None)
+    from harness.common import add_endpoint_args
+
+    add_endpoint_args(ap)
     ap.add_argument("--report", default="results/injecagent.json")
     ap.add_argument("--jsonl", default="")
     ap.add_argument("--trace", default="")
@@ -62,9 +65,21 @@ def main():
     tool_dict = build_tool_dict(
         load_tool_definitions(ROOT / "data/raw/InjecAgent/data/tools.json")
     )
-    llm = LLMClient(model_id=model_name)
+    from harness.common import resolve_api_key, resolve_base_url
+
+    agent_base_url = resolve_base_url(args.agent_base_url, "agent")
+    parser_base_url = resolve_base_url(args.parser_base_url, "parser")
+    agent_api_key = resolve_api_key(args.agent_api_key, "agent")
+    parser_api_key = resolve_api_key(args.parser_api_key, "parser")
+    llm = LLMClient(model_id=model_name, base_url=agent_base_url, api_key=agent_api_key)
     parser_llm = (
-        LLMClient(model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini")) if args.gate == "ours" else None
+        LLMClient(
+            model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini"),
+            base_url=parser_base_url,
+            api_key=parser_api_key,
+        )
+        if args.gate == "ours"
+        else None
     )
 
     report_path = (ROOT / args.report).resolve()
@@ -77,6 +92,8 @@ def main():
             "benchmark": "injecagent",
             "cases": args.cases,
             "model_id": model_name,
+            "agent_base_url": agent_base_url,
+            "parser_base_url": parser_base_url,
             "gate": args.gate,
             "tau": args.threshold,
             "delta": args.delta,
@@ -117,6 +134,8 @@ def main():
         "benchmark": "injecagent",
         "cases": args.cases,
         "model_id": model_name,
+        "agent_base_url": agent_base_url,
+        "parser_base_url": parser_base_url,
         "gate": args.gate,
         "ablation": args.ablation,
         "tau": args.threshold,
