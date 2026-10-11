@@ -13,11 +13,17 @@ import hashlib
 import json
 import subprocess
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+
+try:
+    from tqdm import tqdm
+except ImportError:  # pragma: no cover - progress is best-effort, never fatal
+    tqdm = None
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -64,8 +70,84 @@ class Job:
     n_cases: int
 
     @property
+    def jsonl(self) -> Path:
+        return self.report.with_suffix(".jsonl")
+
+    @property
     def est_calls(self) -> int:
         return self.n_cases * (2 if "--gate" in self.command and "ours" in self.command else 1)
+
+
+def _count_jsonl_lines(path: Path) -> int:
+    """Completed cases for a job. Tolerates a partially-written final line."""
+    try:
+        with path.open("rb") as handle:
+            return sum(1 for line in handle if line.strip())
+    except OSError:
+        return 0
+
+
+class ProgressMonitor:
+    """Polls each in-flight job's JSONL for completed cases and renders one aggregate bar.
+
+    The runners are subprocesses, so their in-process progress callback is unreachable here;
+    the per-case flushed JSONL is the shared channel.
+    """
+
+    def __init__(self, jobs: list[Job], total_cases: int):
+        self._jobs = {job.name: job for job in jobs}
+        self._done: dict[str, int] = {job.name: 0 for job in jobs}
+        self._status: dict[str, str] = {}
+        self._lock = threading.Lock()
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._bar = None
+        if tqdm is not None:
+            self._bar = tqdm(
+                total=total_cases, unit="case", dynamic_ncols=True, desc="phase5", leave=True
+            )
+
+    def start(self) -> None:
+        if self._bar is None:
+            return
+        self._thread = threading.Thread(target=self._loop, daemon=True)
+        self._thread.start()
+
+    def _loop(self) -> None:
+        while not self._stop.wait(2.0):
+            self._refresh()
+
+    def _refresh(self) -> None:
+        with self._lock:
+            for name, job in self._jobs.items():
+                self._done[name] = min(_count_jsonl_lines(job.jsonl), job.n_cases)
+            done = sum(self._done.values())
+            counts: dict[str, int] = {}
+            for value in self._status.values():
+                counts[value] = counts.get(value, 0) + 1
+            postfix = " ".join(f"{k}={v}" for k, v in sorted(counts.items()))
+        self._bar.n = done
+        self._bar.set_postfix_str(postfix, refresh=False)
+        self._bar.refresh()
+
+    def set_status(self, name: str, status: str) -> None:
+        with self._lock:
+            self._status[name] = status
+
+    def line(self, message: str) -> None:
+        if self._bar is not None:
+            tqdm.write(message)
+        else:
+            print(message, flush=True)
+
+    def close(self) -> None:
+        if self._bar is None:
+            return
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=5)
+        self._refresh()
+        self._bar.close()
 
 
 def _sha256(path: Path) -> str:
@@ -88,6 +170,7 @@ def _case_counts(limit: int | None) -> dict[str, int]:
 
 def build_jobs(args) -> list[Job]:
     counts = _case_counts(args.limit)
+    resume_flag = [] if args.no_resume else ["--resume"]
     jobs: list[Job] = []
     for condition, gate, ablation in CONDITIONS:
         if args.conditions and condition not in args.conditions:
@@ -115,6 +198,7 @@ def build_jobs(args) -> list[Job]:
                 str(args.seed),
                 "--report",
                 str(report),
+                *resume_flag,
             ]
             if args.limit:
                 command += ["--limit", str(args.limit)]
@@ -147,6 +231,7 @@ def build_jobs(args) -> list[Job]:
                 str(args.seed),
                 "--report",
                 str(report),
+                *resume_flag,
             ]
             if args.limit:
                 command += ["--limit", str(args.limit)]
@@ -187,13 +272,35 @@ def build_manifest(args) -> dict:
     }
 
 
-def verify_manifest(manifest: dict) -> list[str]:
+def verify_manifest(manifest: dict, jobs: list[Job], args) -> list[str]:
+    """Refuse a run that does not reproduce the frozen experiment.
+
+    Config edits are caught by hashes, but a different --conditions / --benchmarks /
+    --limit / --tau / --delta / --alpha / --seed selection would silently run a different
+    matrix than the one frozen. That must fail loudly, never drift.
+    """
     problems = []
     if manifest.get("git_dirty"):
         problems.append("manifest was created from a dirty working tree")
     for path, digest in (manifest.get("configs") or {}).items():
         if not (ROOT / path).exists() or _sha256(ROOT / path) != digest:
             problems.append(f"config changed since freeze: {path}")
+    frozen_settings = manifest.get("settings") or {}
+    for key in ("tau", "delta", "alpha", "seed"):
+        if frozen_settings.get(key) != getattr(args, key):
+            problems.append(
+                f"setting changed since freeze: {key} "
+                f"(frozen={frozen_settings.get(key)} now={getattr(args, key)})"
+            )
+    if manifest.get("limit") != args.limit:
+        problems.append(f"limit changed since freeze: frozen={manifest.get('limit')} now={args.limit}")
+    frozen_matrix = manifest.get("matrix") or []
+    now_matrix = [job.name for job in jobs]
+    if now_matrix != frozen_matrix:
+        problems.append(
+            f"matrix changed since freeze: frozen {len(frozen_matrix)} jobs, "
+            f"now {len(now_matrix)} jobs (--conditions/--benchmarks must match the freeze)"
+        )
     return problems
 
 
@@ -239,9 +346,14 @@ def main():
     ap.add_argument("--check", action="store_true", help="verify artifacts vs manifest")
     ap.add_argument("--dry-run", action="store_true", help="list jobs + call estimate only")
     ap.add_argument("--force", action="store_true", help="overwrite existing reports / lock")
+    ap.add_argument(
+        "--no-resume",
+        action="store_true",
+        help="restart partially-written jobs from case 0 instead of continuing them",
+    )
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--retries", type=int, default=2)
-    ap.add_argument("--max-calls", type=int, default=30000)
+    ap.add_argument("--max-calls", type=int, default=40000)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--conditions", nargs="*", default=[])
     ap.add_argument("--benchmarks", nargs="*", default=[])
@@ -303,25 +415,46 @@ def main():
             print("no manifest; run --freeze first")
             raise SystemExit(1)
         manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-        problems = verify_manifest(manifest)
+        problems = verify_manifest(manifest, jobs, args)
         if problems:
             print("refusing to run - freeze violated:")
             for problem in problems:
                 print(f"  - {problem}")
+            print("re-freeze with matching flags, or match the freeze flags exactly")
             raise SystemExit(1)
         pending = [job for job in jobs if args.force or not job.report.exists()]
-        print(f"running {len(pending)}/{len(jobs)} jobs (jobs={args.jobs})")
+        resumed = [
+            job
+            for job in pending
+            if not args.no_resume and job.jsonl.exists() and _count_jsonl_lines(job.jsonl) > 0
+        ]
+        if resumed:
+            skipped = sum(_count_jsonl_lines(job.jsonl) for job in resumed)
+            print(f"resuming {len(resumed)} partially-written job(s); ~{skipped} cases already done")
+        total_cases = sum(job.n_cases for job in pending)
+        print(f"running {len(pending)}/{len(jobs)} jobs (jobs={args.jobs}, cases={total_cases})")
+        monitor = ProgressMonitor(pending, total_cases)
+        monitor.start()
         failures = []
-        with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
-            futures = {pool.submit(run_job, job, args.retries): job for job in pending}
-            for future in as_completed(futures):
-                name, code, elapsed = future.result()
-                status = "ok" if code == 0 else f"FAILED({code})"
-                print(f"  {name:<34} {status:<12} {elapsed:6.1f}s")
-                if code != 0:
-                    failures.append(name)
+        try:
+            with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
+                futures = {pool.submit(run_job, job, args.retries): job for job in pending}
+                for future in as_completed(futures):
+                    job = futures[future]
+                    name, code, elapsed = future.result()
+                    status = "ok" if code == 0 else f"FAILED({code})"
+                    monitor.set_status(name, "done" if code == 0 else "failed")
+                    monitor.line(
+                        f"  {name:<34} {status:<12} {elapsed:6.1f}s  "
+                        f"({_count_jsonl_lines(job.jsonl)}/{job.n_cases} cases)"
+                    )
+                    if code != 0:
+                        failures.append(name)
+        finally:
+            monitor.close()
         if failures:
             print(f"failed jobs ({len(failures)}): {failures}")
+            print("re-run the same command to resume - completed jobs and cases are skipped")
             raise SystemExit(1)
         print("all jobs complete")
         return

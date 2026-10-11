@@ -129,10 +129,17 @@ def serialize_calls(calls: list) -> list:
     return [{"name": c.name, "parameters": c.parameters, "source": c.source} for c in calls]
 
 
-def _run_each(cases: list, llm, tool_dict: dict, policy_factory, handle, progress) -> tuple[dict, list, int]:
-    counts = {"succ": 0, "unsucc": 0, "invalid": 0, "error": 0}
-    gate_blocked = 0
-    rows: list = []
+def _run_each(
+    cases: list,
+    llm,
+    tool_dict: dict,
+    policy_factory,
+    handle,
+    progress,
+    counts: dict,
+    gate_blocked: int,
+    rows: list,
+) -> tuple[dict, list, int]:
     for case in cases:
         result = run_case(case, llm, tool_dict, policy_factory=policy_factory)
         counts[result.eval] = counts.get(result.eval, 0) + 1
@@ -152,9 +159,23 @@ def _run_each(cases: list, llm, tool_dict: dict, policy_factory, handle, progres
         rows.append(row)
         if handle:
             handle.write(json.dumps(row) + "\n")
+            handle.flush()
         if progress:
             progress(result, case)
     return counts, rows, gate_blocked
+
+
+def _read_jsonl(path: str | Path) -> list[dict]:
+    rows: list[dict] = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return rows
 
 
 def run_cases(
@@ -164,13 +185,37 @@ def run_cases(
     policy_factory=None,
     jsonl_path: str | Path | None = None,
     progress=None,
+    resume: bool = False,
 ) -> tuple[dict, list]:
-    """Run cases and return (summary, rows); writes JSONL when a path is given."""
+    """Run cases and return (summary, rows); writes JSONL when a path is given.
+
+    resume=True skips cases already recorded in the JSONL and appends, so an interrupted
+    run continues from its last completed case instead of restarting. The returned summary
+    always covers the full case list, not just the newly run subset.
+    """
+    counts = {"succ": 0, "unsucc": 0, "invalid": 0, "error": 0}
+    gate_blocked = 0
+    rows: list = []
+    remaining = list(cases)
+    mode = "w"
+    if jsonl_path and resume and Path(jsonl_path).exists():
+        done = _read_jsonl(jsonl_path)
+        seen = {r.get("case_id") for r in done}
+        for row in done:
+            counts[row.get("eval")] = counts.get(row.get("eval"), 0) + 1
+            gate_blocked += int(bool(row.get("gate_blocked")))
+        rows.extend(done)
+        remaining = [c for c in cases if c.case_id not in seen]
+        mode = "a"
     if jsonl_path:
-        with Path(jsonl_path).open("w", encoding="utf-8") as handle:
-            counts, rows, gate_blocked = _run_each(cases, llm, tool_dict, policy_factory, handle, progress)
+        with Path(jsonl_path).open(mode, encoding="utf-8") as handle:
+            counts, rows, gate_blocked = _run_each(
+                remaining, llm, tool_dict, policy_factory, handle, progress, counts, gate_blocked, rows
+            )
     else:
-        counts, rows, gate_blocked = _run_each(cases, llm, tool_dict, policy_factory, None, progress)
+        counts, rows, gate_blocked = _run_each(
+            remaining, llm, tool_dict, policy_factory, None, progress, counts, gate_blocked, rows
+        )
     decided = counts["succ"] + counts["unsucc"]
     summary = {
         "n": len(cases),
