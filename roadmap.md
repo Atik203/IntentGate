@@ -59,9 +59,9 @@
 - [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
 - [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
 - [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/04_gate2_gated_eval.md`)
-- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green at the time, 158 today) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
+- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green at the time, 170 today) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
 
-## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze)
+## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze) — DONE 2026-10-12
 
 **Goal: complete, reproducible results. Nothing gets rewritten after this.**
 
@@ -126,37 +126,40 @@ Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,4
 
 **Goal: turn the thesis's two most attackable claims into evidence. Rule: never touch frozen
 Phase 5 numbers — all new work gets E18+ numbers framed as preliminary.**
+**Status: parked until the team says go (Phase 5/Gate 3 complete 2026-10-12).**
 
-**P0 — defends the load-bearing claims (do these first, in parallel):**
+### P0-1 — Second-backbone pilot / E18 (model-agnostic claim)
 
-- [ ] **Second-backbone pilot (model-agnostic claim).** All Phase 5 evidence is gpt-4o-mini
-      (n=1). Re-run a ~200-case subset (B1 + ours) on two new backbones — (a) local
-      `qwen3.5:4b` via Ollama OpenAI-compat endpoint, free (**not** `:latest` — that tag is
-      6.6–7.6 GB and will not fit 6 GB VRAM; the 4b tag is ~2.5–3 GB); (b) `gpt-6-luna`
-      via API (~$0.50). Design: vary the *agent*, hold the *parser* on gpt-4o-mini
-      (`PARSER_MODEL_ID`) so the variable is isolated; compare ASR *deltas* (B1→ours), not
-      absolutes. Needs: `--agent-base-url`/`--parser-base-url` flags on both runners
-      (`LLMClient` already accepts `base_url`; the CLIs just don't pass it — `.env`
-      `QWEN_*` vars are currently unread). Gotchas: set Ollama `num_ctx` ≥ 16384 (default
-      is 4k and **silently truncates** our long tool-definition prompts, despite the model's
-      256K native window); keep MiniLM embeddings on CPU; expect higher `invalid` rates from
-      the 4B model — fine as long as B1 and ours share it.
-- [ ] **B2 strawman defense (coverage-vs-performance curve).** Reviewers will call 8.1%
-      MCPTox coverage a strawman. Contract top tools by availability until weighted coverage
-      hits ~60–70%, re-run B2 on MCPTox, report where ours still wins and where it doesn't.
-      Mostly engineering (`freeze_b2_coverage.py` + contract code exist); ~$2 of calls.
+All Phase 5 evidence is gpt-4o-mini (n=1). Re-run a ~200-case subset (B1 + ours) on two new
+backbones and compare ASR *deltas*, never absolutes.
 
-**P1 — cheap, high signal (cached traces + manual work):**
+- [ ] Wire `--agent-base-url` / `--parser-base-url` through `harness/run_injecagent.py` +
+      `harness/run_mcptox.py` (`LLMClient` already accepts `base_url`; `.env` `QWEN_*` vars
+      are currently unread) + tests
+- [ ] Pull `qwen3.5:4b` (**not** `:latest` — 6.6–7.6 GB won't fit 6 GB VRAM); set Ollama
+      `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
+      verify served ctx via `ollama show`; keep MiniLM embeddings on CPU
+- [ ] Smoke: 5-case B1 + ours on Qwen (parser stays `gpt-4o-mini`) — confirm `invalid` rate sane
+- [ ] Pilot: ~200-case B1 + ours on Qwen via `--agent-base-url localhost:11434/v1` (free, overnight)
+- [ ] Luna arm: same ~200 cases via `--model-name gpt-6-luna` (~$0.50)
+- [ ] Write up delta comparison → E18 (`docs/experiments/06_phase6_pilots.md`)
 
-- [ ] **Intent-mimicry probe (E18).** Phrase attacks to mimic the user's intent language;
-      measure how far `S_sem` inflates toward τ=0.75. Tests Assumption 2 under an adaptive
-      attacker, not just the static pilot. Offline re-score of cached traces — nearly free.
-- [ ] **Escalate precision study (E19).** Hand-label ~50 escalated cases: truly ambiguous or
-      gate noise? Turns the escalate band from mechanism into measured claim. Manual, no cost.
-- [ ] **Statistical discipline.** Post-hoc power analysis on n=2,108/1,348 + multiple-comparison
-      correction across the 10-risk breakdowns. Free, reviewers check it.
+### P0-2 — B2 coverage curve / E19 (strawman defense)
 
-**P2 — if buffer remains:**
+- [ ] Contract next MCPTox tools by availability rank; re-run `scripts/freeze_b2_coverage.py`
+- [ ] Re-run B2 MCPTox at ~40% and ~70% weighted coverage; plot coverage-vs-ASR curve
+- [ ] Write up (with the honest outcome whatever it is) → E19
+
+### P1 — cheap, high signal (cached traces + manual work)
+
+- [ ] E20 intent-mimicry probe: take the 13 residual near-miss templates → generate
+      intent-mimicking variants → re-score vs τ=0.75 offline → report S inflation Δ
+- [ ] E21 escalate precision: hand-label ~50 escalated cases (truly ambiguous vs gate noise)
+- [ ] Stats discipline: post-hoc power analysis on n=2,108/1,348 + multiple-comparison
+      correction across the 10-risk breakdowns; amend E14 notes if anything changes
+- [ ] Per-specificity FPR stratification on full traces (deferred from E15)
+
+### P2 — if buffer remains (each its own checkbox as before)
 
 - [ ] Parser ablation (heuristic vs LLM parser on one condition — what the LLM parser buys)
 - [ ] Live-server MCPTox slice (addresses the static-snapshot limitation, blueprint Sec 8)
@@ -208,6 +211,6 @@ escalate-precision + stats · one on Gate 3 writeup + Ch 5 draft.
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
 | Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — InjecAgent 79/79; MCPTox 65 contracts (37.2% availability-weighted); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/03_b2_toolgate.md`) |
-| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green then (158 today); p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
+| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green then (170 today); p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [x] 2026-10-12 — 30 jobs, 20,736 cases, InjecAgent 19.0%→0.7%, MCPTox 279→144, B2≈B1 (n.s.), p95 ≤20 ms, $9.64 billed |
 | Submission | Thesis + paper draft complete | [ ] |
