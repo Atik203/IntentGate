@@ -25,19 +25,18 @@ Related roots outside `docs/`:
 - [`CHANGELOG.md`](../CHANGELOG.md) — change log (`[Unreleased]` for the current PR window).
 - [`AGENTS.md`](../AGENTS.md) — conventions for AI coding agents working in this repo.
 
-## Status snapshot (2026-09-16)
+## Status snapshot (2026-10-12)
 
 | Gate | Definition | Status |
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes | ✅ 2026-09-11 |
 | Gate 1 | B2 reimpl validated (coverage reported) | ✅ 2026-09-16 |
 | Gate 2 | Gate integrated; tests green; p95 latency measured | ✅ 2026-09-16 |
-| Gate 3 | Full-suite results freeze | ⏳ Phase 5 |
+| Gate 3 | Full-suite results freeze | ✅ 2026-10-12 — InjecAgent 19.0%→0.7%, MCPTox 279→144 ([report](experiments/05_phase5_full_evaluation.md)) |
 
-Headline dev-set result: on 100 InjecAgent cases the gate reduced attack success **9/100 → 0/100**
-(0 false-positive blocks) and on 100 MCPTox cases **22 → 10** attack-influenced calls, at
-**≤ 23 ms p95** overhead. Details and caveats in
-[`experiments/04_gate2_gated_eval.md`](experiments/04_gate2_gated_eval.md).
+Frozen headline: ours takes InjecAgent ASR-valid **354 → 13 cases (19.0% → 0.7%)** and MCPTox
+attack-influenced **279 → 144**, B2 statistically indistinguishable from unprotected, p95 ≤ 20 ms,
+billed $9.64. E11–E17 are final; E1–E10 were the development slices that motivated the design.
 
 ## Conventions
 
