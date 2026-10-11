@@ -1,0 +1,2 @@
+$ E:\PROJECT\IntentGate\.venv\Scripts\python.exe harness/run_injecagent.py --cases data/raw/InjecAgent/data/test_cases_ds_enhanced.json --gate none --ablation none --threshold 0.75 --delta 0.1 --alpha 0.7 --seed 42 --report E:\PROJECT\IntentGate\results\phase5\b1_test_cases_ds_enhanced.json --resume
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 2334.12it/s]
