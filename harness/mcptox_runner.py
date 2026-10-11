@@ -134,10 +134,16 @@ def run_case(case: MCPToxCase, llm, temperature: float = 0.0, policy_factory=Non
     )
 
 
-def _run_each(cases: list, llm, policy_factory, handle, progress) -> tuple[dict, dict, list]:
-    counts: dict = {}
-    by_risk: dict = {}
-    rows: list = []
+def _run_each(
+    cases: list,
+    llm,
+    policy_factory,
+    handle,
+    progress,
+    counts: dict,
+    by_risk: dict,
+    rows: list,
+) -> tuple[dict, dict, list]:
     for case in cases:
         result = run_case(case, llm, policy_factory=policy_factory)
         counts[result.label] = counts.get(result.label, 0) + 1
@@ -159,9 +165,23 @@ def _run_each(cases: list, llm, policy_factory, handle, progress) -> tuple[dict,
         rows.append(row)
         if handle:
             handle.write(json.dumps(row) + "\n")
+            handle.flush()
         if progress:
             progress(result, case)
     return counts, by_risk, rows
+
+
+def _read_jsonl(path: str | Path) -> list[dict]:
+    rows: list[dict] = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return rows
 
 
 def run_cases(
@@ -170,11 +190,38 @@ def run_cases(
     policy_factory=None,
     jsonl_path: str | Path | None = None,
     progress=None,
+    resume: bool = False,
 ) -> tuple[dict, list]:
-    """Run cases and return (summary, rows); writes JSONL when a path is given."""
+    """Run cases and return (summary, rows); writes JSONL when a path is given.
+
+    resume=True skips cases already recorded in the JSONL and appends, so an interrupted
+    run continues from its last completed case instead of restarting. The returned summary
+    always covers the full case list, not just the newly run subset.
+    """
+    counts: dict = {}
+    by_risk: dict = {}
+    rows: list = []
+    remaining = list(cases)
+    mode = "w"
+    if jsonl_path and resume and Path(jsonl_path).exists():
+        done = _read_jsonl(jsonl_path)
+        seen = {r.get("case_id") for r in done}
+        for row in done:
+            label = row.get("label")
+            counts[label] = counts.get(label, 0) + 1
+            risk = row.get("risk")
+            by_risk.setdefault(risk, {}).setdefault(label, 0)
+            by_risk[risk][label] += 1
+        rows.extend(done)
+        remaining = [c for c in cases if c.case_id not in seen]
+        mode = "a"
     if jsonl_path:
-        with Path(jsonl_path).open("w", encoding="utf-8") as handle:
-            counts, by_risk, rows = _run_each(cases, llm, policy_factory, handle, progress)
+        with Path(jsonl_path).open(mode, encoding="utf-8") as handle:
+            counts, by_risk, rows = _run_each(
+                remaining, llm, policy_factory, handle, progress, counts, by_risk, rows
+            )
     else:
-        counts, by_risk, rows = _run_each(cases, llm, policy_factory, None, progress)
+        counts, by_risk, rows = _run_each(
+            remaining, llm, policy_factory, None, progress, counts, by_risk, rows
+        )
     return {"n": len(cases), "counts": counts, "by_risk": by_risk}, rows
