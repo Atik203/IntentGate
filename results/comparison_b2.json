@@ -1,0 +1,15 @@
+{
+  "baseline": "toolgate_b2",
+  "n_cases": 510,
+  "evaluated_tools": 47,
+  "contracted_tools": 47,
+  "coverage": 1.0,
+  "violations": 0,
+  "no_contract_count": 0,
+  "no_contract_tools": [],
+  "replay": {
+    "calls": 2,
+    "violations": 0,
+    "no_contract": 0
+  }
+}
