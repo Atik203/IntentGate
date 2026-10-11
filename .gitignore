@@ -15,6 +15,4 @@ __pycache__/
 # benchmark clones + snapshots (re-clone via scripts/clone_benchmarks.ps1)
 data/raw/
 
-# run outputs (JSONL traces, reports) - keep via results/.gitkeep only
-results/*
-!results/.gitkeep*.egg-info/
+
