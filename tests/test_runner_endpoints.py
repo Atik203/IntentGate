@@ -140,6 +140,56 @@ def test_llm_client_omits_reasoning_effort_when_unset():
     assert "reasoning_effort" not in captured
 
 
+def test_llm_client_omits_temperature_when_model_rejects_it():
+    from intent_gate.agent.base import LLMClient
+
+    calls = []
+
+    class _FakeCompletions:
+        def create(self, **kwargs):
+            calls.append(kwargs)
+            if "temperature" in kwargs:
+                raise Exception(
+                    "Error code: 400 - Unsupported value: 'temperature' does not support 0.0 "
+                    "with this model."
+                )
+
+            class _Msg:
+                content = "ok"
+
+            class _Choice:
+                message = _Msg()
+
+            class _Resp:
+                choices = [_Choice()]
+                usage = None
+
+            return _Resp()
+
+    client = LLMClient(model_id="gpt-6-luna")
+    client._client = type("_C", (), {"chat": type("_Chat", (), {"completions": _FakeCompletions()})()})()
+    assert client.call([{"role": "user", "content": "hi"}]) == "ok"
+    assert "temperature" in calls[0]
+    assert "temperature" not in calls[1]
+    assert client._send_temperature is False
+
+
+def test_llm_client_reraises_other_errors():
+    import pytest
+
+    from intent_gate.agent.base import LLMClient
+
+    class _FakeCompletions:
+        def create(self, **kwargs):
+            raise Exception("Error code: 429 - rate limit exceeded")
+
+    client = LLMClient(model_id="gpt-4o-mini")
+    client._client = type("_C", (), {"chat": type("_Chat", (), {"completions": _FakeCompletions()})()})()
+    with pytest.raises(Exception, match="rate limit"):
+        client.call([{"role": "user", "content": "hi"}])
+    assert client._send_temperature is True
+
+
 def _run(script: str, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(
         [sys.executable, str(ROOT / script), *args],
