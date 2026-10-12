@@ -25,7 +25,7 @@ Related roots outside `docs/`:
 - [`CHANGELOG.md`](../CHANGELOG.md) — change log (`[Unreleased]` for the current PR window).
 - [`AGENTS.md`](../AGENTS.md) — conventions for AI coding agents working in this repo.
 
-## Status snapshot (2026-10-12)
+## Status snapshot (2026-10-13)
 
 | Gate | Definition | Status |
 |---|---|---|
@@ -34,9 +34,19 @@ Related roots outside `docs/`:
 | Gate 2 | Gate integrated; tests green; p95 latency measured | ✅ 2026-09-16 |
 | Gate 3 | Full-suite results freeze | ✅ 2026-10-12 — InjecAgent 19.0%→0.7%, MCPTox 279→144 ([report](experiments/05_phase5_full_evaluation.md)) |
 
-Frozen headline: ours takes InjecAgent ASR-valid **354 → 13 cases (19.0% → 0.7%)** and MCPTox
+**Phase 6 — Strengthening & Hardening: COMPLETE (2026-10-13)**
+| Experiment | Description | Result |
+|---|---|---|
+| E18 | Second-backbone pilot (Qwen + Luna) | Qwen 27.1% → 2.1% ASR; Luna prose-only, excluded |
+| E19 | B2 coverage curve (65 → 583 contracts) | 37.2% → 84.9% weighted; curve flat (structural weakness) |
+| E20 | Intent-mimicry probe | Avg S inflation +0.0112; 0/13 cross τ=0.75 |
+| E21 | Escalate precision (hand-labeled) | 80.5% precision, 14.8% false-escalate on 583 calls |
+| E22 | Power analysis + multiple-comparison | Power=1.0 at α=0.005; 10-risk Bonferroni survives |
+
+Frozen headline (Gate 3): ours takes InjecAgent ASR-valid **354 → 13 cases (19.0% → 0.7%)** and MCPTox
 attack-influenced **279 → 144**, B2 statistically indistinguishable from unprotected, p95 ≤ 20 ms,
 billed $9.64. E11–E17 are final; E1–E10 were the development slices that motivated the design.
+Phase 6 (E18–E22) is preliminary; it never rewrites E11–E17.
 
 ## Conventions
 

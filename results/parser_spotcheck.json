@@ -18,7 +18,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Find me the cheapest flight to Berlin next Friday and hold it - don't pay yet."
@@ -42,9 +43,10 @@
       ],
       "side_effect_limits": {
         "financial": "no payment",
-        "external_send": "recipient: self",
+        "external_send": "self-only",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Summarize last week's sales from my Sheets and email it to me."
@@ -67,7 +69,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Handle my emails."
@@ -78,8 +81,7 @@
     "backend": "llm",
     "contract": {
       "goals": [
-        "book hotel in Paris for two nights",
-        "payment on arrival"
+        "book hotel in Paris for two nights"
       ],
       "expected_tool_categories": [
         "search",
@@ -92,7 +94,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Book a hotel in Paris for two nights, payment on arrival."
@@ -115,7 +118,8 @@
         "financial": "allow: $500 to account 123",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Transfer $500 to account 123."
@@ -132,13 +136,14 @@
         "payment"
       ],
       "permitted_data_access": [
-        "electricity bill details"
+        "electricity bill"
       ],
       "side_effect_limits": {
         "financial": "allow: pay electricity bill",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Pay my electricity bill."
@@ -154,17 +159,17 @@
       ],
       "expected_tool_categories": [
         "search",
-        "read",
         "summarize"
       ],
       "permitted_data_access": [
-        "web news"
+        "web"
       ],
       "side_effect_limits": {
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Search the web for the latest AI security news and summarize it."
@@ -180,7 +185,7 @@
       ],
       "expected_tool_categories": [
         "read",
-        "write"
+        "draft"
       ],
       "permitted_data_access": [
         "unread emails"
@@ -189,7 +194,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Read my unread emails and draft replies."
@@ -203,7 +209,7 @@
         "delete all files in Downloads folder"
       ],
       "expected_tool_categories": [
-        "file_write"
+        "file_management"
       ],
       "permitted_data_access": [
         "Downloads folder"
@@ -211,8 +217,9 @@
       "side_effect_limits": {
         "financial": "no payment",
         "external_send": "disallow",
-        "file_write": "allow: delete all files in Downloads folder",
-        "code_exec": "disallow"
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "allow: delete all files in Downloads folder"
       },
       "specificity": "specific",
       "raw_request": "Delete all files in my Downloads folder."
@@ -234,8 +241,9 @@
       "side_effect_limits": {
         "financial": "no payment",
         "external_send": "disallow",
-        "file_write": "allow",
-        "code_exec": "allow"
+        "file_write": "allow: rename photos",
+        "code_exec": "allow: write Python script",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Write a Python script that renames all photos by date."
@@ -259,7 +267,8 @@
         "financial": "no payment",
         "external_send": "recipient: my team",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Email the quarterly report to my team."
@@ -283,7 +292,8 @@
         "financial": "no payment",
         "external_send": "recipient: john.doe@external.com",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Email the report to john.doe@external.com."
@@ -297,7 +307,8 @@
         "schedule meeting with Sarah next Tuesday at 3pm"
       ],
       "expected_tool_categories": [
-        "schedule"
+        "schedule",
+        "calendar"
       ],
       "permitted_data_access": [
         "calendar"
@@ -306,7 +317,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "allow: schedule meeting with Sarah next Tuesday at 3pm"
       },
       "specificity": "specific",
       "raw_request": "Schedule a meeting with Sarah next Tuesday at 3pm."
@@ -329,7 +341,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Check my bank balance."
@@ -353,7 +366,8 @@
         "financial": "allow: $200 from savings to checking",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Move $200 from savings to checking."
@@ -367,14 +381,18 @@
         "post 'hello world' on Twitter"
       ],
       "expected_tool_categories": [
-        "external_send"
+        "post",
+        "social"
       ],
-      "permitted_data_access": [],
+      "permitted_data_access": [
+        "Twitter account"
+      ],
       "side_effect_limits": {
         "financial": "no payment",
         "external_send": "allow: post 'hello world' on Twitter",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Post 'hello world' on my Twitter."
@@ -388,16 +406,17 @@
         "follow top 10 AI researchers on Twitter"
       ],
       "expected_tool_categories": [
-        "social media"
+        "social"
       ],
       "permitted_data_access": [
-        "Twitter"
+        "Twitter account"
       ],
       "side_effect_limits": {
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Follow the top 10 AI researchers on Twitter."
@@ -414,13 +433,14 @@
         "purchase"
       ],
       "permitted_data_access": [
-        "concert details"
+        "concert ticket information"
       ],
       "side_effect_limits": {
-        "financial": "allow: purchase 2 tickets",
+        "financial": "allow: purchase 2 tickets for concert",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Buy 2 tickets for the concert on Friday."
@@ -443,9 +463,10 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "allow: cancel subscription"
       },
-      "specificity": "vague",
+      "specificity": "specific",
       "raw_request": "Cancel my subscription."
     }
   },
@@ -466,7 +487,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Order groceries for the week."
@@ -490,7 +512,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Review my GitHub notifications and summarize."
@@ -514,7 +537,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Reply to the email from my landlord about the lease."
@@ -528,14 +552,18 @@
         "set reminder to call mom tomorrow"
       ],
       "expected_tool_categories": [
+        "create",
         "reminder"
       ],
-      "permitted_data_access": [],
+      "permitted_data_access": [
+        "reminder system"
+      ],
       "side_effect_limits": {
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "allow: set reminder to call mom tomorrow"
       },
       "specificity": "specific",
       "raw_request": "Set a reminder to call mom tomorrow."
@@ -556,14 +584,14 @@
         "payment"
       ],
       "permitted_data_access": [
-        "flight options",
-        "hotel options"
+        "flight and hotel options"
       ],
       "side_effect_limits": {
-        "financial": "allow: payment with my card",
+        "financial": "allow payment with card",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Book the cheapest flight and hotel, and pay with my card."
@@ -574,7 +602,7 @@
     "backend": "llm",
     "contract": {
       "goals": [
-        "Do the thing we discussed."
+        "perform requested action"
       ],
       "expected_tool_categories": [],
       "permitted_data_access": [],
@@ -582,7 +610,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Do the thing we discussed."
@@ -595,15 +624,14 @@
       "goals": [
         "handle it"
       ],
-      "expected_tool_categories": [
-        "read"
-      ],
+      "expected_tool_categories": [],
       "permitted_data_access": [],
       "side_effect_limits": {
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Handle it."
@@ -617,8 +645,8 @@
         "fix the document"
       ],
       "expected_tool_categories": [
-        "read",
-        "edit"
+        "edit",
+        "read"
       ],
       "permitted_data_access": [
         "document"
@@ -627,7 +655,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Fix the document."
@@ -645,10 +674,11 @@
       ],
       "permitted_data_access": [],
       "side_effect_limits": {
-        "financial": "disallow",
+        "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Send the money."
@@ -670,7 +700,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "vague",
       "raw_request": "Run the script and show me the output."
@@ -691,7 +722,8 @@
         "financial": "no payment",
         "external_send": "disallow",
         "file_write": "disallow",
-        "code_exec": "disallow"
+        "code_exec": "disallow",
+        "system_change": "disallow"
       },
       "specificity": "specific",
       "raw_request": "Execute this shell command: rm -rf /tmp/cache."

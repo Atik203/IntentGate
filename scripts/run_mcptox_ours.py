@@ -137,11 +137,13 @@ def main():
     agent_cost = estimate_usage_cost(llm.usage)
     parser_cost = estimate_usage_cost(parser_llm.usage) if parser_llm else None
     summary["usage"] = {"agent": llm.usage, "parser": parser_llm.usage if parser_llm else None}
-    summary["estimated_cost_usd"] = (
-        round((agent_cost or 0.0) + (parser_cost or 0.0), 4)
-        if (agent_cost is not None or parser_cost is not None)
-        else None
-    )
+    if agent_cost is None:
+        summary["estimated_cost_usd"] = parser_cost
+        summary["cost_note"] = "agent cost unknown (local/unbilled model); total omits agent"
+    elif parser_cost is None:
+        summary["estimated_cost_usd"] = agent_cost
+    else:
+        summary["estimated_cost_usd"] = round(agent_cost + parser_cost, 4)
     summary_file = out_dir / "summary.json"
     summary_file.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))

@@ -400,11 +400,12 @@ just above the threshold with no rule to trip — the same boundary as Gate 2, n
 | Gate 1 | Manual-rule baseline (B2) implemented, coverage frozen | ✅ 2026-09-16 |
 | Gate 2 | Gate integrated; tests green; speed measured | ✅ 2026-09-16 |
 | **Gate 3** | **Full evaluation results frozen** | ✅ 2026-10-12 — InjecAgent 19.0%→0.7%, MCPTox 279→144 |
+| **Phase 6** | **Strengthening & Hardening (E18–E22)** | ✅ 2026-10-13 — all P0/P1 complete |
 
 **What exists today:** a working gate, a fair baseline, the frozen full-suite results (E11–E17),
-and documented evidence for every number above. **What it cost:** the 30-job matrix ran
-**34,560 model calls, billed $9.64** (list-price estimate $11.46 — prompt caching saved ~16%).
-No further big runs are needed before Phase 6 pilots.
+Phase 6 preliminary pilots (E18–E22), and documented evidence for every number above. **What it cost:**
+the 30-job matrix ran **34,560 model calls, billed $9.64** (list-price estimate $11.46 — prompt caching
+saved ~16%). Phase 6 pilots added ~$0.07 total. No further big runs are needed.
 
 ---
 
@@ -412,40 +413,35 @@ No further big runs are needed before Phase 6 pilots.
 
 ## 6. Where we are going
 
-### Phase 5 — the final evaluation (the current work)
+### Phase 6 — Strengthening & Hardening (COMPLETE 2026-10-13)
 
-| Stage | What happens | Status |
+| Priority | Experiment | Result |
 |---|---|---|
-| Stage 0 | Tooling: orchestrator, reporter, ablations, stats, cost | ✅ done |
-| Stage 1 | Freeze code/configs → run the 30-job matrix → integrity check | ✅ done 2026-10-12 (30/30, `--check` passed, billed $9.64) |
-| Stage 2 | Analysis: Pareto curve, confidence intervals, significance tests, breakdowns, error taxonomy, latency, utility | ✅ done — `results/phase5/report.json` + taxonomies |
-| Stage 3 | **Gate 3 freeze**: write the results report, update roadmap + changelog, tag the commit, open PR | ✅ done — [`experiments/05_phase5_full_evaluation.md`](experiments/05_phase5_full_evaluation.md), tag `gate3-freeze` |
+| **P0-1 (E18)** | Second-backbone pilot (Qwen + Luna) | Qwen 27.1% → 2.1% ASR; Luna prose-only, excluded |
+| **P0-2 (E19)** | B2 coverage curve (65 → 583 contracts) | 37.2% → 84.9% weighted; curve flat (structural weakness) |
+| **P1 (E20–E22)** | Mimicry / Escalate / Stats | Avg S inflation +0.0112; 80.5% escalate precision; Power=1.0 |
 
-The matrix: **6 conditions** (no gate, ToolGate baseline, our gate, and three ablations) × **5
-dataset files** (4 InjecAgent splits/settings + the MCPTox snapshot) = 30 jobs. Runs are resumable:
-if one fails, the orchestrator retries and skips finished jobs.
+All P0/P1 items complete. P2 buffer items (parser ablation, live MCPTox, paraphrase, drift) remain
+as optional future work — see [`../roadmap.md`](../roadmap.md) §Phase 6 P2.
 
-**Cost chart** (actuals from the frozen run 2026-10-12, ~5.6 h wall-clock at `--jobs 3`):
+### Phase 7 — Thesis Writing (Weeks 13–16)
 
-| Group | Cases | Calls | List-price actual |
-|---|---|---|---|
-| B1 (unprotected) | 3,456 | 3,456 | $1.33 |
-| B2 (ToolGate reimpl) | 3,456 | 3,456 | $1.33 |
-| Ours (gate; agent + parser calls) | 3,456 | 6,912 | $2.20 |
-| Ablations A1–A3 (each agent + parser) | 10,368 | 20,736 | $6.60 |
-| **Total** | 20,736 | **34,560** | **$11.46 list / $9.64 billed** |
+| Chapter | Focus | Status |
+|---|---|---|
+| Ch 1 | Intro & motivation (OWASP excessive agency, why action gate) | ⏳ |
+| Ch 2 | Related work — answer Reviewer #2 Q#1 | ⏳ |
+| Ch 3 | Method — parser, contract, scorer, gate, escalate | ⏳ |
+| Ch 4 | ToolGate B2 baseline (Appendix G translation, coverage %, fidelity) | ⏳ |
+| Ch 5 | Evaluation — metrics, baselines, ablations, per-category, stats, taxonomy | ⏳ |
+| Ch 6 | Limitations & future work | ⏳ |
+| Appendix | Reproducibility: hashes, configs, contract examples, JSONL samples | ⏳ |
 
-### After Phase 5
+### Phase 8 — Paper Draft (parallel)
 
-- **Phase 6 (optional stretch):** a small multi-turn "drift" pilot on AgentDojo, and/or a
-  paraphrase-robustness mini-pilot — only if Phase 5 finishes with time to spare.
-- **Phase 7 — thesis:** chapters for method, B2 baseline, evaluation, limitations; reproducibility
-  appendix; supervisor review rounds.
-- **Phase 8 — paper draft:** short workshop/Findings-style paper built from the frozen results.
+Short workshop/Findings-style paper from frozen results (E11–E17) + Phase 6 pilots (E18–E22).
 
-**What "freeze" means for everyone:** after Stage 3, the numbers are final. No code or config
-changes that affect results, and no re-runs, unless the whole evaluation is re-done. This protects
-reproducibility.
+**What "freeze" means for everyone:** After Gate 3 (2026-10-12), the Phase 5 numbers are final.
+Phase 6 (E18+) is preliminary and never rewrites E11–E17. This protects reproducibility.
 
 ---
 

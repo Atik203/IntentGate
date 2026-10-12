@@ -54,10 +54,10 @@ def test_mail_contract_records_effect():
 
 
 def test_fake_tool_is_no_contract():
-    checker = ToolGateChecker(evaluated_tools={"count_messages", "read_file"})
-    obs = checker.check(ToolCall(name="count_messages", parameters={}))
+    checker = ToolGateChecker(evaluated_tools={"nonexistent_tool_xyz", "read_file"})
+    obs = checker.check(ToolCall(name="nonexistent_tool_xyz", parameters={}))
     assert obs.startswith("no_contract:")
-    assert checker.no_contract_tools == {"count_messages"}
+    assert checker.no_contract_tools == {"nonexistent_tool_xyz"}
 
 
 def test_mcptox_contract_set_has_expected_families():

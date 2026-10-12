@@ -62,7 +62,7 @@ def test_allow_all_policy_decide_allows_everything():
 
 def test_toolgate_decide_marks_no_contract_and_violations():
     policy = ToolGatePolicy()
-    unknown = policy.decide(ToolCall(name="count_messages", parameters={}))
+    unknown = policy.decide(ToolCall(name="nonexistent_tool_xyz", parameters={}))
     assert unknown["allowed"] is True and unknown["no_contract"] is True
 
     violation = policy.decide(
