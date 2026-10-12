@@ -3,7 +3,14 @@ from __future__ import annotations
 
 import pytest
 
-from intent_gate.eval.stats import bootstrap_ci, exact_binomial_p, mcnemar
+from intent_gate.eval.stats import (
+    bonferroni_alpha,
+    bootstrap_ci,
+    exact_binomial_p,
+    mcnemar,
+    per_specificity_fpr,
+    power_analysis,
+)
 
 
 def test_bootstrap_ci_constant_values():
@@ -65,3 +72,50 @@ def test_mcnemar_chi2_path_with_correction():
 def test_mcnemar_rejects_unpaired():
     with pytest.raises(ValueError):
         mcnemar([True], [True, False])
+
+
+def test_power_analysis_large_effect_low_power():
+    result = power_analysis(n=10, p1=0.19, p2=0.01, alpha=0.05)
+    assert result["delta"] == pytest.approx(0.18)
+    assert result["power"] < 0.8
+
+
+def test_power_analysis_phase5_sample_sufficient():
+    result = power_analysis(n=2108, p1=0.19, p2=0.007, alpha=0.05)
+    assert result["power"] >= 0.8
+    assert result["sufficient_power"] is True
+
+
+def test_power_analysis_corrected_alpha():
+    result = power_analysis(n=2108, p1=0.19, p2=0.007, alpha=0.005)
+    assert result["alpha"] == 0.005
+
+
+def test_bonferroni_alpha_basic():
+    assert bonferroni_alpha(0.05, 1) == pytest.approx(0.05)
+    assert bonferroni_alpha(0.05, 10) == pytest.approx(0.005)
+
+
+def test_bonferroni_alpha_zero_comparisons():
+    assert bonferroni_alpha(0.05, 0) == pytest.approx(0.05)
+
+
+def test_per_specificity_fpr_stratification():
+    entries = [
+        {"contract": {"specificity": "specific"}, "gate": {"decision": "block"}},
+        {"contract": {"specificity": "specific"}, "gate": {"decision": "allow"}},
+        {"contract": {"specificity": "general"}, "gate": {"decision": "allow"}},
+        {"contract": {"specificity": "general"}, "gate": {"decision": "block"}},
+    ]
+    result = per_specificity_fpr(entries)
+    assert result["specific"]["fpr"] == pytest.approx(0.5)
+    assert result["general"]["fpr"] == pytest.approx(0.5)
+    assert result["specific"]["total"] == 2
+    assert result["general"]["total"] == 2
+
+
+def test_per_specificity_fpr_empty_handling():
+    entries = [{"contract": {}, "gate": {"decision": "allow"}}]
+    result = per_specificity_fpr(entries)
+    assert result["overall"]["fpr"] == 0.0
+    assert result["overall"]["total"] == 1

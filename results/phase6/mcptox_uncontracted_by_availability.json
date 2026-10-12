@@ -1,0 +1,1074 @@
+[
+  {
+    "tool": "search",
+    "servers": 3
+  },
+  {
+    "tool": "puppeteer_click",
+    "servers": 1
+  },
+  {
+    "tool": "puppeteer_fill",
+    "servers": 1
+  },
+  {
+    "tool": "puppeteer_hover",
+    "servers": 1
+  },
+  {
+    "tool": "puppeteer_navigate",
+    "servers": 1
+  },
+  {
+    "tool": "puppeteer_screenshot",
+    "servers": 1
+  },
+  {
+    "tool": "puppeteer_select",
+    "servers": 1
+  },
+  {
+    "tool": "maps_around_search",
+    "servers": 1
+  },
+  {
+    "tool": "maps_bicycling",
+    "servers": 1
+  },
+  {
+    "tool": "maps_direction_driving",
+    "servers": 1
+  },
+  {
+    "tool": "maps_direction_transit_integrated",
+    "servers": 1
+  },
+  {
+    "tool": "maps_direction_walking",
+    "servers": 1
+  },
+  {
+    "tool": "maps_distance",
+    "servers": 1
+  },
+  {
+    "tool": "maps_geo",
+    "servers": 1
+  },
+  {
+    "tool": "maps_ip_location",
+    "servers": 1
+  },
+  {
+    "tool": "maps_regeocode",
+    "servers": 1
+  },
+  {
+    "tool": "maps_search_detail",
+    "servers": 1
+  },
+  {
+    "tool": "maps_text_search",
+    "servers": 1
+  },
+  {
+    "tool": "maps_weather",
+    "servers": 1
+  },
+  {
+    "tool": "delete_apps_clientId_webhooks_webhookId",
+    "servers": 1
+  },
+  {
+    "tool": "get_apps_clientId_webhooks_webhookId",
+    "servers": 1
+  },
+  {
+    "tool": "get_customers",
+    "servers": 1
+  },
+  {
+    "tool": "get_customers_id_directdebitmandates",
+    "servers": 1
+  },
+  {
+    "tool": "get_schedules_templates",
+    "servers": 1
+  },
+  {
+    "tool": "get_schedules_templates_settings",
+    "servers": 1
+  },
+  {
+    "tool": "post_customers",
+    "servers": 1
+  },
+  {
+    "tool": "put_apps_clientId_webhooks_digest",
+    "servers": 1
+  },
+  {
+    "tool": "put_apps_clientId_webhooks_webhookId",
+    "servers": 1
+  },
+  {
+    "tool": "put_customers",
+    "servers": 1
+  },
+  {
+    "tool": "put_customers_directdebitmandates_id_cancel",
+    "servers": 1
+  },
+  {
+    "tool": "put_customers_id_directdebitmandates",
+    "servers": 1
+  },
+  {
+    "tool": "put_invoices_id_activate",
+    "servers": 1
+  },
+  {
+    "tool": "put_invoices_id_mark_as_paid",
+    "servers": 1
+  },
+  {
+    "tool": "put_invoices_id_void",
+    "servers": 1
+  },
+  {
+    "tool": "put_schedules",
+    "servers": 1
+  },
+  {
+    "tool": "put_schedules_messages",
+    "servers": 1
+  },
+  {
+    "tool": "put_schedules_templates",
+    "servers": 1
+  },
+  {
+    "tool": "put_schedules_templates_settings",
+    "servers": 1
+  },
+  {
+    "tool": "upload_invoice_to_adfin",
+    "servers": 1
+  },
+  {
+    "tool": "write_note",
+    "servers": 1
+  },
+  {
+    "tool": "add_issue_comment",
+    "servers": 1
+  },
+  {
+    "tool": "create_pull_request",
+    "servers": 1
+  },
+  {
+    "tool": "create_pull_request_review",
+    "servers": 1
+  },
+  {
+    "tool": "get_issue",
+    "servers": 1
+  },
+  {
+    "tool": "get_pull_request",
+    "servers": 1
+  },
+  {
+    "tool": "list_commits",
+    "servers": 1
+  },
+  {
+    "tool": "list_issues",
+    "servers": 1
+  },
+  {
+    "tool": "list_pull_requests",
+    "servers": 1
+  },
+  {
+    "tool": "search_issues",
+    "servers": 1
+  },
+  {
+    "tool": "search_users",
+    "servers": 1
+  },
+  {
+    "tool": "update_issue",
+    "servers": 1
+  },
+  {
+    "tool": "retrieve_from_aws_kb",
+    "servers": 1
+  },
+  {
+    "tool": "slack_add_reaction",
+    "servers": 1
+  },
+  {
+    "tool": "slack_get_channel_history",
+    "servers": 1
+  },
+  {
+    "tool": "slack_get_thread_replies",
+    "servers": 1
+  },
+  {
+    "tool": "slack_get_user_profile",
+    "servers": 1
+  },
+  {
+    "tool": "slack_get_users",
+    "servers": 1
+  },
+  {
+    "tool": "slack_list_channels",
+    "servers": 1
+  },
+  {
+    "tool": "slack_post_message",
+    "servers": 1
+  },
+  {
+    "tool": "slack_reply_to_thread",
+    "servers": 1
+  },
+  {
+    "tool": "forums",
+    "servers": 1
+  },
+  {
+    "tool": "google-autocomplete",
+    "servers": 1
+  },
+  {
+    "tool": "people-also-ask",
+    "servers": 1
+  },
+  {
+    "tool": "semantic-keywords",
+    "servers": 1
+  },
+  {
+    "tool": "count-daily-emails",
+    "servers": 1
+  },
+  {
+    "tool": "get-email-content",
+    "servers": 1
+  },
+  {
+    "tool": "search-emails",
+    "servers": 1
+  },
+  {
+    "tool": "send-email",
+    "servers": 1
+  },
+  {
+    "tool": "convert-to-pdf",
+    "servers": 1
+  },
+  {
+    "tool": "crawl",
+    "servers": 1
+  },
+  {
+    "tool": "doc-to-text",
+    "servers": 1
+  },
+  {
+    "tool": "extract",
+    "servers": 1
+  },
+  {
+    "tool": "extract-audio",
+    "servers": 1
+  },
+  {
+    "tool": "extract-document",
+    "servers": 1
+  },
+  {
+    "tool": "extract-image",
+    "servers": 1
+  },
+  {
+    "tool": "extract-video",
+    "servers": 1
+  },
+  {
+    "tool": "get-autocomplete",
+    "servers": 1
+  },
+  {
+    "tool": "get-google-reviews",
+    "servers": 1
+  },
+  {
+    "tool": "get-youtube-transcript",
+    "servers": 1
+  },
+  {
+    "tool": "merge-pdfs",
+    "servers": 1
+  },
+  {
+    "tool": "read-pdf-metadata",
+    "servers": 1
+  },
+  {
+    "tool": "scrape",
+    "servers": 1
+  },
+  {
+    "tool": "screenshot",
+    "servers": 1
+  },
+  {
+    "tool": "search-news",
+    "servers": 1
+  },
+  {
+    "tool": "search-places",
+    "servers": 1
+  },
+  {
+    "tool": "trim-video",
+    "servers": 1
+  },
+  {
+    "tool": "browser_use_agent",
+    "servers": 1
+  },
+  {
+    "tool": "claude_computer_use_agent",
+    "servers": 1
+  },
+  {
+    "tool": "crawl_webpages",
+    "servers": 1
+  },
+  {
+    "tool": "create_profile",
+    "servers": 1
+  },
+  {
+    "tool": "delete_profile",
+    "servers": 1
+  },
+  {
+    "tool": "extract_structured_data",
+    "servers": 1
+  },
+  {
+    "tool": "list_profiles",
+    "servers": 1
+  },
+  {
+    "tool": "openai_computer_use_agent",
+    "servers": 1
+  },
+  {
+    "tool": "scrape_webpage",
+    "servers": 1
+  },
+  {
+    "tool": "search_with_bing",
+    "servers": 1
+  },
+  {
+    "tool": "append_insight",
+    "servers": 1
+  },
+  {
+    "tool": "create_table",
+    "servers": 1
+  },
+  {
+    "tool": "describe_table",
+    "servers": 1
+  },
+  {
+    "tool": "read_query",
+    "servers": 1
+  },
+  {
+    "tool": "write_query",
+    "servers": 1
+  },
+  {
+    "tool": "download_chart",
+    "servers": 1
+  },
+  {
+    "tool": "generate_chart",
+    "servers": 1
+  },
+  {
+    "tool": "sequentialthinking",
+    "servers": 1
+  },
+  {
+    "tool": "fetch",
+    "servers": 1
+  },
+  {
+    "tool": "delete",
+    "servers": 1
+  },
+  {
+    "tool": "get",
+    "servers": 1
+  },
+  {
+    "tool": "list",
+    "servers": 1
+  },
+  {
+    "tool": "set",
+    "servers": 1
+  },
+  {
+    "tool": "add",
+    "servers": 1
+  },
+  {
+    "tool": "annotatedMessage",
+    "servers": 1
+  },
+  {
+    "tool": "echo",
+    "servers": 1
+  },
+  {
+    "tool": "getResourceReference",
+    "servers": 1
+  },
+  {
+    "tool": "getTinyImage",
+    "servers": 1
+  },
+  {
+    "tool": "longRunningOperation",
+    "servers": 1
+  },
+  {
+    "tool": "printEnv",
+    "servers": 1
+  },
+  {
+    "tool": "sampleLLM",
+    "servers": 1
+  },
+  {
+    "tool": "create_merge_request",
+    "servers": 1
+  },
+  {
+    "tool": "run_code",
+    "servers": 1
+  },
+  {
+    "tool": "text_to_cad",
+    "servers": 1
+  },
+  {
+    "tool": "gyazo_image",
+    "servers": 1
+  },
+  {
+    "tool": "gyazo_latest_image",
+    "servers": 1
+  },
+  {
+    "tool": "gyazo_search",
+    "servers": 1
+  },
+  {
+    "tool": "gyazo_upload",
+    "servers": 1
+  },
+  {
+    "tool": "list_categories",
+    "servers": 1
+  },
+  {
+    "tool": "update_categories",
+    "servers": 1
+  },
+  {
+    "tool": "add_observations",
+    "servers": 1
+  },
+  {
+    "tool": "create_entities",
+    "servers": 1
+  },
+  {
+    "tool": "create_relations",
+    "servers": 1
+  },
+  {
+    "tool": "delete_entities",
+    "servers": 1
+  },
+  {
+    "tool": "delete_observations",
+    "servers": 1
+  },
+  {
+    "tool": "delete_relations",
+    "servers": 1
+  },
+  {
+    "tool": "open_nodes",
+    "servers": 1
+  },
+  {
+    "tool": "read_graph",
+    "servers": 1
+  },
+  {
+    "tool": "brave_local_search",
+    "servers": 1
+  },
+  {
+    "tool": "brave_web_search",
+    "servers": 1
+  },
+  {
+    "tool": "extract-web-data",
+    "servers": 1
+  },
+  {
+    "tool": "analytics_fixed_window",
+    "servers": 1
+  },
+  {
+    "tool": "analytics_sliding_window",
+    "servers": 1
+  },
+  {
+    "tool": "company_overview",
+    "servers": 1
+  },
+  {
+    "tool": "etf_profile",
+    "servers": 1
+  },
+  {
+    "tool": "historical_options",
+    "servers": 1
+  },
+  {
+    "tool": "insider_transactions",
+    "servers": 1
+  },
+  {
+    "tool": "market_status",
+    "servers": 1
+  },
+  {
+    "tool": "realtime_bulk_quotes",
+    "servers": 1
+  },
+  {
+    "tool": "realtime_options",
+    "servers": 1
+  },
+  {
+    "tool": "stock_quote",
+    "servers": 1
+  },
+  {
+    "tool": "symbol_search",
+    "servers": 1
+  },
+  {
+    "tool": "time_series_daily",
+    "servers": 1
+  },
+  {
+    "tool": "time_series_daily_adjusted",
+    "servers": 1
+  },
+  {
+    "tool": "time_series_intraday",
+    "servers": 1
+  },
+  {
+    "tool": "time_series_monthly",
+    "servers": 1
+  },
+  {
+    "tool": "time_series_monthly_adjusted",
+    "servers": 1
+  },
+  {
+    "tool": "time_series_weekly",
+    "servers": 1
+  },
+  {
+    "tool": "time_series_weekly_adjusted",
+    "servers": 1
+  },
+  {
+    "tool": "top_gainers_losers",
+    "servers": 1
+  },
+  {
+    "tool": "map_directions",
+    "servers": 1
+  },
+  {
+    "tool": "map_distance_matrix",
+    "servers": 1
+  },
+  {
+    "tool": "map_geocode",
+    "servers": 1
+  },
+  {
+    "tool": "map_ip_location",
+    "servers": 1
+  },
+  {
+    "tool": "map_place_details",
+    "servers": 1
+  },
+  {
+    "tool": "map_poi_extract",
+    "servers": 1
+  },
+  {
+    "tool": "map_reverse_geocode",
+    "servers": 1
+  },
+  {
+    "tool": "map_road_traffic",
+    "servers": 1
+  },
+  {
+    "tool": "map_search_places",
+    "servers": 1
+  },
+  {
+    "tool": "map_weather",
+    "servers": 1
+  },
+  {
+    "tool": "check-whatsapp-status",
+    "servers": 1
+  },
+  {
+    "tool": "list-recent-contacts",
+    "servers": 1
+  },
+  {
+    "tool": "send-whatsapp-message",
+    "servers": 1
+  },
+  {
+    "tool": "git_add",
+    "servers": 1
+  },
+  {
+    "tool": "git_checkout",
+    "servers": 1
+  },
+  {
+    "tool": "git_commit",
+    "servers": 1
+  },
+  {
+    "tool": "git_create_branch",
+    "servers": 1
+  },
+  {
+    "tool": "git_diff",
+    "servers": 1
+  },
+  {
+    "tool": "git_diff_staged",
+    "servers": 1
+  },
+  {
+    "tool": "git_diff_unstaged",
+    "servers": 1
+  },
+  {
+    "tool": "git_log",
+    "servers": 1
+  },
+  {
+    "tool": "git_reset",
+    "servers": 1
+  },
+  {
+    "tool": "git_show",
+    "servers": 1
+  },
+  {
+    "tool": "git_status",
+    "servers": 1
+  },
+  {
+    "tool": "get_sentry_issue",
+    "servers": 1
+  },
+  {
+    "tool": "maps_directions",
+    "servers": 1
+  },
+  {
+    "tool": "maps_distance_matrix",
+    "servers": 1
+  },
+  {
+    "tool": "maps_elevation",
+    "servers": 1
+  },
+  {
+    "tool": "maps_geocode",
+    "servers": 1
+  },
+  {
+    "tool": "maps_place_details",
+    "servers": 1
+  },
+  {
+    "tool": "maps_reverse_geocode",
+    "servers": 1
+  },
+  {
+    "tool": "maps_search_places",
+    "servers": 1
+  },
+  {
+    "tool": "activate_licenses",
+    "servers": 1
+  },
+  {
+    "tool": "change_plan_subscriptions",
+    "servers": 1
+  },
+  {
+    "tool": "charge_subscriptions",
+    "servers": 1
+  },
+  {
+    "tool": "create_payments",
+    "servers": 1
+  },
+  {
+    "tool": "create_subscriptions",
+    "servers": 1
+  },
+  {
+    "tool": "deactivate_licenses",
+    "servers": 1
+  },
+  {
+    "tool": "list_license_key_instances",
+    "servers": 1
+  },
+  {
+    "tool": "list_license_keys",
+    "servers": 1
+  },
+  {
+    "tool": "list_payments",
+    "servers": 1
+  },
+  {
+    "tool": "list_subscriptions",
+    "servers": 1
+  },
+  {
+    "tool": "retrieve_invoices_payments",
+    "servers": 1
+  },
+  {
+    "tool": "retrieve_license_key_instances",
+    "servers": 1
+  },
+  {
+    "tool": "retrieve_license_keys",
+    "servers": 1
+  },
+  {
+    "tool": "retrieve_line_items_payments",
+    "servers": 1
+  },
+  {
+    "tool": "retrieve_payments",
+    "servers": 1
+  },
+  {
+    "tool": "retrieve_subscriptions",
+    "servers": 1
+  },
+  {
+    "tool": "update_license_key_instances",
+    "servers": 1
+  },
+  {
+    "tool": "update_license_keys",
+    "servers": 1
+  },
+  {
+    "tool": "update_subscriptions",
+    "servers": 1
+  },
+  {
+    "tool": "validate_licenses",
+    "servers": 1
+  },
+  {
+    "tool": "abort-actor-run",
+    "servers": 1
+  },
+  {
+    "tool": "get-actor",
+    "servers": 1
+  },
+  {
+    "tool": "get-actor-details",
+    "servers": 1
+  },
+  {
+    "tool": "get-actor-log",
+    "servers": 1
+  },
+  {
+    "tool": "get-actor-run",
+    "servers": 1
+  },
+  {
+    "tool": "get-dataset",
+    "servers": 1
+  },
+  {
+    "tool": "get-dataset-items",
+    "servers": 1
+  },
+  {
+    "tool": "esports-lol-schedules",
+    "servers": 1
+  },
+  {
+    "tool": "esports-lol-team-standings",
+    "servers": 1
+  },
+  {
+    "tool": "lol-champion-analysis",
+    "servers": 1
+  },
+  {
+    "tool": "lol-champion-leader-board",
+    "servers": 1
+  },
+  {
+    "tool": "lol-champion-meta-data",
+    "servers": 1
+  },
+  {
+    "tool": "lol-champion-positions-data",
+    "servers": 1
+  },
+  {
+    "tool": "lol-champion-skin-sale",
+    "servers": 1
+  },
+  {
+    "tool": "lol-summoner-game-history",
+    "servers": 1
+  },
+  {
+    "tool": "lol-summoner-renewal",
+    "servers": 1
+  },
+  {
+    "tool": "lol-summoner-search",
+    "servers": 1
+  },
+  {
+    "tool": "tft-champion-item-build",
+    "servers": 1
+  },
+  {
+    "tool": "tft-meta-item-combinations",
+    "servers": 1
+  },
+  {
+    "tool": "tft-meta-trend-deck-list",
+    "servers": 1
+  },
+  {
+    "tool": "tft-play-style-comment",
+    "servers": 1
+  },
+  {
+    "tool": "tft-recommend-champion-for-item",
+    "servers": 1
+  },
+  {
+    "tool": "valorant-agents-composition-with-map",
+    "servers": 1
+  },
+  {
+    "tool": "valorant-characters-statistics",
+    "servers": 1
+  },
+  {
+    "tool": "valorant-leaderboard",
+    "servers": 1
+  },
+  {
+    "tool": "valorant-meta-characters",
+    "servers": 1
+  },
+  {
+    "tool": "valorant-meta-maps",
+    "servers": 1
+  },
+  {
+    "tool": "tavily-crawl",
+    "servers": 1
+  },
+  {
+    "tool": "tavily-extract",
+    "servers": 1
+  },
+  {
+    "tool": "tavily-map",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_file_clones",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_file_coverage",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_file_issues",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_file_with_analysis",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_issue",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_pattern",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_pull_request_files_coverage",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_pull_request_git_diff",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_repository_pull_request",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_get_repository_with_analysis",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_files",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_organization_repositories",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_pull_request_issues",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_repository_issues",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_repository_pull_requests",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_repository_tool_patterns",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_repository_tools",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_list_tools",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_search_organization_srm_items",
+    "servers": 1
+  },
+  {
+    "tool": "codacy_search_repository_srm_items",
+    "servers": 1
+  },
+  {
+    "tool": "get_available_crypto_tickers",
+    "servers": 1
+  },
+  {
+    "tool": "get_balance_sheets",
+    "servers": 1
+  },
+  {
+    "tool": "get_cash_flow_statements",
+    "servers": 1
+  },
+  {
+    "tool": "get_company_news",
+    "servers": 1
+  },
+  {
+    "tool": "get_crypto_prices",
+    "servers": 1
+  },
+  {
+    "tool": "get_current_crypto_price",
+    "servers": 1
+  },
+  {
+    "tool": "get_historical_crypto_prices",
+    "servers": 1
+  },
+  {
+    "tool": "get_historical_stock_prices",
+    "servers": 1
+  },
+  {
+    "tool": "get_income_statements",
+    "servers": 1
+  },
+  {
+    "tool": "get_sec_filings",
+    "servers": 1
+  }
+]

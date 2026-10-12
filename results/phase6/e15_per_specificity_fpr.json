@@ -1,0 +1,22 @@
+{
+  "specific": {
+    "fpr": 0.1275,
+    "blocked": 230,
+    "total": 1804
+  },
+  "general": {
+    "fpr": 0.0,
+    "blocked": 0,
+    "total": 0
+  },
+  "vague": {
+    "fpr": 0.0957,
+    "blocked": 20,
+    "total": 209
+  },
+  "overall": {
+    "fpr": 0.1242,
+    "blocked": 250,
+    "total": 2013
+  }
+}

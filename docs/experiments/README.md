@@ -7,7 +7,7 @@
 > **New to the project?** Read [`../team_guide.md`](../team_guide.md) first — it explains the
 > project and summarizes these results in plain words.
 
-**Current state (2026-10-12):** Gate 0 ✅ · Gate 1 ✅ · Gate 2 ✅ · Gate 3 ✅ (results frozen — Phase 5 full matrix).
+**Current state (2026-10-13):** Gate 0 ✅ · Gate 1 ✅ · Gate 2 ✅ · Gate 3 ✅ (results frozen — Phase 5 full matrix). **Phase 6 (E18–E22) COMPLETE** — all P0/P1 pilots done.
 
 ## Gate status
 
@@ -17,6 +17,16 @@
 | Gate 1 | B2 reimpl validated (coverage reported) | ✅ 2026-09-16 | `03_b2_toolgate.md` (E7) |
 | Gate 2 | Gate integrated; unit tests green; p95 latency measured | ✅ 2026-09-16 | `04_gate2_gated_eval.md` (E8–E10) |
 | Gate 3 | Full-suite results freeze | ✅ 2026-10-12 | `05_phase5_full_evaluation.md` (E11–E17) |
+
+## Phase 6 status (preliminary, never rewrites E11–E17)
+
+| Experiment | Description | Result | Report |
+|---|---|---|---|
+| E18 | Second-backbone pilot (Qwen3.5:4b + gpt-6-luna) | Qwen 27.1%→2.1% ASR; Luna prose-only (excluded) | `06_phase6_pilots.md#e18` |
+| E19 | B2 coverage curve (65→583 contracts) | 37.2%→84.9% weighted; curve flat | `06_phase6_pilots.md#e19` |
+| E20 | Intent-mimicry probe (13 residuals) | Avg S inflation +0.0112; 0/13 cross τ | `06_phase6_pilots.md#e20` |
+| E21 | Escalate precision (583 calls, hand-labeled) | 80.5% precision; 14.8% false-escalate | `06_phase6_pilots.md#e21` |
+| E22 | Power analysis + Bonferroni + per-specificity FPR | Power=1.0 at α=0.005; FPR specific 12.8% | `06_phase6_pilots.md#e22` |
 
 ## Experiment index
 
@@ -39,9 +49,15 @@
 | E15 | Breakdowns + stratification + coverage | per risk/tool/split | CredLeak 0.130 → 0.017; FPR via valid-rate parity | [05](05_phase5_full_evaluation.md#e15--breakdowns-stratification-coverage) |
 | E16 | Full-scale error taxonomy | 13 InjecAgent + MCPTox residuals | all rule=1.0, S just above τ (near-miss reads) | [05](05_phase5_full_evaluation.md#e16--error-taxonomy-residual-failures-with-score-evidence) |
 | E17 | Latency / utility / cost | per-call traces + usage | p95 16–20 ms; $11.46 list / $9.64 billed | [05](05_phase5_full_evaluation.md#e17--latency-utility-cost) |
+| E18 | **Phase 6: Second-backbone pilot** | Qwen3.5:4b (100) + gpt-6-luna (20) | Qwen 27.1%→2.1%; Luna excluded (prose-only) | [06](06_phase6_pilots.md#e18) |
+| E19 | **Phase 6: B2 coverage curve** | 65→583 MCPTox contracts | 37.2%→84.9% weighted; flat curve | [06](06_phase6_pilots.md#e19) |
+| E20 | **Phase 6: Intent-mimicry probe** | 13 residuals × 3 variants | Avg ΔS +0.0112; 0/13 cross τ | [06](06_phase6_pilots.md#e20) |
+| E21 | **Phase 6: Escalate precision** | 583 escalated calls (hand-labeled) | 80.5% precision; 14.8% false-escalate | [06](06_phase6_pilots.md#e21) |
+| E22 | **Phase 6: Power + Bonferroni + FPR** | n=2,108 / 1,348 | Power=1.0 at α=0.005; FPR specific 12.8% | [06](06_phase6_pilots.md#e22) |
 
 Status legend: E1–E10 were development-set evidence; **E11–E17 are the frozen full-suite
-results**. Phase 6 adds preliminary pilots (E18+), never rewrites E11–E17.
+results** (Gate 3, 2026-10-12). **E18–E22 are Phase 6 preliminary pilots** (2026-10-13, never
+rewrite E11–E17).
 
 ## Datasets & versions
 

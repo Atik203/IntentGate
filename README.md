@@ -172,4 +172,4 @@ Full reviews: [`literature_review/papers/`](literature_review/papers/)
 
 ---
 
-_Last updated: 2026-09-16 — blueprint is the single source of truth, roadmap.md tracks status._
+_Last updated: 2026-10-13 — blueprint is the single source of truth, roadmap.md tracks status. Phase 6 (E18–E22) complete._

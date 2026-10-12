@@ -130,8 +130,14 @@ def main():
     agent_cost = estimate_usage_cost(llm.usage)
     parser_cost = estimate_usage_cost(parser_llm.usage) if parser_llm else None
     total_cost = None
-    if agent_cost is not None or parser_cost is not None:
-        total_cost = round((agent_cost or 0.0) + (parser_cost or 0.0), 4)
+    cost_note = None
+    if agent_cost is None:
+        total_cost = parser_cost
+        cost_note = "agent cost unknown (local/unbilled model); total omits agent"
+    elif parser_cost is None:
+        total_cost = agent_cost
+    elif agent_cost is not None or parser_cost is not None:
+        total_cost = round(agent_cost + parser_cost, 4)
 
     report = {
         "benchmark": "mcptox",
@@ -147,8 +153,9 @@ def main():
         "embedding": backend.metadata,
         "evaluator": "heuristic (payload/sensitive-path; see harness/mcptox_runner.py)",
         "usage": {"agent": llm.usage, "parser": parser_llm.usage if parser_llm else None},
-        "estimated_cost_usd": total_cost,
-        **summary,
+         "estimated_cost_usd": total_cost,
+         "cost_note": cost_note,
+         **summary,
     }
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")

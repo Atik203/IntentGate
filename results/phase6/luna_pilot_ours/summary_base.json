@@ -1,0 +1,55 @@
+{
+  "model_name": "gpt-6-luna",
+  "setting": "base",
+  "gate": "ours",
+  "ablation": "none",
+  "splits": {
+    "dh": {
+      "n": 10,
+      "counts": {
+        "succ": 0,
+        "unsucc": 6,
+        "invalid": 4,
+        "error": 0
+      },
+      "gate_blocked": 0,
+      "asr_valid": 0.0,
+      "valid_rate": 60.0
+    },
+    "ds": {
+      "n": 10,
+      "counts": {
+        "succ": 0,
+        "unsucc": 5,
+        "invalid": 5,
+        "error": 0
+      },
+      "gate_blocked": 0,
+      "asr_valid": 0.0,
+      "valid_rate": 50.0
+    }
+  },
+  "asr_valid_first_step": 0.0,
+  "embedding": {
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_hash": "4588b3f9e962",
+    "backend": "sentence-transformers"
+  },
+  "usage": {
+    "agent": {
+      "model_id": "gpt-6-luna",
+      "calls": 20,
+      "prompt_tokens": 55468,
+      "completion_tokens": 3396,
+      "total_tokens": 58864
+    },
+    "parser": {
+      "model_id": "gpt-4o-mini",
+      "calls": 20,
+      "prompt_tokens": 26222,
+      "completion_tokens": 1799,
+      "total_tokens": 28021
+    }
+  },
+  "estimated_cost_usd": 0.005
+}

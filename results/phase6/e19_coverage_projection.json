@@ -1,0 +1,597 @@
+{
+  "current": {
+    "distinct_tools": 801,
+    "contracted_tools": 65,
+    "distinct_coverage_pct": 0.0811,
+    "availability_weighted_pct": 0.3719,
+    "total_availability_slots": 16485
+  },
+  "targets": {
+    "coverage_40": {
+      "tools_to_add": 8,
+      "projected_weighted_pct": 0.4,
+      "tool_names": [
+        "lol-champion-meta-data",
+        "valorant-meta-characters",
+        "lol-champion-analysis",
+        "valorant-agents-composition-with-map",
+        "lol-summoner-renewal",
+        "esports-lol-schedules",
+        "tft-champion-item-build",
+        "valorant-meta-maps"
+      ]
+    },
+    "coverage_50": {
+      "tools_to_add": 39,
+      "projected_weighted_pct": 0.5012,
+      "tool_names": [
+        "lol-champion-meta-data",
+        "valorant-meta-characters",
+        "lol-champion-analysis",
+        "valorant-agents-composition-with-map",
+        "lol-summoner-renewal",
+        "esports-lol-schedules",
+        "tft-champion-item-build",
+        "valorant-meta-maps",
+        "tft-play-style-comment",
+        "lol-champion-positions-data",
+        "valorant-characters-statistics",
+        "lol-champion-skin-sale",
+        "lol-summoner-game-history",
+        "tft-meta-trend-deck-list",
+        "valorant-leaderboard",
+        "lol-summoner-search",
+        "tft-meta-item-combinations",
+        "lol-champion-leader-board",
+        "esports-lol-team-standings",
+        "tft-recommend-champion-for-item",
+        "list_commits",
+        "list_issues",
+        "add_issue_comment",
+        "list_pull_requests",
+        "get_issue",
+        "create_pull_request",
+        "search_issues",
+        "update_issue",
+        "create_pull_request_review",
+        "get_pull_request",
+        "search_users",
+        "update_categories",
+        "list_categories",
+        "puppeteer_select",
+        "puppeteer_hover",
+        "puppeteer_navigate",
+        "puppeteer_click",
+        "puppeteer_fill",
+        "puppeteer_screenshot"
+      ]
+    },
+    "coverage_60": {
+      "tools_to_add": 76,
+      "projected_weighted_pct": 0.6012,
+      "tool_names": [
+        "lol-champion-meta-data",
+        "valorant-meta-characters",
+        "lol-champion-analysis",
+        "valorant-agents-composition-with-map",
+        "lol-summoner-renewal",
+        "esports-lol-schedules",
+        "tft-champion-item-build",
+        "valorant-meta-maps",
+        "tft-play-style-comment",
+        "lol-champion-positions-data",
+        "valorant-characters-statistics",
+        "lol-champion-skin-sale",
+        "lol-summoner-game-history",
+        "tft-meta-trend-deck-list",
+        "valorant-leaderboard",
+        "lol-summoner-search",
+        "tft-meta-item-combinations",
+        "lol-champion-leader-board",
+        "esports-lol-team-standings",
+        "tft-recommend-champion-for-item",
+        "list_commits",
+        "list_issues",
+        "add_issue_comment",
+        "list_pull_requests",
+        "get_issue",
+        "create_pull_request",
+        "search_issues",
+        "update_issue",
+        "create_pull_request_review",
+        "get_pull_request",
+        "search_users",
+        "update_categories",
+        "list_categories",
+        "puppeteer_select",
+        "puppeteer_hover",
+        "puppeteer_navigate",
+        "puppeteer_click",
+        "puppeteer_fill",
+        "puppeteer_screenshot",
+        "symbol_search",
+        "top_gainers_losers",
+        "time_series_monthly_adjusted",
+        "analytics_fixed_window",
+        "insider_transactions",
+        "realtime_bulk_quotes",
+        "analytics_sliding_window",
+        "time_series_daily_adjusted",
+        "market_status",
+        "historical_options",
+        "stock_quote",
+        "time_series_weekly",
+        "realtime_options",
+        "etf_profile",
+        "time_series_intraday",
+        "time_series_daily",
+        "company_overview",
+        "time_series_weekly_adjusted",
+        "time_series_monthly",
+        "search",
+        "open_nodes",
+        "create_entities",
+        "delete_relations",
+        "add_observations",
+        "read_graph",
+        "delete_entities",
+        "delete_observations",
+        "create_relations",
+        "get-actor-run-list",
+        "get-key-value-store-list",
+        "apify-actor-help-tool",
+        "abort-actor-run",
+        "search-actors",
+        "get-key-value-store-record",
+        "get-actor-run",
+        "get-dataset-items",
+        "get-actor"
+      ]
+    },
+    "coverage_70": {
+      "tools_to_add": 117,
+      "projected_weighted_pct": 0.7006,
+      "tool_names": [
+        "lol-champion-meta-data",
+        "valorant-meta-characters",
+        "lol-champion-analysis",
+        "valorant-agents-composition-with-map",
+        "lol-summoner-renewal",
+        "esports-lol-schedules",
+        "tft-champion-item-build",
+        "valorant-meta-maps",
+        "tft-play-style-comment",
+        "lol-champion-positions-data",
+        "valorant-characters-statistics",
+        "lol-champion-skin-sale",
+        "lol-summoner-game-history",
+        "tft-meta-trend-deck-list",
+        "valorant-leaderboard",
+        "lol-summoner-search",
+        "tft-meta-item-combinations",
+        "lol-champion-leader-board",
+        "esports-lol-team-standings",
+        "tft-recommend-champion-for-item",
+        "list_commits",
+        "list_issues",
+        "add_issue_comment",
+        "list_pull_requests",
+        "get_issue",
+        "create_pull_request",
+        "search_issues",
+        "update_issue",
+        "create_pull_request_review",
+        "get_pull_request",
+        "search_users",
+        "update_categories",
+        "list_categories",
+        "puppeteer_select",
+        "puppeteer_hover",
+        "puppeteer_navigate",
+        "puppeteer_click",
+        "puppeteer_fill",
+        "puppeteer_screenshot",
+        "symbol_search",
+        "top_gainers_losers",
+        "time_series_monthly_adjusted",
+        "analytics_fixed_window",
+        "insider_transactions",
+        "realtime_bulk_quotes",
+        "analytics_sliding_window",
+        "time_series_daily_adjusted",
+        "market_status",
+        "historical_options",
+        "stock_quote",
+        "time_series_weekly",
+        "realtime_options",
+        "etf_profile",
+        "time_series_intraday",
+        "time_series_daily",
+        "company_overview",
+        "time_series_weekly_adjusted",
+        "time_series_monthly",
+        "search",
+        "open_nodes",
+        "create_entities",
+        "delete_relations",
+        "add_observations",
+        "read_graph",
+        "delete_entities",
+        "delete_observations",
+        "create_relations",
+        "get-actor-run-list",
+        "get-key-value-store-list",
+        "apify-actor-help-tool",
+        "abort-actor-run",
+        "search-actors",
+        "get-key-value-store-record",
+        "get-actor-run",
+        "get-dataset-items",
+        "get-actor",
+        "get-key-value-store-keys",
+        "get-dataset-list",
+        "get-dataset",
+        "get-actor-details",
+        "apify-slash-rag-web-browser",
+        "get-actor-log",
+        "get-key-value-store",
+        "slack_reply_to_thread",
+        "slack_get_users",
+        "slack_add_reaction",
+        "slack_post_message",
+        "slack_get_channel_history",
+        "slack_get_user_profile",
+        "slack_get_thread_replies",
+        "slack_list_channels",
+        "put_apps_clientId_webhooks_digest",
+        "get_customers",
+        "post_customers",
+        "get_customers_id_directdebitmandates",
+        "put_customers_directdebitmandates_id_cancel",
+        "put_schedules_messages",
+        "put_schedules_templates_settings",
+        "put_customers",
+        "delete_apps_clientId_webhooks_webhookId",
+        "put_invoices_id_void",
+        "put_schedules_templates",
+        "get_apps_clientId_webhooks_webhookId",
+        "put_schedules",
+        "get_schedules_templates",
+        "put_apps_clientId_webhooks_webhookId",
+        "upload_invoice_to_adfin",
+        "put_invoices_id_mark_as_paid",
+        "put_customers_id_directdebitmandates",
+        "put_invoices_id_activate",
+        "get_schedules_templates_settings",
+        "extract-video",
+        "convert-to-pdf",
+        "trim-video",
+        "crawl",
+        "extract-audio",
+        "merge-pdfs"
+      ]
+    }
+  },
+  "top_uncontracted": [
+    {
+      "tool": "lol-champion-meta-data",
+      "availability": 58
+    },
+    {
+      "tool": "valorant-meta-characters",
+      "availability": 58
+    },
+    {
+      "tool": "lol-champion-analysis",
+      "availability": 58
+    },
+    {
+      "tool": "valorant-agents-composition-with-map",
+      "availability": 58
+    },
+    {
+      "tool": "lol-summoner-renewal",
+      "availability": 58
+    },
+    {
+      "tool": "esports-lol-schedules",
+      "availability": 58
+    },
+    {
+      "tool": "tft-champion-item-build",
+      "availability": 58
+    },
+    {
+      "tool": "valorant-meta-maps",
+      "availability": 58
+    },
+    {
+      "tool": "tft-play-style-comment",
+      "availability": 58
+    },
+    {
+      "tool": "lol-champion-positions-data",
+      "availability": 58
+    },
+    {
+      "tool": "valorant-characters-statistics",
+      "availability": 58
+    },
+    {
+      "tool": "lol-champion-skin-sale",
+      "availability": 58
+    },
+    {
+      "tool": "lol-summoner-game-history",
+      "availability": 58
+    },
+    {
+      "tool": "tft-meta-trend-deck-list",
+      "availability": 58
+    },
+    {
+      "tool": "valorant-leaderboard",
+      "availability": 58
+    },
+    {
+      "tool": "lol-summoner-search",
+      "availability": 58
+    },
+    {
+      "tool": "tft-meta-item-combinations",
+      "availability": 58
+    },
+    {
+      "tool": "lol-champion-leader-board",
+      "availability": 58
+    },
+    {
+      "tool": "esports-lol-team-standings",
+      "availability": 58
+    },
+    {
+      "tool": "tft-recommend-champion-for-item",
+      "availability": 58
+    },
+    {
+      "tool": "list_commits",
+      "availability": 53
+    },
+    {
+      "tool": "list_issues",
+      "availability": 53
+    },
+    {
+      "tool": "add_issue_comment",
+      "availability": 53
+    },
+    {
+      "tool": "list_pull_requests",
+      "availability": 53
+    },
+    {
+      "tool": "get_issue",
+      "availability": 53
+    },
+    {
+      "tool": "create_pull_request",
+      "availability": 53
+    },
+    {
+      "tool": "search_issues",
+      "availability": 53
+    },
+    {
+      "tool": "update_issue",
+      "availability": 53
+    },
+    {
+      "tool": "create_pull_request_review",
+      "availability": 53
+    },
+    {
+      "tool": "get_pull_request",
+      "availability": 53
+    },
+    {
+      "tool": "search_users",
+      "availability": 53
+    },
+    {
+      "tool": "update_categories",
+      "availability": 51
+    },
+    {
+      "tool": "list_categories",
+      "availability": 51
+    },
+    {
+      "tool": "puppeteer_select",
+      "availability": 48
+    },
+    {
+      "tool": "puppeteer_hover",
+      "availability": 48
+    },
+    {
+      "tool": "puppeteer_navigate",
+      "availability": 48
+    },
+    {
+      "tool": "puppeteer_click",
+      "availability": 48
+    },
+    {
+      "tool": "puppeteer_fill",
+      "availability": 48
+    },
+    {
+      "tool": "puppeteer_screenshot",
+      "availability": 48
+    },
+    {
+      "tool": "symbol_search",
+      "availability": 45
+    },
+    {
+      "tool": "top_gainers_losers",
+      "availability": 45
+    },
+    {
+      "tool": "time_series_monthly_adjusted",
+      "availability": 45
+    },
+    {
+      "tool": "analytics_fixed_window",
+      "availability": 45
+    },
+    {
+      "tool": "insider_transactions",
+      "availability": 45
+    },
+    {
+      "tool": "realtime_bulk_quotes",
+      "availability": 45
+    },
+    {
+      "tool": "analytics_sliding_window",
+      "availability": 45
+    },
+    {
+      "tool": "time_series_daily_adjusted",
+      "availability": 45
+    },
+    {
+      "tool": "market_status",
+      "availability": 45
+    },
+    {
+      "tool": "historical_options",
+      "availability": 45
+    },
+    {
+      "tool": "stock_quote",
+      "availability": 45
+    },
+    {
+      "tool": "time_series_weekly",
+      "availability": 45
+    },
+    {
+      "tool": "realtime_options",
+      "availability": 45
+    },
+    {
+      "tool": "etf_profile",
+      "availability": 45
+    },
+    {
+      "tool": "time_series_intraday",
+      "availability": 45
+    },
+    {
+      "tool": "time_series_daily",
+      "availability": 45
+    },
+    {
+      "tool": "company_overview",
+      "availability": 45
+    },
+    {
+      "tool": "time_series_weekly_adjusted",
+      "availability": 45
+    },
+    {
+      "tool": "time_series_monthly",
+      "availability": 45
+    },
+    {
+      "tool": "search",
+      "availability": 44
+    },
+    {
+      "tool": "open_nodes",
+      "availability": 44
+    },
+    {
+      "tool": "create_entities",
+      "availability": 44
+    },
+    {
+      "tool": "delete_relations",
+      "availability": 44
+    },
+    {
+      "tool": "add_observations",
+      "availability": 44
+    },
+    {
+      "tool": "read_graph",
+      "availability": 44
+    },
+    {
+      "tool": "delete_entities",
+      "availability": 44
+    },
+    {
+      "tool": "delete_observations",
+      "availability": 44
+    },
+    {
+      "tool": "create_relations",
+      "availability": 44
+    },
+    {
+      "tool": "get-actor-run-list",
+      "availability": 44
+    },
+    {
+      "tool": "get-key-value-store-list",
+      "availability": 44
+    },
+    {
+      "tool": "apify-actor-help-tool",
+      "availability": 44
+    },
+    {
+      "tool": "abort-actor-run",
+      "availability": 44
+    },
+    {
+      "tool": "search-actors",
+      "availability": 44
+    },
+    {
+      "tool": "get-key-value-store-record",
+      "availability": 44
+    },
+    {
+      "tool": "get-actor-run",
+      "availability": 44
+    },
+    {
+      "tool": "get-dataset-items",
+      "availability": 44
+    },
+    {
+      "tool": "get-actor",
+      "availability": 44
+    },
+    {
+      "tool": "get-key-value-store-keys",
+      "availability": 44
+    },
+    {
+      "tool": "get-dataset-list",
+      "availability": 44
+    },
+    {
+      "tool": "get-dataset",
+      "availability": 44
+    },
+    {
+      "tool": "get-actor-details",
+      "availability": 44
+    }
+  ]
+}

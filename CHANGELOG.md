@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Phase 6 P0-1 Qwen pilot support:** `reasoning_effort` on `LLMClient` + `--agent-reasoning-effort` (CLI > `AGENT_REASONING_EFFORT`) across all four runners — Qwen3.5 thinking models return empty `content` on the OpenAI-compatible endpoint without it (use `--agent-reasoning-effort none`); 6 tests.
 - **Phase 6 P0-1 endpoint wiring:** `--agent-base-url` / `--parser-base-url` (+ `--agent-api-key` / `--parser-api-key`) on both harness runners and the `run_*_ours.py` pilots; CLI > env (`AGENT_BASE_URL`→legacy `QWEN_BASE_URL` for agent, `PARSER_BASE_URL` for parser — parser stays on default unless overridden); base URLs logged in trace/report metadata (keys never logged). `.env.example` documents all six vars; local `.env` gained empty placeholders. 7 tests (`tests/test_runner_endpoints.py`).
-- **Gate 3 freeze (E11–E17, `docs/experiments/05_phase5_full_evaluation.md`):** 30-job frozen matrix (20,736 cases, τ=0.75) — InjecAgent 19.0%→0.7%, MCPTox 279→144; B2 ≈ B1 (n.s.) vs ours p<1e-6; p95 16–20 ms; $11.46 list / $9.64 billed.
+- **Phase 6 E18 second-backbone pilot:** Qwen3.5:4b + gpt-6-luna pilots on 200+20 cases — Qwen ASR 27.1%→2.1%, Luna 70%→45% invalid. Parser calls asserted > 0. `docs/experiments/06_phase6_pilots.md`.
+- **Phase 6 E19 B2 coverage curve:** Extended MCPTox contracts 65→583 (8.1%→84.9% weighted); offline projection + 200-case re-run confirm flat coverage-vs-ASR curve. Structural weakness, not coverage-limited.
+- **Phase 6 E20 intent-mimicry probe:** 13 residual near-miss cases + 3 mimicry variants each; avg S inflation +0.0112, 0/13 cross τ=0.75. `scripts/e20_intent_mimicry.py`.
+- **Phase 6 E21 escalate precision:** Ground-truth classification of 583 escalated calls from Phase 5 traces; 80.5% precision, 14.8% false-escalate rate. `scripts/e21_escalate_precision.py`.
+- **Phase 6 E22 stats discipline:** `power_analysis()`, `bonferroni_alpha()`, `per_specificity_fpr()` added to `src/intent_gate/eval/stats.py`; post-hoc power = 1.0 at α=0.005 for both benchmarks; 10-risk Bonferroni survives. 7 new tests.
+- **Phase 6 documentation:** `docs/experiments/06_phase6_pilots.md` (E18–E22, full template).
+- **Phase 5 Gate 3 freeze (E11–E17, `docs/experiments/05_phase5_full_evaluation.md`):** 30-job frozen matrix (20,736 cases, τ=0.75) — InjecAgent 19.0%→0.7%, MCPTox 279→144; B2 ≈ B1 (n.s.) vs ours p<1e-6; p95 16–20 ms; $11.46 list / $9.64 billed.
 - **Phase 5 run infrastructure:** case-level `--resume` (7 tests), live `tqdm` bar over flushed JSONLs (`mininterval=30`), `--max-calls` 30k→40k, freeze-integrity guard against matrix/limit/settings drift (5 tests); `tqdm` declared in deps.
 - **Benchmark bootstrap rewrite:** `clone_benchmarks.ps1` as pinned verify-and-repair from `configs/benchmark_versions.yaml` (`-VerifyOnly`/`-Force`/`-Only`); `data/README.md` as teammate entry point.
 - **Tracked-`results/` hygiene:** `AGENTS.md`/`CONTRIBUTING.md` state the real rules; `.gitignore` += `*.egg-info/`, `node_modules/`, `config.bat`; egg-info untracked; MCPTox count corrected to 801 registered.
@@ -35,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TraceLogger` default path moved out of the repo (`<tmp>/intent_gate/gate_trace.jsonl`) so bare/default gate instances (tests, `build_policy_factory` without a trace) no longer append to the tracked `results/gate_trace.jsonl`; 1 test.
 - B2 fidelity: real Hoare pre/postconditions keyed by harness tool names, world-state rollback, coverage vs evaluated universe (`b2_coverage.json`); `no_contract_tools` tracked.
 - Rule-engine FP fixes from the Gate 0 pilot (CamelCase action keywords, read/search-mail + shared-calendar vetoes, `_limit_allows` word boundaries).
+- `count_messages` contract added to MCPTox contracts; 2 tests updated to use `nonexistent_tool_xyz` instead of `count_messages` as the no-contract fixture (197 tests green).
 - Untracked `src/intent_gate.egg-info/` (now gitignored); `literature_review.md` path corrections.
 
 ### Gate 0 (2026-09-11) — GO
