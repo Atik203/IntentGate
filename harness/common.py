@@ -49,6 +49,12 @@ def add_endpoint_args(ap):
     ap.add_argument("--parser-base-url", default=None, help="parser LLM base_url (else PARSER_BASE_URL)")
     ap.add_argument("--agent-api-key", default=None, help="agent LLM api key (else AGENT_API_KEY/QWEN_API_KEY)")
     ap.add_argument("--parser-api-key", default=None, help="parser LLM api key (else PARSER_API_KEY)")
+    ap.add_argument(
+        "--agent-reasoning-effort",
+        default=None,
+        help="agent LLM reasoning_effort (e.g. 'none' disables Qwen thinking on Ollama); "
+        "else AGENT_REASONING_EFFORT",
+    )
     return ap
 
 
@@ -79,3 +85,16 @@ def resolve_api_key(cli_value: str | None, role: str) -> str | None:
     if role == "agent":
         return _first_env("AGENT_API_KEY", "QWEN_API_KEY")
     return _first_env("PARSER_API_KEY")
+
+
+def resolve_reasoning_effort(cli_value: str | None, role: str) -> str | None:
+    """Agent reasoning-effort override (CLI > env); unset keeps provider default.
+
+    Used to disable Qwen "thinking" on local Ollama (`reasoning_effort=none`), which
+    otherwise returns empty `content` and breaks tool-call parsing.
+    """
+    if cli_value:
+        return cli_value
+    if role == "agent":
+        return _first_env("AGENT_REASONING_EFFORT")
+    return _first_env("PARSER_REASONING_EFFORT")
