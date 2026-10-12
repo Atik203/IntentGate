@@ -1,0 +1,23 @@
+{
+  "benchmark": "injecagent",
+  "cases": "data/raw/InjecAgent/data/test_cases_dh_base.json",
+  "model_id": "gpt-4o-mini",
+  "gate": "toolgate",
+  "tau": 0.6,
+  "delta": 0.1,
+  "embedding": {
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_hash": "fea010037875",
+    "backend": "sentence-transformers"
+  },
+  "n": 100,
+  "counts": {
+    "succ": 6,
+    "unsucc": 79,
+    "invalid": 15,
+    "error": 0
+  },
+  "gate_blocked": 1,
+  "asr_valid": 7.1,
+  "valid_rate": 85.0
+}
