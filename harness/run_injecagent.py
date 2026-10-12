@@ -1,7 +1,7 @@
 """Run a gated condition (none / ours / toolgate) on one InjecAgent case file (blueprint Sec 6/13).
 
 Usage: python harness/run_injecagent.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json \
-  --gate ours --threshold 0.6 --report results/injecagent.json
+  --gate ours --threshold 0.75 --report results/injecagent.json
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def main():
         choices=["none", "semantic-only", "rule-only", "raw-request"],
         default="none",
     )
-    ap.add_argument("--threshold", type=float, default=0.6)
+    ap.add_argument("--threshold", type=float, default=0.75)
     ap.add_argument("--delta", type=float, default=0.1)
     ap.add_argument("--alpha", type=float, default=0.7)
     ap.add_argument("--limit", type=int, default=None)
@@ -34,7 +34,11 @@ def main():
     from harness.common import add_endpoint_args
 
     add_endpoint_args(ap)
-    ap.add_argument("--report", default="results/injecagent.json")
+    ap.add_argument(
+        "--report",
+        required=True,
+        help="report JSON path (required so a run can never clobber a tracked baseline path)",
+    )
     ap.add_argument("--jsonl", default="")
     ap.add_argument("--trace", default="")
     ap.add_argument(
@@ -65,18 +69,24 @@ def main():
     tool_dict = build_tool_dict(
         load_tool_definitions(ROOT / "data/raw/InjecAgent/data/tools.json")
     )
-    from harness.common import resolve_api_key, resolve_base_url
+    from harness.common import resolve_api_key, resolve_base_url, resolve_reasoning_effort
 
     agent_base_url = resolve_base_url(args.agent_base_url, "agent")
     parser_base_url = resolve_base_url(args.parser_base_url, "parser")
     agent_api_key = resolve_api_key(args.agent_api_key, "agent")
     parser_api_key = resolve_api_key(args.parser_api_key, "parser")
-    llm = LLMClient(model_id=model_name, base_url=agent_base_url, api_key=agent_api_key)
+    llm = LLMClient(
+        model_id=model_name,
+        base_url=agent_base_url,
+        api_key=agent_api_key,
+        reasoning_effort=resolve_reasoning_effort(args.agent_reasoning_effort, "agent"),
+    )
     parser_llm = (
         LLMClient(
             model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini"),
             base_url=parser_base_url,
             api_key=parser_api_key,
+            reasoning_effort=resolve_reasoning_effort(None, "parser"),
         )
         if args.gate == "ours"
         else None

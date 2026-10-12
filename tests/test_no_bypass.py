@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from intent_gate.gate.middleware import GateMiddleware
 from intent_gate.gate.trace import TraceLogger
@@ -130,3 +131,11 @@ def test_trace_logger_append_false_truncates(tmp_path):
     second.close()
     lines = path.read_text(encoding="utf-8").strip().splitlines()
     assert len(lines) == 1
+
+
+def test_trace_logger_default_path_is_outside_repo():
+    root = Path(__file__).resolve().parents[1]
+    logger = TraceLogger()
+    logger.close()
+    assert logger.path.name == "gate_trace.jsonl"
+    assert not logger.path.resolve().is_relative_to(root.resolve())

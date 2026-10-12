@@ -125,9 +125,9 @@ target). Default `τ = 0.75` set in `configs/thresholds.yaml` (full sweep in E9)
 # E1 (authors' harness; needs the gitignored clone)
 python scripts/run_injecagent_reference.py --per-split 10 --setting base
 # E2 (our B1 pipeline; needs OPENAI_API_KEY in .env)
-python scripts/run_injecagent_ours.py --per-split 10 --setting base
+python scripts/run_injecagent_ours.py --per-split 10 --setting base --out results/injecagent_ours
 # E3 (MCPTox snapshot)
-python scripts/run_mcptox_ours.py --limit 20
+python scripts/run_mcptox_ours.py --limit 20 --out results/mcptox_ours
 # E4 (pilot; offline-safe after build)
 python scripts/build_pilot_set.py
 python scripts/pilot_score_dist.py

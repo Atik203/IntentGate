@@ -37,6 +37,9 @@ where = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 
+[tool.pyright]
+extraPaths = ["."]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

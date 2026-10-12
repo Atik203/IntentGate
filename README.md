@@ -121,7 +121,7 @@ git clone https://github.com/ethz-spylab/agentdojo       # stretch
 pip install -e .  # pip wrapper around agent tool executor
 
 # 3. Run evaluation (Weeks 9–12)
-python harness/run_injecagent.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --gate ours --threshold 0.6
+python harness/run_injecagent.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --gate ours --threshold 0.6 --report results/injecagent.json
 python harness/run_mcptox.py --gate ours --snapshot v1 --report results/mcptox.json
 python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --report results/comparison.json
 ```

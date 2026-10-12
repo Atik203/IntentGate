@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import time
 from pathlib import Path
 
@@ -11,11 +12,15 @@ from intent_gate.types import GateResult, ToolCall
 class TraceLogger:
     def __init__(
         self,
-        path: str | Path = "results/gate_trace.jsonl",
+        path: str | Path | None = None,
         metadata: dict | None = None,
         append: bool = True,
     ):
-        self.path = Path(path)
+        self.path = (
+            Path(path)
+            if path is not None
+            else Path(tempfile.gettempdir()) / "intent_gate" / "gate_trace.jsonl"
+        )
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.metadata = dict(metadata or {})
         self._fh = self.path.open("a" if append else "w", encoding="utf-8")
