@@ -142,13 +142,24 @@ backbones and compare ASR *deltas*, never absolutes.
       `harness/run_mcptox.py` (+ `--agent-api-key` / `--parser-api-key`, same flags on the
       `run_*_ours.py` pilots; `LLMClient` already accepts `base_url`; env fallback
       `AGENT_BASE_URL`→legacy `QWEN_BASE_URL` for agent, `PARSER_BASE_URL` for parser) + tests
-      (`tests/test_runner_endpoints.py`, 7 tests)
-- [ ] Pull `qwen3.5:4b` (**not** `:latest` — 6.6–7.6 GB won't fit 6 GB VRAM); set Ollama
+      (`tests/test_runner_endpoints.py`, 7 tests). Extras landed with the pilot:
+      `--agent-reasoning-effort` (Qwen3.5 thinking models return empty `content` on the
+      OpenAI-compatible endpoint without `reasoning_effort=none`), `--out`/`--report` made
+      **required** (a run can no longer default onto a tracked baseline path), `TraceLogger`
+      default moved out of the repo, `LLMClient` auto-omits unsupported `temperature`
+      (`gpt-6-luna`). 190 tests green
+- [~] Pull `qwen3.5:4b` (**not** `:latest` — 6.6–7.6 GB won't fit 6 GB VRAM); set Ollama
       `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
-      verify served ctx via `ollama show`; keep MiniLM embeddings on CPU
-- [ ] Smoke: 5-case B1 + ours on Qwen (parser stays `gpt-4o-mini`) — confirm `invalid` rate sane
-- [ ] Pilot: ~200-case B1 + ours on Qwen via `--agent-base-url localhost:11434/v1` (free, overnight)
-- [ ] Luna arm: same ~200 cases via `--model-name gpt-6-luna` (~$0.50)
+      verify served ctx via `ollama show`; keep MiniLM embeddings on CPU. *(pulled on the dev
+      box; `num_ctx` still to set on the GPU box)*
+- [~] Smoke on Qwen: dh 0/3, ds 2/3 (B1) → ours τ=0.75 blocks both (ds 0/3). **Must re-run**:
+      parser silently fell back to `heuristic` (stale `OPENAI_API_KEY`, 401), so the smoke is
+      not the gpt-4o-mini-parser condition — assert `usage.parser.calls > 0` when re-running
+- [~] Pilot: ~200-case B1 + ours infra ready; local CPU trial stopped (~2.6 min/case → ~4 h/arm)
+      — to run on the GPU box via `--agent-base-url localhost:11434/v1` (free, overnight)
+- [~] Luna arm: `gpt-6-luna` temperature blocker fixed + validated (runs clean), but ~60%
+      `invalid` on a 10-case smoke (Luna answers in prose, no ReAct `Thought:/Final Answer:`) —
+      prompt-vs-parser-leniency decision pending
 - [ ] Write up delta comparison → E18 (`docs/experiments/06_phase6_pilots.md`)
 
 ### P0-2 — B2 coverage curve / E19 (strawman defense)
