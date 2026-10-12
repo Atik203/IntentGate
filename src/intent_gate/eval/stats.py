@@ -7,10 +7,66 @@ Phase 6 additions (P1 stats discipline):
 """
 from __future__ import annotations
 
-from math import comb, erfc, sqrt
+from math import comb, erfc, exp, log, sqrt
 
 import numpy as np
-from scipy import stats as scipy_stats
+
+
+def _normal_cdf(x: float) -> float:
+    """Standard normal CDF via error function (no scipy needed)."""
+    return 0.5 * (1.0 + _erf(x / sqrt(2.0)))
+
+
+def _erf(x: float) -> float:
+    """Error function via Abramowitz & Stegun approximation (7.1.26)."""
+    a1 = 0.254829592
+    a2 = -0.284496736
+    a3 = 1.421413741
+    a4 = -1.453152027
+    a5 = 1.061405429
+    p = 0.3275911
+    sign = 1.0 if x >= 0 else -1.0
+    x = abs(x)
+    t = 1.0 / (1.0 + p * x)
+    y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x)
+    return sign * y
+
+
+def _norm_ppf(p: float) -> float:
+    """Inverse normal CDF (percent point function) via rational approximation.
+
+    Acklam's algorithm — no scipy dependency. Accurate to ~1e-9.
+    """
+    if p <= 0.0:
+        return float("-inf")
+    if p >= 1.0:
+        return float("inf")
+    a = [-3.969683028665376e+01, 2.209460984245205e+02,
+         -2.759285104469687e+02, 1.383577518672690e+02,
+         -3.066479806614716e+01, 2.506628277459239e+00]
+    b = [-5.447609879822309e+01, 1.615858368580409e+02,
+         -1.556989798598866e+02, 6.680131188771972e+01,
+         -1.328068133141820e+01]
+    c = [-7.784894002430293e-03, -3.223964580411365e-01,
+         -2.400758277161838e+00, -2.549732539343734e+00,
+         4.374664141464968e+00, 2.938163982698783e+00]
+    d = [7.784695709041462e-03, 3.224671290700398e-01,
+         2.445134137142996e+00, 3.754470714500752e+00]
+    plow = 0.02425
+    phigh = 1 - plow
+    if p < plow:
+        q = sqrt(-2 * exp(p))
+        x_val = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+               ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    elif p <= phigh:
+        q = p - 0.5
+        r = q * q
+        x_val = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / \
+               (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
+    q = sqrt(-2 * log(1 - p))
+    x_val = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+           ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    return x_val
 
 
 def bootstrap_ci(
@@ -116,9 +172,9 @@ def power_analysis(n: int, p1: float, p2: float, alpha: float = 0.05) -> dict:
     if se == 0:
         return {"n": n, "p1": p1, "p2": p2, "delta": delta, "alpha": alpha,
                 "power": 1.0 if delta > 0 else 0.0, "sufficient_power": delta > 0}
-    z_alpha = scipy_stats.norm.ppf(1 - alpha / 2.0)
+    z_alpha = _norm_ppf(1 - alpha / 2.0)
     z_power = (delta / se) - z_alpha
-    power = float(scipy_stats.norm.cdf(z_power))
+    power = _normal_cdf(z_power)
     return {
         "n": n,
         "p1": p1,
