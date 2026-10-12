@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docs restructure: `blueprint.md`/`setup.md`/`references.bib` → `docs/`; 10 experiment notes merged into indexed reports (merge map in `docs/experiments/README.md`).
 
 ### Fixed
+- `LLMClient` auto-omits `temperature` when a model rejects `0.0` (e.g. `gpt-6-luna`, which only accepts its default temp=1), emitting a stderr warning; models that accept 0 are unchanged. 2 tests.
 - `TraceLogger` default path moved out of the repo (`<tmp>/intent_gate/gate_trace.jsonl`) so bare/default gate instances (tests, `build_policy_factory` without a trace) no longer append to the tracked `results/gate_trace.jsonl`; 1 test.
 - B2 fidelity: real Hoare pre/postconditions keyed by harness tool names, world-state rollback, coverage vs evaluated universe (`b2_coverage.json`); `no_contract_tools` tracked.
 - Rule-engine FP fixes from the Gate 0 pilot (CamelCase action keywords, read/search-mail + shared-calendar vetoes, `_limit_allows` word boundaries).
