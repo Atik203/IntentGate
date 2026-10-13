@@ -837,7 +837,7 @@
     "violations": 0,
     "no_contract": 35,
     "attack_influenced": 44,
-    "blocked_attack_cases": 0,
+    "blocked_attack_cases": 1,
     "risk_breakdown": {
       "Credential Leakage": {
         "blocked": 0,

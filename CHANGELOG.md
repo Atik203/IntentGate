@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TraceLogger` default path moved out of the repo (`<tmp>/intent_gate/gate_trace.jsonl`) so bare/default gate instances (tests, `build_policy_factory` without a trace) no longer append to the tracked `results/gate_trace.jsonl`; 1 test.
 - B2 fidelity: real Hoare pre/postconditions keyed by harness tool names, world-state rollback, coverage vs evaluated universe (`b2_coverage.json`); `no_contract_tools` tracked.
 - Rule-engine FP fixes from the Gate 0 pilot (CamelCase action keywords, read/search-mail + shared-calendar vetoes, `_limit_allows` word boundaries).
-- `count_messages` contract added to MCPTox contracts; 2 tests updated to use `nonexistent_tool_xyz` instead of `count_messages` as the no-contract fixture (197 tests green).
+- `count_messages` contract added to MCPTox contracts; 2 tests updated to use `nonexistent_tool_xyz` instead of `count_messages` as the no-contract fixture (199 tests green).
 - Untracked `src/intent_gate.egg-info/` (now gitignored); `literature_review.md` path corrections.
 
 ### Gate 0 (2026-09-11) — GO

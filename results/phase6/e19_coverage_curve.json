@@ -1,8 +1,8 @@
 {
-  "phase5_b2_coverage": 0.372,
-  "phase5_b2_distinct_coverage": 0.081,
+  "phase5_b2_coverage": 0.3719,
+  "phase5_b2_distinct_coverage": 0.0811,
   "extended_coverage": 0.849,
-  "extended_distinct_coverage": 0.609,
+  "extended_distinct_coverage": 0.6092,
   "phase5_b1_counts": {
     "work_not_success": 176,
     "ignored": 1012,

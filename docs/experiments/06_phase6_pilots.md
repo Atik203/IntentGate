@@ -9,10 +9,10 @@
 | E18 | Second-backbone pilot (model-agnosticism) | Validate ASR reduction on ≥2 backbones | Qwen: 27.1% → 2.1% ASR; Luna: 70% invalid (prose output); parser calls=100 ✓ | `results/phase6/{qwen,luna}_pilot_*` |
 | E19 | B2 coverage curve | Does extending contracts toward ~70% weighted coverage close the gap? | 84.9% coverage → projected ASR 67.9%; 200-case re-run: 2.2% block rate — curve is flat | `results/phase6/e19_coverage_curve.json` |
 | E20 | Intent-mimicry probe | Can attackers inflate S above τ by mimicking legitimate intent? | Avg S inflation +0.0112; 0/13 cases cross τ=0.75 with mimicry | `results/phase6/e20_mimicry.json` |
-| E21 | Escalate precision (hand-labeled) | What fraction of escalated calls are true attacks? | 80.5% precision (354 TP / 440 TP+FP); 14.8% false-escalate rate | `results/phase6/e21_escalate_precision.json` |
+| E21 | Escalate precision (ground-truth classification) | What fraction of escalated calls are true attacks? | 80.5% precision (354 TP / 440 TP+FP); 14.8% false-escalate rate | `results/phase6/e21_escalate_precision.json` |
 | E22 | Post-hoc power analysis + multiple-comparison correction | Is n sufficient; do 10-risk breakdowns survive correction? | Power = 1.0 at α=0.05 and α=0.005; 10-comparison Bonferroni → α=0.005 | `results/phase6/e14_power_analysis.json` |
 
-Pinned models: embeddings `sentence-transformers/all-MiniLM-L6-v2` (hash `4588b3f9e662`, CPU).
+Pinned models: embeddings `sentence-transformers/all-MiniLM-L6-v2` (hash `4588b3f9e962`, CPU).
 Benchmark pins: `configs/benchmark_versions.yaml` (InjecAgent `f19c9f2c`, MCPTox static snapshot).
 
 ---
@@ -24,12 +24,13 @@ backbones — the core claim that the gate is model-agnostic, not a property of 
 
 **Setup.** `scripts/run_injecagent_ours.py` with `--agent-base-url` + `--agent-api-key` (Phase 6
 P0-1 wiring in `harness/common.py`). Parser stays on the default endpoint (isolating the variable).
-`--gate none` (B1) and `--gate ours --tau 0.75` (gated) on 200 cases (50 dh + 50 ds × base).
+`--gate none` (B1) and `--gate ours --tau 0.75` (gated) on 100 cases per condition
+(50 dh + 50 ds, base setting; 200 runs total across both conditions).
 Qwen via Ollama local; Luna via OpenAI-compatible endpoint.
 
 | Backbone | Condition | Cases | Parser calls | ASR-valid (first step) | Gate-blocks | Invalid |
 |---|---|---|---|---|---|---|
-| gpt-4o-mini (Phaser 5 freeze) | B1 | 2,108 | 0 | 19.0% | — | — |
+| gpt-4o-mini (Phase 5 freeze) | B1 | 2,108 | 0 | 19.0% | — | — |
 | gpt-4o-mini | Ours | 2,108 | 8,432 | **0.7%** | 340 | — |
 | **qwen3.5:4b** (Ollama) | B1 | 100 | 0 | **27.1%** | — | 4 (4%) |
 | **qwen3.5:4b** | Ours (τ=0.75) | 100 | **100 ✓** | **2.1%** | 24 | 4 (4%) |
@@ -38,7 +39,7 @@ Qwen via Ollama local; Luna via OpenAI-compatible endpoint.
 
 ### Key observations
 
-1. **Qwen (local Ollama, CPU embeddings):** ASR 27.1% → 2.1% (92.7% relative reduction).
+1. **Qwen (local Ollama, CPU embeddings):** ASR 27.1% → 2.1% (92.3% relative reduction).
    Parser calls confirmed at 100 > 0. Gate blocked 24 attacks with **zero false positives** on
    legitimate calls (valid-rate 96% in both conditions — parity maintained).
 
@@ -122,11 +123,15 @@ The offline projection shows 184 of 271 attack cases (67.9%) would still pass th
 contracts' pre-conditions because **attack calls look like legitimate queries** — the attack is
 in the tool's *registration* (poisoned description), not in calling a wrong tool.
 
-The 200-case B2 re-run confirmed: only 1/45 attacks blocked (2.2% block rate). The coverage-vs-ASR
+The 200-case B2 re-run confirmed: only 1/45 attack-relevant cases blocked (2.2% block
+rate; `blocked_attack_cases: 1` in `e19_b2_rerun.json`, derived from the rerun JSONL where
+19 `success` + 26 `work_not_success` = 45 attack-relevant cases). The coverage-vs-ASR
 curve is **flat**.
 
 **Conclusion:** B2's weakness is structural, not coverage-limited. Per-tool Hoare contracts cannot
-catch poisoned registrations or out-of-set attacker tools. This validates the Phase 5 decision to
+catch poisoned registrations or out-of-set attacker tools. (The rerun JSONL also shows 2
+blocks on benign calls in `ignored` cases — the extended contracts fire on the wrong calls
+as well as missing the attacks.) This validates the Phase 5 decision to
 treat B2 ≈ B1 as a finding, not a shortfall.
 
 ---
@@ -166,14 +171,16 @@ attack surface.
 
 ---
 
-## E21 — Escalate precision (ground-truth hand-label) {#e21}
+## E21 — Escalate precision (ground-truth classification) {#e21}
 
 **Goal.** Phase 5 reported a 21.6% escalate share at τ=0.75 (E13). What fraction of escalated
 calls are *true attack attempts* vs *legitimate calls falsely escalated*?
 
 **Setup.** `scripts/e21_escalate_precision.py` — extracts all 583 escalated tool calls from
-Phase 5 traces (`results/phase5/ours_*_trace.jsonl`), classifies each against ground truth
-(attacker_tools / user_tool from case metadata, MCPTox labels).
+Phase 5 traces (`results/phase5/ours_*_trace.jsonl`), classifies each rule-based against
+ground truth from case metadata (attacker_tools / user_tool for InjecAgent, fake_tool +
+labels for MCPTox). Full census, not a sampled hand-label: every escalated call is
+classified deterministically, so the precision is exact rather than estimated.
 
 ### Classification (ground truth)
 
@@ -257,7 +264,7 @@ specificity (deferred from E15 limitations).
 | Comparisons | α (original) | α (Bonferroni-adjusted) | Phase 5 per-risk p-values survive? |
 |---|---|---|---|
 | 5 (primary slices) | 0.05 | 0.010 | ✓ All p < 1e-6 |
-| 10 (11 risk categories) | 0.05 | 0.005 | ✓ All per-risk p < 0.005 |
+| 11 (risk categories) | 0.05 | 0.005 | ✓ All per-risk p < 0.005 |
 
 The Phase 5 per-risk McNemar results (E15) survive the correction — the B1→Ours effect is
 statistically significant even under the strictest threshold.
@@ -329,7 +336,7 @@ python scripts/e21_escalate_precision.py
    fall back to `heuristic` (stale `OPENAI_API_KEY` → 401), so the gate never fired. Fixed — E18
    re-runs assert `usage.parser.calls > 0`.
 2. **`count_messages` contract:** Added to MCPTox contracts, broke 2 tests expecting `no_contract`
-   → changed test fixtures to `nonexistent_tool_xyz`. **197 tests green.**
+   → changed test fixtures to `nonexistent_tool_xyz`. **199 tests green.**
 3. **Luna temperature rejection:** `gpt-6-luna` rejects `temperature=0` → `LLMClient` auto-omits.
 4. **Qwen context window:** Ollama `num_ctx` must be ≥16384 on GPU box (deployment caveat).
 5. **E19 coverage_curve.json bug:** `phase5_b2_coverage` was 0.849 (copy of `extended_coverage`);

@@ -59,7 +59,7 @@
 - [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
 - [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
 - [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/04_gate2_gated_eval.md`)
-- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green at the time, 170 today) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
+- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green at the time, 199 today) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
 
 ## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze) — DONE 2026-10-12
 
@@ -147,7 +147,7 @@ backbones and compare ASR *deltas*, never absolutes.
   OpenAI-compatible endpoint without `reasoning_effort=none`), `--out`/`--report` made
   **required** (a run can no longer default onto a tracked baseline path), `TraceLogger`
   default moved out of the repo, `LLMClient` auto-omits unsupported `temperature`
-  (`gpt-6-luna`). 190 tests green → **197 tests green** (7 stats + 2 test-fix tests)
+  (`gpt-6-luna`). 190 tests green → **199 tests green** (7 stats + 2 test-fix + 2 PPF pins)
 - [x] Pull `qwen3.5:4b` (**not** `:latest` — 6.6–7.6 GB won't fit 6 GB VRAM); set Ollama
   `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
   verify served ctx via `ollama show`; keep MiniLM embeddings on CPU. *(pulled + num_ctx set
@@ -174,7 +174,8 @@ backbones and compare ASR *deltas*, never absolutes.
 - [x] E20 intent-mimicry probe: take the 13 residual near-miss templates → generate
   intent-mimicking variants → re-score vs τ=0.75 offline → report S inflation Δ
   (avg ΔS = +0.0112, 0/13 cross τ with mimicry)
-- [x] E21 escalate precision: hand-label ~50 escalated cases (truly ambiguous vs gate noise)
+- [x] E21 escalate precision: classify all 583 escalated calls rule-based against ground truth
+  from case metadata (full census, deterministic — not a sampled hand-label)
   (80.5% precision, 14.8% false-escalate rate on 583 escalated calls)
 - [x] Stats discipline: post-hoc power analysis on n=2,108/1,348 + multiple-comparison
   correction across the 10-risk breakdowns; amend E14 notes if anything changes
@@ -235,6 +236,6 @@ backbones and compare ASR *deltas*, never absolutes.
 |---|---|---|
 | Gate 0 | B1 reproduces + 50-case pilot passes (Assumption 2) | [x] 2026-09-11 — AUC 0.979, ASR 0/FPR 4% @ τ=0.75 |
 | Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — InjecAgent 79/79; MCPTox 65 contracts (37.2% availability-weighted); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/03_b2_toolgate.md`) |
-| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green then (170 today); p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
+| Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green then (199 today); p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [x] 2026-10-12 — 30 jobs, 20,736 cases, InjecAgent 19.0%→0.7%, MCPTox 279→144, B2≈B1 (n.s.), p95 ≤20 ms, $9.64 billed |
 | Submission | Thesis + paper draft complete | [ ] |

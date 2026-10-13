@@ -421,7 +421,7 @@ This produces the Pareto tables in E9 and E13.
 | `tests/test_metrics.py` | ASR/valid-rate definitions | `eval/metrics.py` |
 | `tests/test_stats.py` | McNemar + bootstrap + power/Bonferroni/FPR | `eval/stats.py` |
 
-Run: `pytest -q` — **197 tests**, all green.
+Run: `pytest -q` — **199 tests**, all green.
 
 ---
 
