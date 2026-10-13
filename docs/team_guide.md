@@ -413,6 +413,33 @@ saved ~16%). Phase 6 pilots added ~$0.07 total. No further big runs are needed.
 
 ## 6. Where we are going
 
+### Phase 5 — the final evaluation (DONE 2026-10-12)
+
+| Stage | What happens | Status |
+|---|---|---|
+| Stage 0 | Tooling: orchestrator, reporter, ablations, stats, cost | ✅ done |
+| Stage 1 | Freeze code/configs → run the 30-job matrix → integrity check | ✅ done 2026-10-12 (30/30, `--check` passed, billed $9.64) |
+| Stage 2 | Analysis: Pareto curve, confidence intervals, significance tests, breakdowns, error taxonomy, latency, utility | ✅ done — `results/phase5/report.json` + taxonomies |
+| Stage 3 | **Gate 3 freeze**: write the results report, update roadmap + changelog, tag the commit, open PR | ✅ done — [`experiments/05_phase5_full_evaluation.md`](experiments/05_phase5_full_evaluation.md), tag `gate3-freeze` |
+
+The matrix: **6 conditions** (no gate, ToolGate baseline, our gate, and three ablations) × **5
+dataset files** (4 InjecAgent splits/settings + the MCPTox snapshot) = 30 jobs. Runs are resumable:
+if one fails, the orchestrator retries and skips finished jobs.
+
+**Cost chart** (actuals from the frozen run 2026-10-12, ~5.6 h wall-clock at `--jobs 3`):
+
+| Group | Cases | Calls | List-price actual |
+|---|---|---|---|
+| B1 (unprotected) | 3,456 | 3,456 | $1.33 |
+| B2 (ToolGate reimpl) | 3,456 | 3,456 | $1.33 |
+| Ours (gate; agent + parser calls) | 3,456 | 6,912 | $2.20 |
+| Ablations A1–A3 (each agent + parser) | 10,368 | 20,736 | $6.60 |
+| **Total** | 20,736 | **34,560** | **$11.46 list / $9.64 billed** |
+
+**What "freeze" means for everyone:** after Stage 3, the numbers are final. No code or config
+changes that affect results, and no re-runs, unless the whole evaluation is re-done. This protects
+reproducibility.
+
 ### Phase 6 — Strengthening & Hardening (COMPLETE 2026-10-13)
 
 | Priority | Experiment | Result |
@@ -452,7 +479,7 @@ Phase 6 (E18+) is preliminary and never rewrites E11–E17. This protects reprod
 You do **not** need to understand the code to help. Safe tasks (no API cost):
 
 1. **Set up your machine** — follow [`setup.md`](setup.md) (about 10 minutes; the first install
-   downloads a model, so be patient). Then run `pytest -q`; you should see **170 passed**.
+   downloads a model, so be patient). Then run `pytest -q`; you should see **199 passed**.
 2. **Read one experiment report** — start with
    [`experiments/01_gate0_foundation.md`](experiments/01_gate0_foundation.md). If anything is
    unclear, that is a documentation bug: report it.

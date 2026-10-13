@@ -116,7 +116,8 @@ def main():
     rows = load_phase5_jsonl(b2_jsonl)
     print(f"Loaded {len(rows)} Phase 5 B2 MCPTox cases")
 
-    # Current coverage
+    # Frozen Phase 5 record (configs/b2_coverage.json is the frozen evidence file and
+    # is never overwritten; extended coverage is computed below from code, offline).
     coverage = json.loads((ROOT / "configs/b2_coverage.json").read_text())
     mcptox_cov = coverage["mcptox"]
     print(f"Phase 5 B2 coverage: {mcptox_cov['contracted_tools']}/{mcptox_cov['evaluated_tools']} "
@@ -125,6 +126,23 @@ def main():
     # Load current (extended) contracts
     contracts = build_contracts()
     print(f"Extended contracts: {len(contracts)} total")
+
+    # Extended coverage, computed offline from the contract code + snapshot availability
+    # (same formula as scripts/freeze_b2_coverage.py; no LLM calls).
+    from harness.adapters.mcptox import load_mcptox_cases
+
+    snap_cases = load_mcptox_cases(ROOT / "data/raw/mcptox/response_all.json")
+    availability: Counter = Counter()
+    universe: set = set()
+    for snap_case in snap_cases:
+        for tool in set(snap_case.clean_tools):
+            availability[tool] += 1
+            universe.add(tool)
+    contracted = set(contracts) & universe
+    ext_distinct = len(contracted) / len(universe)
+    ext_weighted = sum(availability[t] for t in contracted) / sum(availability.values())
+    print(f"Extended coverage: {len(contracted)}/{len(universe)} "
+          f"({ext_distinct:.1%} distinct, {ext_weighted:.1%} weighted)")
 
     # Project ASR with extended coverage
     projection = project_b2_asr(rows, contracts)
@@ -171,7 +189,7 @@ def main():
         backend = EmbeddingBackend()
         trace = TraceLogger(
             ROOT / f"results/phase6/e19_b2_coverage85_trace.jsonl",
-            metadata={"benchmark": "mcptox", "gate": "toolgate", "e19_coverage": mcptox_cov["availability_weighted_coverage"]},
+            metadata={"benchmark": "mcptox", "gate": "toolgate", "e19_coverage": ext_weighted},
             append=False,
         )
         policy_factory = build_policy_factory(
@@ -189,13 +207,15 @@ def main():
     out_path = ROOT / "results/phase6/e19_coverage_curve.json"
     out_path.write_text(json.dumps({
         "phase5_b2_coverage": mcptox_cov["availability_weighted_coverage"],
-        "extended_coverage": mcptox_cov["availability_weighted_coverage"],  # frozen value after extension
+        "phase5_b2_distinct_coverage": mcptox_cov["coverage"],
+        "extended_coverage": round(ext_weighted, 4),
+        "extended_distinct_coverage": round(ext_distinct, 4),
         "phase5_b1_counts": b1_counts,
         "phase5_b2_counts": b2_counts,
         "offline_projection": projection,
         "key_finding": (
             "Extending B2 contracts from 8.1% distinct / 37.2% weighted to "
-            f"{mcptox_cov['coverage']:.1%} / {mcptox_cov['availability_weighted_coverage']:.1%} "
+            f"{ext_distinct:.1%} / {ext_weighted:.1%} "
             "does not meaningfully reduce ASR because attack calls pass pre-conditions "
             "(they look like legitimate queries). B2's weakness is structural: poisoned "
             "registrations and out-of-set tools cannot be caught by per-tool contracts."

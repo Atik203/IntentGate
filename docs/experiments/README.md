@@ -25,7 +25,7 @@
 | E18 | Second-backbone pilot (Qwen3.5:4b + gpt-6-luna) | Qwen 27.1%→2.1% ASR; Luna prose-only (excluded) | `06_phase6_pilots.md#e18` |
 | E19 | B2 coverage curve (65→583 contracts) | 37.2%→84.9% weighted; curve flat | `06_phase6_pilots.md#e19` |
 | E20 | Intent-mimicry probe (13 residuals) | Avg S inflation +0.0112; 0/13 cross τ | `06_phase6_pilots.md#e20` |
-| E21 | Escalate precision (583 calls, hand-labeled) | 80.5% precision; 14.8% false-escalate | `06_phase6_pilots.md#e21` |
+| E21 | Escalate precision (583 calls, ground-truth classified) | 80.5% precision; 14.8% false-escalate | `06_phase6_pilots.md#e21` |
 | E22 | Power analysis + Bonferroni + per-specificity FPR | Power=1.0 at α=0.005; FPR specific 12.8% | `06_phase6_pilots.md#e22` |
 
 ## Experiment index
@@ -52,7 +52,7 @@
 | E18 | **Phase 6: Second-backbone pilot** | Qwen3.5:4b (100) + gpt-6-luna (20) | Qwen 27.1%→2.1%; Luna excluded (prose-only) | [06](06_phase6_pilots.md#e18) |
 | E19 | **Phase 6: B2 coverage curve** | 65→583 MCPTox contracts | 37.2%→84.9% weighted; flat curve | [06](06_phase6_pilots.md#e19) |
 | E20 | **Phase 6: Intent-mimicry probe** | 13 residuals × 3 variants | Avg ΔS +0.0112; 0/13 cross τ | [06](06_phase6_pilots.md#e20) |
-| E21 | **Phase 6: Escalate precision** | 583 escalated calls (hand-labeled) | 80.5% precision; 14.8% false-escalate | [06](06_phase6_pilots.md#e21) |
+| E21 | **Phase 6: Escalate precision** | 583 escalated calls (ground-truth classified) | 80.5% precision; 14.8% false-escalate | [06](06_phase6_pilots.md#e21) |
 | E22 | **Phase 6: Power + Bonferroni + FPR** | n=2,108 / 1,348 | Power=1.0 at α=0.005; FPR specific 12.8% | [06](06_phase6_pilots.md#e22) |
 
 Status legend: E1–E10 were development-set evidence; **E11–E17 are the frozen full-suite

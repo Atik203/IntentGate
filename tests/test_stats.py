@@ -4,6 +4,7 @@ from __future__ import annotations
 import pytest
 
 from intent_gate.eval.stats import (
+    _norm_ppf,
     bonferroni_alpha,
     bootstrap_ci,
     exact_binomial_p,
@@ -119,3 +120,14 @@ def test_per_specificity_fpr_empty_handling():
     result = per_specificity_fpr(entries)
     assert result["overall"]["fpr"] == 0.0
     assert result["overall"]["total"] == 1
+
+
+def test_norm_ppf_known_values():
+    assert _norm_ppf(0.975) == pytest.approx(1.96, abs=1e-4)
+    assert _norm_ppf(0.5) == pytest.approx(0.0, abs=1e-9)
+    assert _norm_ppf(0.025) == pytest.approx(-1.96, abs=1e-4)
+
+
+def test_norm_ppf_lower_tail_finite():
+    assert _norm_ppf(0.01) == pytest.approx(-2.3263, abs=1e-4)
+    assert _norm_ppf(0.995) == pytest.approx(2.5758, abs=1e-4)
