@@ -128,7 +128,8 @@ visible (ordering invariant, tested); **every** tool execution passes through th
 
 - **What:** the complete matrix under a code/config freeze (lock + manifest, git SHA
   recorded): 6 conditions (B1 / B2 / ours / 3 ablations) × 5 dataset files = **30 jobs,
-  20,736 cases**, seed 42, τ=0.75, δ=0.1, α=0.7. Integrity `--check` passed 30/30.
+  20,736 cases**, seed 42, τ=0.75, δ=0.1, α=0.7, backbone **gpt-4o-mini for both agent and
+  parser** (temperature 0). Integrity `--check` passed 30/30.
 - **How:** `scripts/run_phase5.py` (resumable, 3-way parallel, ~5.6 h wall-clock) →
   `scripts/report_phase5.py` (breakdowns, bootstrap CIs, McNemar, Pareto, taxonomy).
 
@@ -140,14 +141,20 @@ visible (ordering invariant, tested); **every** tool execution passes through th
 | MCPTox attack-influenced (1,348) | 279 | **144** (140 blocked) | 271 (10 blocked) | ours p=1.25e-07; B2 p=0.33 (n.s.) |
 
 - **Ablations:** semantic-only (A1) matches/exceeds ours; rule-only (A2) ≈ unprotected;
-  raw-request (A3) ≈ ours. Reading: **semantics detect, rules veto** — and the A3 result
-  honestly narrows the contract claim (stated in the report, not hidden).
+  raw-request (A3) ≈ ours. Honest reading: **semantics do the detecting** — rules alone
+  detect almost nothing, so their value is the fail-closed veto guarantee plus the
+  escalate-band input, not detection lift. A3 ≈ ours likewise narrows the contract claim
+  (stated in the report, not hidden).
 - **Residuals:** all 13 remaining InjecAgent failures share one signature — rule=1.0,
   S just above τ (0.75–0.79), read-only near-miss calls. One boundary, fully characterized.
 - **Utility:** valid-rate parity B1 vs ours on every slice (no clean-call loss).
+  Escalate share at τ=0.75 is 21.6% (InjecAgent) / 18.2% (MCPTox) — benchmark mode counts
+  escalate as block; E21 shows the band fires at 80.5% precision, so most escalates are
+  true attacks awaiting review, not false alarms.
 - **Setup cost:** **0 contracts (ours) vs 145 manual (B2)** on the evaluated tool set.
-- **Latency:** ours p95 **16–20 ms** per gated call (CPU embeddings; target <100 ms);
-  B2 ≤ 0.06 ms (in-memory checks).
+- **Latency:** ours p95 **16–20 ms** per gated call (CPU embeddings; target <100 ms —
+  covers embed + score + veto; the once-per-session parser LLM call is amortized, not
+  per-call); B2 ≤ 0.06 ms (in-memory checks).
 - **Money:** $11.46 list-price / **$9.64 actually billed** (~16% prompt-cache saving).
 
 | Group | Cases | LLM calls | List-price |
