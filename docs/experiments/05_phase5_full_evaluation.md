@@ -178,7 +178,8 @@ ablation both fail to move the needle where it matters.
    headline CIs only in this report.
 3. **No dedicated legitimate-only suite** — FPR rests on valid-rate parity + the E4 pilot.
 4. **Single backbone** (gpt-4o-mini) — generality is claimed, not yet shown → Phase 6 P0.
-5. **Static snapshot, not live servers** (blueprint Sec 8) → Phase 6 P2 slice.
+5. **Static snapshot, not live servers** (blueprint Sec 8) → deferred to future work
+   (live-server slice cut from Phase 7 scope; static snapshot stands).
 6. **Small-n flat spots** (Message Hijacking n=44, Data Tampering n=120) — reported, not smoothed.
 7. **A3 ≈ ours** narrows the contract-parsing claim to auditability/escalate input rather than
    detection lift on these splits — stated here so reviewers don't have to find it.

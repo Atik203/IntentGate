@@ -125,13 +125,12 @@ Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,4
 - [x] `docs/experiments/05_phase5_full_evaluation.md` (E11–E17: matrix, Pareto, ablations, breakdowns, stats, taxonomy, latency/utility; limitations + supervisor Q&A)
 - [x] Roadmap + CHANGELOG updated, commit tagged, PR to `dev`; no results edits after this point
 
-## Phase 6 — Strengthening & Hardening (Weeks 13–14) — ACTIVE from 2026-10-12
+## Phase 6 — Strengthening & Hardening (Weeks 13–14) — DONE 2026-10-13
 
 **Goal: turn the thesis's two most attackable claims into evidence. Rule: never touch frozen
 Phase 5 numbers — all new work gets E18+ numbers framed as preliminary.**
-**Status: ACTIVE — Phase 5/Gate 3 frozen and merged to `main`. Teammates start here:
-branch from `dev` (`feat/phase6-<topic>`), PR back to `dev`. Do not re-run the frozen matrix —
-read `results/phase5/` instead.**
+**Status: COMPLETE — all P0/P1 pilots done (E18–E22, `docs/experiments/06_phase6_pilots.md`).
+Teammates continue at Phase 7.**
 
 ### P0-1 — Second-backbone pilot / E18 (model-agnostic claim)
 
@@ -183,19 +182,34 @@ backbones and compare ASR *deltas*, never absolutes.
 - [x] Per-specificity FPR stratification on full traces (deferred from E15)
   (specific: 12.8% FPR / vague: 9.6% / overall: 12.4% — includes escalate candidates)
 
-### P2 — if buffer remains (each its own checkbox as before)
+**Team (done):** P0 items (E18/E19) · E20 (mimicry) · E21 (escalate precision) · E22 (stats).
 
-- [ ] Parser ablation (heuristic vs LLM parser on one condition — what the LLM parser buys)
-- [ ] Live-server MCPTox slice (addresses the static-snapshot limitation, blueprint Sec 8)
-- [ ] 20-case paraphrase-robustness mini-pilot (defense-aware paraphrase)
-- [ ] 20-case multi-turn drift pilot (AgentDojo subset) — include as "preliminary" or defer
-- [ ] Decide: drift pilot in thesis (preliminary) or future work — one figure max
+## Phase 7 — Extra Hardening Pilots (buffer time available)
 
-**Suggested split (5 members):** P0 items done (E18/E19). E20 done (mimicry). E21 done
-(escalate precision). E22 done (stats discipline). Remaining: P2 buffer items (one member)
-+ Gate 3/Phase 7 writeup (one member).
+**Goal: two cheap, high-signal pilots the review recommended. Same rule as Phase 6: frozen
+Phase 5 numbers never touched — new work gets E23+ numbers framed as preliminary.**
 
-## Phase 7 — Thesis Writing (Weeks 13–16)
+- [ ] **E23 paraphrase-robustness mini-pilot (defense-aware paraphrase, do first).**
+      20 cases: paraphrase hijacks to maximize semantic similarity while keeping malicious
+      params → re-score vs τ=0.75 → report ASR delta vs E20 mimicry finding. Complements E20
+      (E20 rephrased the *call*; this rephrases the *attack delivery*). ASB's 5 injection
+      phrasings are a ready-made set (`literature_review/papers/04-asb-zhang-2025.md`).
+- [ ] **E24 parser ablation (heuristic vs LLM parser on one subset).** What the LLM parser
+      buys: run one InjecAgent subset (B1 + ours) with `--ablation` off but parser swapped
+      for the heuristic fallback → compare ASR/valid-rate deltas. Answers the method-chapter
+      question directly; ~$1–2 on a 200-case subset.
+- [ ] Write up E23–E24 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
+
+**Explicitly deferred to future work (Ch 6 material, not pilots):** live-server MCPTox slice
+(static-snapshot limitation stands, blueprint Sec 8) · 20-case multi-turn drift pilot
+(AgentDojo subset) — new infra + cost, lowest return before submission.
+
+## Phase 8 — Thesis + Paper Writing (merged; old Phase 7 + old Phase 8)
+
+**Goal: thesis chapters + workshop/Findings-tier submission paper from the same frozen
+evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings.**
+
+### Thesis
 
 - [ ] Ch 1: Intro & motivation (problem, OWASP excessive agency, why action gate)
 - [ ] Ch 2: Related work — answer Reviewer #2 Q#1 in first paragraph ("not just embeddings + if-statements")
@@ -206,11 +220,9 @@ backbones and compare ASR *deltas*, never absolutes.
 - [ ] Reproducibility appendix: hashes, configs, contract examples, JSONL sample
 - [ ] Supervisor review rounds; final defence
 
-## Phase 8 — Paper Draft (parallel, Weeks 12–16)
+### Paper (workshop/Findings, ~4–8 pages)
 
-**Goal: workshop/Findings-tier submission; journal expansion optional.**
-
-- [ ] Workshop/Findings outline (2-column short paper, ~4-8 pages)
+- [ ] Outline (2-column short paper)
 - [ ] Related work: ToolGate "same gate, opposite policy source" framing (blueprint Sec 18)
 - [ ] Results section: ASR/FPR/latency/setup-cost tables + Pareto + error taxonomy
 - [ ] Reviewer #2 checklist (blueprint Sec 18) cleared item by item
