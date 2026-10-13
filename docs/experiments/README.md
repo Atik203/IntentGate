@@ -57,7 +57,7 @@
 
 Status legend: E1–E10 were development-set evidence; **E11–E17 are the frozen full-suite
 results** (Gate 3, 2026-10-12). **E18–E22 are Phase 6 preliminary pilots** (2026-10-13, never
-rewrite E11–E17). Next: Phase 7 extra pilots (E23 paraphrase, E24 parser ablation) → roadmap.
+rewrite E11–E17). Next: Phase 7 Q1 hardening (E23–E30, all 9 submission-gate items) → roadmap.
 
 ## Datasets & versions
 
