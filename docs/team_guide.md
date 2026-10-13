@@ -448,10 +448,18 @@ reproducibility.
 | **P0-2 (E19)** | B2 coverage curve (65 → 583 contracts) | 37.2% → 84.9% weighted; curve flat (structural weakness) |
 | **P1 (E20–E22)** | Mimicry / Escalate / Stats | Avg S inflation +0.0112; 80.5% escalate precision; Power=1.0 |
 
-All P0/P1 items complete. P2 buffer items (parser ablation, live MCPTox, paraphrase, drift) remain
-as optional future work — see [`../roadmap.md`](../roadmap.md) §Phase 6 P2.
+All P0/P1 items complete — Phase 6 is DONE. Next: Phase 7 extra pilots (E23 paraphrase,
+E24 parser ablation) — see [`../roadmap.md`](../roadmap.md) §Phase 7. Live-server slice and
+drift pilot are deferred to future work (Ch 6 material).
 
-### Phase 7 — Thesis Writing (Weeks 13–16)
+### Phase 7 — Extra Hardening Pilots
+
+| Pilot | What | Status |
+|---|---|---|
+| E23 | Paraphrase-robustness mini-pilot (20 cases, defense-aware) | ⏳ next |
+| E24 | Parser ablation on a subset (heuristic vs LLM parser) | ⏳ |
+
+### Phase 8 — Thesis + Paper Writing (merged)
 
 | Chapter | Focus | Status |
 |---|---|---|
@@ -462,10 +470,7 @@ as optional future work — see [`../roadmap.md`](../roadmap.md) §Phase 6 P2.
 | Ch 5 | Evaluation — metrics, baselines, ablations, per-category, stats, taxonomy | ⏳ |
 | Ch 6 | Limitations & future work | ⏳ |
 | Appendix | Reproducibility: hashes, configs, contract examples, JSONL samples | ⏳ |
-
-### Phase 8 — Paper Draft (parallel)
-
-Short workshop/Findings-style paper from frozen results (E11–E17) + Phase 6 pilots (E18–E22).
+| Paper | Workshop/Findings draft from frozen results (E11–E17) + pilots (E18+) | ⏳ |
 
 **What "freeze" means for everyone:** After Gate 3 (2026-10-12), the Phase 5 numbers are final.
 Phase 6 (E18+) is preliminary and never rewrites E11–E17. This protects reproducibility.
