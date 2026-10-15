@@ -460,7 +460,7 @@ slice and drift pilot are deferred to future work (Ch 6 material).
 | E24 | Prompt-level baselines (delimiters, instructional-prevention, sandwich) | ⏳ |
 | E25 | Third backbone pilot (new family, same 100-case protocol) | ⏳ |
 | E26 | Adaptive attacker (paraphrase-delivery + threshold-aware) | ⏳ |
-| E27–E30 | Progent comparison · formalism · conformal band · parser ablation · embedding swap · artifact | ⏳ |
+| E27–E31 | Progent comparison · formalism · conformal band · parser ablation · embedding swap · contract-vs-semantic · artifact | ⏳ |
 
 ### Phase 8 — Thesis + Paper Writing (merged)
 

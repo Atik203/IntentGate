@@ -184,7 +184,7 @@ backbones and compare ASR *deltas*, never absolutes.
 
 **Team (done):** P0 items (E18/E19) · E20 (mimicry) · E21 (escalate precision) · E22 (stats).
 
-## Phase 7 — Q1 Hardening (all 9 submission-gate items)
+## Phase 7 — Q1 Hardening (all 10 submission-gate items)
 
 **Goal: close every gap the Q1 review named, in effort order. Same iron rule as Phase 6:
 frozen Phase 5 numbers (E11–E17) are never touched or re-run — all new work gets E23+
@@ -195,7 +195,7 @@ Branch from `dev` (`feat/phase7-<topic>`), PR back to `dev`. Total est. API cost
 **Numbering note (authoritative):** earlier drafts called the paraphrase pilot E23 and the
 parser ablation E24. Final mapping below wins — E23 = utility suite, E24 = prompt baselines,
 E25 = third backbone, E26 = adaptive attacker, E27 = Progent, E28 = parser ablation,
-E29 = embedding/transfer, E30 = conformal band.
+E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supervisor Q5).
 
 ### P0 — submission gate (do first, all parallelizable)
 
@@ -262,12 +262,23 @@ E29 = embedding/transfer, E30 = conformal band.
       procedure, not a magic number. How: re-score cached traces with one stronger embedding
       (E5/MPNet) + report τ tuned on base tested on enhanced (and vice versa). Done when:
       transfer table + recalibration note in `07_phase7_pilots.md#e29`.
+- [ ] **E31 contract-vs-semantic contribution (supervisor Q5).** Goal: E12 showed A1
+      (semantic-only) ≈ ours on headline ASR — locate *where* the full contract + rules +
+      escalate add value, or scope the claim honestly. How: offline on cached traces
+      (`results/phase5/ours_*` vs `a1_*` JSONLs, no LLM calls): (a) per-category/per-risk
+      outcome flips — ours blocks where A1 allows and vice versa (expect rules decisive on
+      high-severity veto categories); (b) escalate-band ablation — what the band loses
+      without S_rule/veto input; (c) cost/latency parity check (contract parse is
+      once-per-session, amortized). Done when: flip table + "where the contract
+      wins/ties/loses" verdict in `07_phase7_pilots.md#e31`; if A1 ties everywhere, the
+      contract claim is scoped to auditability + fail-closed guarantees (already stated in
+      E12 — this makes it measured, not asserted).
 - [ ] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
       pinned `pip install` + `results/` manifest check (`scripts/run_phase5.py --check`
       already exists — wire it into the container entrypoint). Done when: clean-machine
       `docker build && docker run pytest -q` passes and the repro commands in
       `docs/experiments/README.md` run unmodified inside the container.
-- [ ] Write up E23–E30 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
+- [ ] Write up E23–E31 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
 
 **Explicitly deferred to future work (Ch 6 material, not pilots):** live-server MCPTox slice
 (static-snapshot limitation stands, blueprint Sec 8) · 20-case multi-turn drift pilot
