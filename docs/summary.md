@@ -347,7 +347,7 @@ are conservative.
 
 | Phase | Work | Status |
 |---|---|---|
-| Phase 7 | Q1 hardening (~$8): E23 utility suite · E24 prompt baselines · E25 third backbone · E26 adaptive attacker · E27 Progent · E28 parser ablation · E29 embedding/transfer · E30 conformal band · formalism + artifact | ⏳ next |
+| Phase 7 | Q1 hardening (~$8): E23 utility suite · E24 prompt baselines · E25 third backbone · E26 adaptive attacker · E27 Progent · E28 parser ablation · E29 embedding/transfer · E30 conformal band · E31 contract-vs-semantic · formalism + artifact | ⏳ next |
 | Phase 8 | Thesis + paper (chapters below) from frozen evidence + pilots | ⏳ after Phase 7 |
 
 | Chapter | Source (already written) |
