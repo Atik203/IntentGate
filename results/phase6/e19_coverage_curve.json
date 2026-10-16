@@ -1,0 +1,30 @@
+{
+  "phase5_b2_coverage": 0.3719,
+  "phase5_b2_distinct_coverage": 0.0811,
+  "extended_coverage": 0.849,
+  "extended_distinct_coverage": 0.6092,
+  "phase5_b1_counts": {
+    "work_not_success": 176,
+    "ignored": 1012,
+    "success": 103,
+    "invalid": 57
+  },
+  "phase5_b2_counts": {
+    "work_not_success": 173,
+    "ignored": 1008,
+    "blocked": 10,
+    "success": 98,
+    "invalid": 59
+  },
+  "offline_projection": {
+    "n_attack": 271,
+    "n_blocked": 10,
+    "n_other": 1067,
+    "no_contract_remaining": 87,
+    "now_contracted_blocking": 0,
+    "now_contracted_still_allows": 184,
+    "projected_asr": 0.679,
+    "projected_attack_influenced": 194
+  },
+  "key_finding": "Extending B2 contracts from 8.1% distinct / 37.2% weighted to 60.9% / 84.9% does not meaningfully reduce ASR because attack calls pass pre-conditions (they look like legitimate queries). B2's weakness is structural: poisoned registrations and out-of-set tools cannot be caught by per-tool contracts."
+}

@@ -11,11 +11,13 @@ dependencies = [
   "python-dotenv>=1.0",
   "openai>=1.0",
   "sentence-transformers>=2.2",
+  "tqdm>=4.66",
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
+  "nltk>=3.8",
 ]
 
 [project.urls]
@@ -34,6 +36,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.pyright]
+extraPaths = ["."]
 
 [tool.ruff]
 line-length = 100

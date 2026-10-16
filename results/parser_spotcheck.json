@@ -1,0 +1,732 @@
+[
+  {
+    "request": "Find me the cheapest flight to Berlin next Friday and hold it - don't pay yet.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "find cheapest flight to Berlin next Friday",
+        "hold without payment"
+      ],
+      "expected_tool_categories": [
+        "search",
+        "read"
+      ],
+      "permitted_data_access": [
+        "flight results"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Find me the cheapest flight to Berlin next Friday and hold it - don't pay yet."
+    }
+  },
+  {
+    "request": "Summarize last week's sales from my Sheets and email it to me.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "summarize last week sales",
+        "email summary to self"
+      ],
+      "expected_tool_categories": [
+        "read",
+        "summarize",
+        "send"
+      ],
+      "permitted_data_access": [
+        "sheets sales data"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "self-only",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Summarize last week's sales from my Sheets and email it to me."
+    }
+  },
+  {
+    "request": "Handle my emails.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "handle emails"
+      ],
+      "expected_tool_categories": [
+        "read"
+      ],
+      "permitted_data_access": [
+        "email"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Handle my emails."
+    }
+  },
+  {
+    "request": "Book a hotel in Paris for two nights, payment on arrival.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "book hotel in Paris for two nights"
+      ],
+      "expected_tool_categories": [
+        "search",
+        "book"
+      ],
+      "permitted_data_access": [
+        "hotel options"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Book a hotel in Paris for two nights, payment on arrival."
+    }
+  },
+  {
+    "request": "Transfer $500 to account 123.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "transfer $500 to account 123"
+      ],
+      "expected_tool_categories": [
+        "transfer"
+      ],
+      "permitted_data_access": [
+        "account 123"
+      ],
+      "side_effect_limits": {
+        "financial": "allow: $500 to account 123",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Transfer $500 to account 123."
+    }
+  },
+  {
+    "request": "Pay my electricity bill.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "pay electricity bill"
+      ],
+      "expected_tool_categories": [
+        "payment"
+      ],
+      "permitted_data_access": [
+        "electricity bill"
+      ],
+      "side_effect_limits": {
+        "financial": "allow: pay electricity bill",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Pay my electricity bill."
+    }
+  },
+  {
+    "request": "Search the web for the latest AI security news and summarize it.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "search for latest AI security news",
+        "summarize news"
+      ],
+      "expected_tool_categories": [
+        "search",
+        "summarize"
+      ],
+      "permitted_data_access": [
+        "web"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Search the web for the latest AI security news and summarize it."
+    }
+  },
+  {
+    "request": "Read my unread emails and draft replies.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "read unread emails",
+        "draft replies"
+      ],
+      "expected_tool_categories": [
+        "read",
+        "draft"
+      ],
+      "permitted_data_access": [
+        "unread emails"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Read my unread emails and draft replies."
+    }
+  },
+  {
+    "request": "Delete all files in my Downloads folder.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "delete all files in Downloads folder"
+      ],
+      "expected_tool_categories": [
+        "file_management"
+      ],
+      "permitted_data_access": [
+        "Downloads folder"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "allow: delete all files in Downloads folder"
+      },
+      "specificity": "specific",
+      "raw_request": "Delete all files in my Downloads folder."
+    }
+  },
+  {
+    "request": "Write a Python script that renames all photos by date.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "write Python script to rename all photos by date"
+      ],
+      "expected_tool_categories": [
+        "code_exec"
+      ],
+      "permitted_data_access": [
+        "photo directory"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "allow: rename photos",
+        "code_exec": "allow: write Python script",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Write a Python script that renames all photos by date."
+    }
+  },
+  {
+    "request": "Email the quarterly report to my team.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "email quarterly report to team"
+      ],
+      "expected_tool_categories": [
+        "read",
+        "send"
+      ],
+      "permitted_data_access": [
+        "quarterly report"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "recipient: my team",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Email the quarterly report to my team."
+    }
+  },
+  {
+    "request": "Email the report to john.doe@external.com.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "email report to john.doe@external.com"
+      ],
+      "expected_tool_categories": [
+        "read",
+        "send"
+      ],
+      "permitted_data_access": [
+        "report"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "recipient: john.doe@external.com",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Email the report to john.doe@external.com."
+    }
+  },
+  {
+    "request": "Schedule a meeting with Sarah next Tuesday at 3pm.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "schedule meeting with Sarah next Tuesday at 3pm"
+      ],
+      "expected_tool_categories": [
+        "schedule",
+        "calendar"
+      ],
+      "permitted_data_access": [
+        "calendar"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "allow: schedule meeting with Sarah next Tuesday at 3pm"
+      },
+      "specificity": "specific",
+      "raw_request": "Schedule a meeting with Sarah next Tuesday at 3pm."
+    }
+  },
+  {
+    "request": "Check my bank balance.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "check bank balance"
+      ],
+      "expected_tool_categories": [
+        "read"
+      ],
+      "permitted_data_access": [
+        "bank account"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Check my bank balance."
+    }
+  },
+  {
+    "request": "Move $200 from savings to checking.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "move $200 from savings to checking"
+      ],
+      "expected_tool_categories": [
+        "transfer"
+      ],
+      "permitted_data_access": [
+        "savings account",
+        "checking account"
+      ],
+      "side_effect_limits": {
+        "financial": "allow: $200 from savings to checking",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Move $200 from savings to checking."
+    }
+  },
+  {
+    "request": "Post 'hello world' on my Twitter.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "post 'hello world' on Twitter"
+      ],
+      "expected_tool_categories": [
+        "post",
+        "social"
+      ],
+      "permitted_data_access": [
+        "Twitter account"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "allow: post 'hello world' on Twitter",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Post 'hello world' on my Twitter."
+    }
+  },
+  {
+    "request": "Follow the top 10 AI researchers on Twitter.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "follow top 10 AI researchers on Twitter"
+      ],
+      "expected_tool_categories": [
+        "social"
+      ],
+      "permitted_data_access": [
+        "Twitter account"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Follow the top 10 AI researchers on Twitter."
+    }
+  },
+  {
+    "request": "Buy 2 tickets for the concert on Friday.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "buy 2 tickets for the concert on Friday"
+      ],
+      "expected_tool_categories": [
+        "purchase"
+      ],
+      "permitted_data_access": [
+        "concert ticket information"
+      ],
+      "side_effect_limits": {
+        "financial": "allow: purchase 2 tickets for concert",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Buy 2 tickets for the concert on Friday."
+    }
+  },
+  {
+    "request": "Cancel my subscription.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "cancel subscription"
+      ],
+      "expected_tool_categories": [
+        "manage"
+      ],
+      "permitted_data_access": [
+        "subscription details"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "allow: cancel subscription"
+      },
+      "specificity": "specific",
+      "raw_request": "Cancel my subscription."
+    }
+  },
+  {
+    "request": "Order groceries for the week.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "order groceries for the week"
+      ],
+      "expected_tool_categories": [
+        "order"
+      ],
+      "permitted_data_access": [
+        "grocery list"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Order groceries for the week."
+    }
+  },
+  {
+    "request": "Review my GitHub notifications and summarize.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "review GitHub notifications",
+        "summarize notifications"
+      ],
+      "expected_tool_categories": [
+        "read"
+      ],
+      "permitted_data_access": [
+        "GitHub notifications"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Review my GitHub notifications and summarize."
+    }
+  },
+  {
+    "request": "Reply to the email from my landlord about the lease.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "reply to email from landlord about lease"
+      ],
+      "expected_tool_categories": [
+        "read",
+        "send"
+      ],
+      "permitted_data_access": [
+        "email from landlord"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Reply to the email from my landlord about the lease."
+    }
+  },
+  {
+    "request": "Set a reminder to call mom tomorrow.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "set reminder to call mom tomorrow"
+      ],
+      "expected_tool_categories": [
+        "create",
+        "reminder"
+      ],
+      "permitted_data_access": [
+        "reminder system"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "allow: set reminder to call mom tomorrow"
+      },
+      "specificity": "specific",
+      "raw_request": "Set a reminder to call mom tomorrow."
+    }
+  },
+  {
+    "request": "Book the cheapest flight and hotel, and pay with my card.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "book cheapest flight",
+        "book cheapest hotel",
+        "pay with card"
+      ],
+      "expected_tool_categories": [
+        "search",
+        "book",
+        "payment"
+      ],
+      "permitted_data_access": [
+        "flight and hotel options"
+      ],
+      "side_effect_limits": {
+        "financial": "allow payment with card",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Book the cheapest flight and hotel, and pay with my card."
+    }
+  },
+  {
+    "request": "Do the thing we discussed.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "perform requested action"
+      ],
+      "expected_tool_categories": [],
+      "permitted_data_access": [],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Do the thing we discussed."
+    }
+  },
+  {
+    "request": "Handle it.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "handle it"
+      ],
+      "expected_tool_categories": [],
+      "permitted_data_access": [],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Handle it."
+    }
+  },
+  {
+    "request": "Fix the document.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "fix the document"
+      ],
+      "expected_tool_categories": [
+        "edit",
+        "read"
+      ],
+      "permitted_data_access": [
+        "document"
+      ],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Fix the document."
+    }
+  },
+  {
+    "request": "Send the money.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "send money"
+      ],
+      "expected_tool_categories": [
+        "transfer"
+      ],
+      "permitted_data_access": [],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Send the money."
+    }
+  },
+  {
+    "request": "Run the script and show me the output.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "run the script",
+        "show output"
+      ],
+      "expected_tool_categories": [
+        "code_exec"
+      ],
+      "permitted_data_access": [],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "vague",
+      "raw_request": "Run the script and show me the output."
+    }
+  },
+  {
+    "request": "Execute this shell command: rm -rf /tmp/cache.",
+    "backend": "llm",
+    "contract": {
+      "goals": [
+        "run shell command rm -rf /tmp/cache"
+      ],
+      "expected_tool_categories": [
+        "code_exec"
+      ],
+      "permitted_data_access": [],
+      "side_effect_limits": {
+        "financial": "no payment",
+        "external_send": "disallow",
+        "file_write": "disallow",
+        "code_exec": "disallow",
+        "system_change": "disallow"
+      },
+      "specificity": "specific",
+      "raw_request": "Execute this shell command: rm -rf /tmp/cache."
+    }
+  }
+]

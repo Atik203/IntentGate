@@ -10,7 +10,10 @@ This project builds a **model-agnostic middleware gate** that derives an _intent
 
 ## Setup
 
-Install and verify in ~5 minutes: see **[`setup.md`](setup.md)** (venv + `pip install -e ".[dev]"` + `.env` + `pytest -q` + smoke-test scripts).
+New to the project? Start with **[`docs/team_guide.md`](docs/team_guide.md)** — a beginner-friendly
+explanation of the project, what has been done, and where it is going.
+
+Install and verify in ~5 minutes: see **[`docs/setup.md`](docs/setup.md)** (venv + `pip install -e ".[dev]"` + `.env` + `pytest -q` + smoke-test scripts).
 
 ---
 
@@ -19,15 +22,19 @@ Install and verify in ~5 minutes: see **[`setup.md`](setup.md)** (venv + `pip in
 ```
 IntentGate\
 ├── README.md                      # this file
-├── setup.md                       # install + verify instructions (venv, pip, .env, tests)
 ├── CONTRIBUTING.md                # branch model, PR rules, definition of done
 ├── SECURITY.md                    # vulnerability reporting + scope
 ├── CODE_OF_CONDUCT.md             # Contributor Covenant v2.1
 ├── CHANGELOG.md                   # Keep a Changelog; updated per PR
 ├── LICENSE                        # MIT
 ├── AGENTS.md                      # instructions for AI coding agents (+ LLM cache guidance)
-├── blueprint.md                   # single source of truth (design, Sec 0–18)
 ├── roadmap.md                     # phased tracker (Phases 0–8, Gates 0–3, success criteria)
+├── docs\
+│   ├── README.md                  # docs hub (where everything lives + status snapshot)
+│   ├── setup.md                   # install + verify instructions (venv, pip, .env, tests)
+│   ├── blueprint.md               # single source of truth (design, Sec 0–18, indexed)
+│   ├── references.bib             # BibTeX citation basis (10 verified papers)
+│   └── experiments\               # experiment record: README hub + 01–05 reports (E1–E17)
 ├── pyproject.toml                 # intent-gate package (pip install -e .)
 ├── .github\                       # PR/issue templates + CI (pytest on dev/main)
 ├── configs\                       # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
@@ -36,7 +43,7 @@ IntentGate\
 ├── scripts\                       # pilot_score_dist.py, check_parser.py, clone_benchmarks.ps1
 ├── tests\                         # pytest suite (parser, veto, no-bypass, ordering, metrics)
 ├── data\                          # (gitignored) benchmark clones + snapshots — scripts/clone_benchmarks.ps1
-├── results\                       # (gitignored) JSONL traces + reports
+├── results\                       # tracked on purpose: JSONL traces + reports (teammates read instead of re-running evals)
 ├── literature_review\
 │   ├── index.md                   # Master Comparison Matrix + Gap Map + Verification Log (5 anchors + Closest)
 │   └── papers\
@@ -68,10 +75,11 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 
 - **Index:** [`literature_review/index.md`](literature_review/index.md) — Master Matrix (5 verified 2026-08-24), Legend, Quick Triage, Gap Map, Verification Log
 - **Papers:** 5 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
-- **Blueprint:** [`blueprint.md`](blueprint.md) — Phase 1–5, Sections 0–18 (design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique)
+- **Blueprint:** [`docs/blueprint.md`](docs/blueprint.md) — Phase 1–5, Sections 0–18 (indexed with anchors): design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
+- **Docs hub:** [`docs/README.md`](docs/README.md) · **Team guide (start here):** [`docs/team_guide.md`](docs/team_guide.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E17, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
 
-All 5 papers verified via full arXiv html (not snippets).
+All 5 papers verified via full arXiv html (not snippets). BibTeX: [`docs/references.bib`](docs/references.bib).
 
 ---
 
@@ -90,7 +98,7 @@ All 5 papers verified via full arXiv html (not snippets).
 
 ---
 
-## Evaluation Plan (abridged from `blueprint.md:Section 9`)
+## Evaluation Plan (abridged from `docs/blueprint.md:Section 9`)
 
 - **B1:** Unprotected ReAct (no gate) — raw vulnerability floor
 - **B2:** ToolGate reimplementation (Hoare `{P}T{Q}` per Appendix G, symbolic world-state) — validated on ToolBench/MCP-Universe subset before adversarial runs
@@ -113,18 +121,18 @@ git clone https://github.com/ethz-spylab/agentdojo       # stretch
 pip install -e .  # pip wrapper around agent tool executor
 
 # 3. Run evaluation (Weeks 9–12)
-python harness/run_injecagent.py --gate ours --threshold 0.6 --split enhanced
-python harness/run_mcptox.py --gate ours --snapshot v1 --report asr_fpr_latency.json
-python harness/compare_b2.py --baseline toolgate --report comparison.json
+python harness/run_injecagent.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --gate ours --threshold 0.6 --report results/injecagent.json
+python harness/run_mcptox.py --gate ours --snapshot v1 --report results/mcptox.json
+python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --report results/comparison.json
 ```
 
-> See `blueprint.md:Section 12` for 16-week roadmap (Weeks 1–2 pilot → Weeks 3–4 B2 → Weeks 5–8 gate → Weeks 9–12 full evaluation → Weeks 13–16 writing) and `blueprint.md:Section 13` for exact build order.
+> See `docs/blueprint.md:Section 12` for 16-week roadmap (Weeks 1–2 pilot → Weeks 3–4 B2 → Weeks 5–8 gate → Weeks 9–12 full evaluation → Weeks 13–16 writing) and `docs/blueprint.md:Section 13` for exact build order.
 
 ---
 
 ## Publication Target
 
-Realistic: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, USENIX-adjacent) — Q2 journal equivalent (e.g., _Journal of Information Security and Applications_, _Applied Intelligence_) is feasible with rigorous ASR/FPR/latency/setup-cost reporting and error taxonomy (see `blueprint.md:Section 18` Reviewer #2 checklist).
+Realistic: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, USENIX-adjacent) — Q2 journal equivalent (e.g., _Journal of Information Security and Applications_, _Applied Intelligence_) is feasible with rigorous ASR/FPR/latency/setup-cost reporting and error taxonomy (see `docs/blueprint.md:Section 18` Reviewer #2 checklist).
 
 ---
 
@@ -164,4 +172,4 @@ Full reviews: [`literature_review/papers/`](literature_review/papers/)
 
 ---
 
-_Last updated: 2026-09-06 — blueprint is the single source of truth, roadmap.md tracks status._
+_Last updated: 2026-10-13 — blueprint is the single source of truth, roadmap.md tracks status. Phase 6 (E18–E22) complete._

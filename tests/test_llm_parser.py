@@ -14,6 +14,7 @@ VALID = {
         "external_send": "disallow",
         "file_write": "disallow",
         "code_exec": "disallow",
+        "system_change": "disallow",
     },
     "specificity": "specific",
 }

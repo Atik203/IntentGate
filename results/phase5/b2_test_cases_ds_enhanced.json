@@ -1,0 +1,35 @@
+{
+  "benchmark": "injecagent",
+  "cases": "data/raw/InjecAgent/data/test_cases_ds_enhanced.json",
+  "model_id": "gpt-4o-mini",
+  "gate": "toolgate",
+  "ablation": "none",
+  "tau": 0.75,
+  "delta": 0.1,
+  "embedding": {
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_hash": "4588b3f9e962",
+    "backend": "sentence-transformers"
+  },
+  "usage": {
+    "agent": {
+      "model_id": "gpt-4o-mini",
+      "calls": 544,
+      "prompt_tokens": 1573901,
+      "completion_tokens": 87428,
+      "total_tokens": 1661329
+    },
+    "parser": null
+  },
+  "estimated_cost_usd": 0.2885,
+  "n": 544,
+  "counts": {
+    "succ": 153,
+    "unsucc": 341,
+    "invalid": 50,
+    "error": 0
+  },
+  "gate_blocked": 9,
+  "asr_valid": 31.0,
+  "valid_rate": 90.8
+}

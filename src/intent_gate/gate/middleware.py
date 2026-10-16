@@ -9,8 +9,10 @@ import time
 
 from intent_gate.gate.decisions import decide
 from intent_gate.gate.trace import TraceLogger
+from intent_gate.scoring.embeddings import EmbeddingBackend
+from intent_gate.scoring.rules import evaluate_rules
 from intent_gate.scoring.scorer import score_call
-from intent_gate.types import Decision, GateResult, IntentContract, ToolCall
+from intent_gate.types import GateResult, IntentContract, ToolCall
 
 
 class GateMiddleware:
@@ -24,6 +26,9 @@ class GateMiddleware:
         delta: float = 0.1,
         benchmark_mode: bool = True,
         interactive_prompt=None,
+        backend: EmbeddingBackend | None = None,
+        context: dict | None = None,
+        ablation: str = "none",
     ):
         self.contract = contract
         self.executor = executor  # callable(name, parameters) -> observation
@@ -33,10 +38,48 @@ class GateMiddleware:
         self.delta = delta
         self.benchmark_mode = benchmark_mode
         self.interactive_prompt = interactive_prompt
+        self.backend = backend or EmbeddingBackend()
+        self.context = dict(context or {})
+        self.ablation = ablation
+        self._contract_vec = None
+        self._raw_vec = None
+
+    @property
+    def run_metadata(self) -> dict:
+        return {"embedding": self.backend.metadata}
+
+    def set_context(self, context: dict) -> None:
+        """Merge per-case trace context (case_id, split, contract, ...) into every record."""
+        self.context.update(context or {})
+
+    def _score(self, call: ToolCall) -> tuple[float, float, float, bool, str]:
+        if self.ablation == "rule-only":
+            s_rule, triggered, reason = evaluate_rules(self.contract, call)
+            return s_rule, s_rule, s_rule, triggered, f"ablation:rule-only {reason}".strip()
+        if self.ablation == "semantic-only":
+            s, s_sem, s_rule, triggered, reason = score_call(
+                self.contract, call, backend=self.backend, alpha=self.alpha,
+                contract_vec=self._contract_vec,
+            )
+            return s_sem, s_sem, s_rule, triggered, "ablation:semantic-only"
+        if self.ablation == "raw-request":
+            return score_call(
+                self.contract, call, backend=self.backend, alpha=self.alpha,
+                contract_vec=self._raw_vec,
+            )
+        return score_call(
+            self.contract, call, backend=self.backend, alpha=self.alpha,
+            contract_vec=self._contract_vec,
+        )
 
     def check(self, call: ToolCall) -> GateResult:
+        if self.ablation in ("none", "semantic-only") and self._contract_vec is None:
+            self._contract_vec = self.backend.embed([self.contract.contract_text()])[0]
+        if self.ablation == "raw-request" and self._raw_vec is None:
+            raw_text = self.contract.raw_request or self.contract.contract_text()
+            self._raw_vec = self.backend.embed([raw_text])[0]
         t0 = time.perf_counter()
-        s, s_sem, s_rule, triggered, reason = score_call(self.contract, call, alpha=self.alpha)
+        s, s_sem, s_rule, triggered, reason = self._score(call)
         latency_ms = (time.perf_counter() - t0) * 1000.0
         d = decide(s, tau=self.tau, delta=self.delta)
         result = GateResult(
@@ -49,7 +92,7 @@ class GateMiddleware:
             would_escalate=(d == "escalate" and self.benchmark_mode),
             reason=reason,
         )
-        self.trace.log(call, result)
+        self.trace.log(call, result, extra={**self.run_metadata, **self.context})
         return result
 
     def execute(self, call: ToolCall):

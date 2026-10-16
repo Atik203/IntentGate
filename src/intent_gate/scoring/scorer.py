@@ -13,12 +13,21 @@ def score_call(
     call: ToolCall,
     backend: EmbeddingBackend | None = None,
     alpha: float = 0.7,
+    contract_vec: np.ndarray | None = None,
 ) -> tuple[float, float, float, bool, str]:
-    """Return (S, S_sem, S_rule, rule_triggered, reason). S in [0,1], deterministic."""
+    """Return (S, S_sem, S_rule, rule_triggered, reason). S in [0,1], deterministic.
+
+    ``contract_vec`` is the cached, frozen contract embedding (blueprint Sec 5/6): the gate
+    embeds the contract once per session and passes it here, so only the call is embedded.
+    """
     backend = backend or EmbeddingBackend()
     s_rule, triggered, reason = evaluate_rules(contract, call)
-    vecs = backend.embed([contract.contract_text(), call.naturalized()])
-    s_sem = (cosine(vecs[0], vecs[1]) + 1.0) / 2.0  # map [-1,1] -> [0,1]
+    if contract_vec is None:
+        vecs = backend.embed([contract.contract_text(), call.naturalized()])
+        contract_vec, call_vec = vecs[0], vecs[1]
+    else:
+        call_vec = backend.embed([call.naturalized()])[0]
+    s_sem = (cosine(contract_vec, call_vec) + 1.0) / 2.0  # map [-1,1] -> [0,1]
     s_sem = float(np.clip(s_sem, 0.0, 1.0))
     if triggered and s_rule == 0.0:
         return 0.0, s_sem, s_rule, triggered, reason  # hard veto
