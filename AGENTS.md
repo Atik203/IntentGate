@@ -6,9 +6,9 @@ Instructions for AI coding agents (opencode, Claude Code, Cursor, etc.) working 
 
 IntentGate = thesis project. A model-agnostic **middleware action gate** for tool-using LLM agents: it derives an *intent contract* from the user's original request (once, before any attacker content), scores every proposed `tool_call` against it (embedding similarity + hard rule veto), and decides `allow / block / escalate`.
 
-- **Blueprint (single source of truth):** `blueprint.md` — design Sec 0–18
+- **Blueprint (single source of truth):** `docs/blueprint.md` — design Sec 0–18 (indexed with anchors)
 - **Status tracker:** `roadmap.md` — Phases 0–8, Gates 0–3, success criteria. **Update its checkboxes in the same commit that completes a task.**
-- **Setup for humans:** `setup.md`
+- **Setup for humans:** `docs/setup.md`
 
 ## Repo layout
 
@@ -24,7 +24,9 @@ harness/                    # run_injecagent.py, run_mcptox.py, compare_b2.py, c
 scripts/                    # pilot_score_dist.py, check_parser.py, clone_benchmarks.ps1
 configs/                    # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
 tests/                      # pytest; fixtures/ has labeled hijack+legit cases
-data/  results/             # gitignored (benchmarks, JSONL traces)
+docs/                       # team_guide.md (start here) + README hub + setup.md + blueprint.md (indexed) + references.bib + experiments/ (E1-E10)
+data/                      # README.md tracked; raw/ gitignored (bootstrap via scripts/clone_benchmarks.ps1)
+results/                   # TRACKED on purpose: teammates read results/ instead of re-running evals
 ```
 
 ## Commands (Windows/PowerShell, pwsh)
@@ -32,15 +34,16 @@ data/  results/             # gitignored (benchmarks, JSONL traces)
 ```powershell
 .venv\Scripts\Activate.ps1          # activate venv
 pip install -e ".[dev]"             # install (first run downloads torch - slow)
-pytest -q                           # run tests (expect 26+ passing)
+pytest -q                           # run tests (expect 199 passing; data-dependent tests skip without clones)
 python scripts/check_parser.py      # parser spot-check (offline)
 python scripts/pilot_score_dist.py  # scorer pilot (offline)
-powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1
+powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1   # bootstrap data/raw at pinned commits
+powershell -ExecutionPolicy Bypass -File scripts/clone_benchmarks.ps1 -VerifyOnly   # health check, no downloads
 python harness/run_injecagent.py --cases <path> --gate ours --threshold 0.6
 ```
 
 - Lint: `ruff check .` (ruff configured in pyproject; not required to run every change, but keep lines <= 100).
-- There is no Makefile/CI config; keep it venv+pip+pytest only.
+- No Makefile; CI (`.github/workflows/tests.yml`) runs `pytest -q` on `dev`/`main` — keep the local flow venv+pip+pytest only.
 
 ## Code conventions
 
@@ -52,8 +55,9 @@ python harness/run_injecagent.py --cases <path> --gate ours --threshold 0.6
 6. **Ordering invariant.** Intent parsing happens *before* tool definitions/attacker content load (`harness/common.py` `OrderingGuard`). Never pass tool outputs to the parser.
 7. **Same agent prompt across B1/B2/ours.** Only the middleware differs; measured delta = gate effect.
 8. **Deterministic.** Seed everything, `temperature=0` for parser/agent, pin model IDs, log hashes (embedding model, benchmark commits) in every result.
-9. **Scope discipline.** B2 contracts only for the *evaluated tool subset* (not all 353 MCPTox tools). Missing contract = `no_contract` counter, never silently allowed.
+9. **Scope discipline.** B2 contracts only for the *evaluated tool subset* (not all 801 MCPTox registered tools). Missing contract = `no_contract` counter, never silently allowed.
 10. **Blueprint-faithful naming.** Keep blueprint terms: `S_sem`, `S_rule`, `tau`, `delta`, `escalate`, `Gate N` milestones.
+11. **B2 contract keys = harness tool names.** Contracts are keyed by the `ToolCall` name (`<Toolkit><Tool>`, e.g. `GmailSendEmail`). `ToolGateChecker.coverage` is computed against the evaluated tool universe (`evaluated_tools`), never self-referentially; frozen numbers live in `configs/b2_coverage.json`.
 
 ## LLM model notes + cache-hit guidance
 
@@ -72,10 +76,14 @@ To maximize context cache hits (DeepSeek context caching, OpenAI automatic promp
 
 ## Workflow
 
-- Blueprint (`blueprint.md`) is the design source of truth; roadmap (`roadmap.md`) is the status source. If they conflict, flag it — don't silently pick one.
+- Blueprint (`docs/blueprint.md`) is the design source of truth; roadmap (`roadmap.md`) is the status source. If they conflict, flag it — don't silently pick one.
+- Doc sync: literature-review changes (`literature_review/`, `docs/references.bib`) and design edits must update the affected docs (`docs/blueprint.md`, `README.md`, `literature_review/index.md`) **and** `roadmap.md` + `CHANGELOG.md` in the same PR. Experiment results go in `docs/experiments/` following its template (At a glance → Goal → Setup → Results → Artifacts → Limitations → Supervisor Q&A).
 - Check the roadmap before starting work: a `[ ]` item in the current phase is the next thing to do. Mark `[~]` while working, `[x]` when done + tested.
 - Before touching `src/` or `harness/`, run `pytest -q` and keep it green.
-- Do not commit `.env`, `data/raw/`, `results/*.jsonl`, `.venv/`, `*.egg-info/` (gitignore already covers these).
+- **Never commit:** `.env`, `data/raw/`, `.venv/`, `node_modules/`, `config.bat`. These are gitignored.
+- **`results/` IS tracked on purpose.** 120 result files live in git so teammates read published numbers instead of re-running evals (each run costs real LLM tokens). Commit new run outputs; cite the benchmark pins from `configs/benchmark_versions.yaml` in the results log (blueprint Sec 8).
+- **`data/raw/` is never committed** (~440 MB of third-party benchmarks). Teammates fetch it with `scripts/clone_benchmarks.ps1`, which clones at the exact pinned commits. Only `data/README.md` is tracked.
+- **Do not commit `src/*.egg-info/`** — it is a `pip install -e .` build artifact. 5 files are currently tracked from an earlier commit; they should be untracked (`git rm -r --cached src/intent_gate.egg-info`) and the path added to `.gitignore`.
 - Security-relevant code paths (parser ordering, no-bypass, veto logic) have dedicated tests — add/extend them with any change.
 
 ## Branching (5-member team)

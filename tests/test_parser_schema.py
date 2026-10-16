@@ -9,6 +9,7 @@ def test_empty_request_returns_minimal_fail_closed():
     c = IntentParser().parse("")
     assert c.side_effect_limits["code_exec"] == "disallow"
     assert c.side_effect_limits["financial"] == "no payment"
+    assert c.side_effect_limits["system_change"] == "disallow"
     assert c.specificity == "vague"
 
 
@@ -28,6 +29,7 @@ def test_coerce_contract_missing_fields_default_fail_closed():
     c = coerce_contract({"goals": ["x"], "side_effect_limits": {"financial": "allow"}}, raw_request="x")
     assert c.side_effect_limits["file_write"] == "disallow"
     assert c.side_effect_limits["code_exec"] == "disallow"
+    assert c.side_effect_limits["system_change"] == "disallow"
     assert c.side_effect_limits["financial"] == "allow"
 
 

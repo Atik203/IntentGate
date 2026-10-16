@@ -1,7 +1,7 @@
-"""Run OUR B1 pipeline on an InjecAgent subset (S3b; blueprint Sec 13 step 1).
+"""Run OUR pipeline on an InjecAgent subset (S3b / gated conditions; blueprint Sec 13).
 
-Same vendored prompts/parsing as the gate will use; no gate yet (B1).
-Usage: python scripts/run_injecagent_ours.py --per-split 10 --setting base
+Usage: python scripts/run_injecagent_ours.py --per-split 10 --setting base --gate ours \\
+  --out results/phase6/qwen_ours_base
 """
 from __future__ import annotations
 
@@ -21,9 +21,28 @@ def main():
     ap.add_argument("--per-split", type=int, default=10)
     ap.add_argument("--setting", choices=["base", "enhanced"], default="base")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--gate", choices=["none", "ours", "toolgate"], default="none")
+    ap.add_argument(
+        "--ablation",
+        choices=["none", "semantic-only", "rule-only", "raw-request"],
+        default="none",
+    )
+    ap.add_argument("--tau", type=float, default=0.75)
+    ap.add_argument("--delta", type=float, default=0.1)
+    ap.add_argument("--alpha", type=float, default=0.7)
     ap.add_argument("--model-name", default=None)
-    ap.add_argument("--out", default="results/injecagent_ours")
+    from harness.common import add_endpoint_args
+
+    add_endpoint_args(ap)
+    ap.add_argument(
+        "--out",
+        required=True,
+        help="output directory (required so a run can never clobber a tracked baseline path)",
+    )
+    ap.add_argument("--trace", default="")
     args = ap.parse_args()
+    if args.ablation != "none" and args.gate != "ours":
+        ap.error("--ablation requires --gate ours")
 
     from dotenv import load_dotenv
 
@@ -31,49 +50,82 @@ def main():
     model_name = args.model_name or os.getenv("AGENT_MODEL_ID", "gpt-4o-mini")
 
     from harness.adapters.injecagent import load_injecagent_cases, load_tool_definitions
-    from harness.injecagent_runner import build_tool_dict, run_case, serialize_calls
+    from harness.gate_policy import build_policy_factory
+    from harness.injecagent_runner import build_tool_dict, run_cases, serialize_calls
     from intent_gate.agent.base import LLMClient
+    from intent_gate.baselines.toolgate.world_state import seed_from_request
+    from intent_gate.eval.cost import estimate_usage_cost
+    from intent_gate.gate.trace import TraceLogger
+    from intent_gate.parser.parser import build_parser
+    from intent_gate.scoring.embeddings import EmbeddingBackend
 
     tool_dict = build_tool_dict(load_tool_definitions(ROOT / "data/raw/InjecAgent/data/tools.json"))
-    llm = LLMClient(model_id=model_name)
+    from harness.common import resolve_api_key, resolve_base_url, resolve_reasoning_effort
+
+    llm = LLMClient(
+        model_id=model_name,
+        base_url=resolve_base_url(args.agent_base_url, "agent"),
+        api_key=resolve_api_key(args.agent_api_key, "agent"),
+        reasoning_effort=resolve_reasoning_effort(args.agent_reasoning_effort, "agent"),
+    )
+    parser_llm = (
+        LLMClient(
+            model_id=os.getenv("PARSER_MODEL_ID", "gpt-4o-mini"),
+            base_url=resolve_base_url(args.parser_base_url, "parser"),
+            api_key=resolve_api_key(args.parser_api_key, "parser"),
+            reasoning_effort=resolve_reasoning_effort(None, "parser"),
+        )
+        if args.gate == "ours"
+        else None
+    )
     out_dir = (ROOT / args.out).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    summary = {"model_name": model_name, "setting": args.setting, "splits": {}}
+    backend = EmbeddingBackend()
+    trace_path = Path(args.trace) if args.trace else out_dir / f"gate_trace_{args.setting}.jsonl"
+    trace = TraceLogger(
+        trace_path,
+        metadata={
+            "benchmark": "injecagent",
+            "setting": args.setting,
+            "model_id": model_name,
+            "gate": args.gate,
+            "tau": args.tau,
+            "delta": args.delta,
+            "alpha": args.alpha,
+            "ablation": args.ablation,
+            "embedding": backend.metadata,
+        },
+        append=False,
+    )
+    policy_factory = build_policy_factory(
+        args.gate,
+        parser=build_parser(llm=parser_llm),
+        backend=backend,
+        trace=trace,
+        tau=args.tau,
+        delta=args.delta,
+        alpha=args.alpha,
+        state_factory=seed_from_request,
+        ablation=args.ablation,
+    )
+
+    summary = {"model_name": model_name, "setting": args.setting, "gate": args.gate, "ablation": args.ablation, "splits": {}}
     for split in ["dh", "ds"]:
         case_file = ROOT / "data/raw/InjecAgent/data" / f"test_cases_{split}_{args.setting}.json"
         cases = load_injecagent_cases(case_file, limit=args.per_split, seed=args.seed)
-        counts = {"succ": 0, "unsucc": 0, "invalid": 0, "error": 0}
         out_file = out_dir / f"test_cases_{split}_{args.setting}.jsonl"
-        with out_file.open("w", encoding="utf-8") as fh:
-            for case in cases:
-                result = run_case(case, llm, tool_dict)
-                counts[result.eval] = counts.get(result.eval, 0) + 1
-                fh.write(
-                    json.dumps(
-                        {
-                            "case_id": case.case_id,
-                            "eval": result.eval,
-                            "invalid_reason": result.invalid_reason,
-                            "output": result.output,
-                            "tool_calls": serialize_calls(result.tool_calls),
-                            "attacker_params": result.attacker_params,
-                            "attacker_thought": result.attacker_thought,
-                            "error": result.error,
-                        }
-                    )
-                    + "\n"
-                )
-                calls = [c["name"] for c in serialize_calls(result.tool_calls)]
-                print(f"{result.eval:>7} | {split} | {case.user_tool} -> {calls[:2]}")
 
-        decided = counts["succ"] + counts["unsucc"]
-        summary["splits"][split] = {
-            "n": len(cases),
-            "counts": counts,
-            "asr_valid": round(100.0 * counts["succ"] / decided, 1) if decided else None,
-            "valid_rate": round(100.0 * decided / len(cases), 1) if cases else None,
-        }
+        def progress(result, case, split=split):
+            calls = [c["name"] for c in serialize_calls(result.tool_calls)]
+            print(f"{result.eval:>7} | {split} | {case.user_tool} -> {calls[:2]}")
+
+        split_summary, _ = run_cases(
+            cases, llm, tool_dict, policy_factory=policy_factory, jsonl_path=out_file, progress=progress
+        )
+        summary["splits"][split] = split_summary
+
+    trace.close()
 
     dh, ds = summary["splits"]["dh"], summary["splits"]["ds"]
     total_decided = (
@@ -81,6 +133,17 @@ def main():
     )
     total_succ = dh["counts"]["succ"] + ds["counts"]["succ"]
     summary["asr_valid_first_step"] = round(100.0 * total_succ / total_decided, 1) if total_decided else None
+    summary["embedding"] = backend.metadata
+    agent_cost = estimate_usage_cost(llm.usage)
+    parser_cost = estimate_usage_cost(parser_llm.usage) if parser_llm else None
+    summary["usage"] = {"agent": llm.usage, "parser": parser_llm.usage if parser_llm else None}
+    if agent_cost is None:
+        summary["estimated_cost_usd"] = parser_cost
+        summary["cost_note"] = "agent cost unknown (local/unbilled model); total omits agent"
+    elif parser_cost is None:
+        summary["estimated_cost_usd"] = agent_cost
+    else:
+        summary["estimated_cost_usd"] = round(agent_cost + parser_cost, 4)
 
     summary_file = out_dir / f"summary_{args.setting}.json"
     summary_file.write_text(json.dumps(summary, indent=2), encoding="utf-8")

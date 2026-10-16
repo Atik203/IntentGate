@@ -12,6 +12,7 @@ FLIGHT_CONTRACT = IntentContract(
         "external_send": "disallow",
         "file_write": "disallow",
         "code_exec": "disallow",
+        "system_change": "disallow",
     },
     specificity="specific",
     raw_request="Find me the cheapest flight to Berlin next Friday and hold it - don't pay yet.",

@@ -1,0 +1,58 @@
+# Docs — index
+
+> Documentation hub for the IntentGate thesis. **New to the project? Start with the
+> [team guide](team_guide.md)** (beginner-friendly: what/why/status/next). For the design itself
+> read the [blueprint](blueprint.md), and for results the [experiments](experiments/README.md) hub.
+
+## What lives where
+
+| Document | What it is | When to read it |
+|---|---|---|
+| [`team_guide.md`](team_guide.md) | **Start here** — beginner-friendly guide: project in plain words, glossary, what has been done with results, where we are going, what you can do | First day; when confused about the big picture |
+| [`blueprint.md`](blueprint.md) | Design source of truth (Sec 0–18): problem, pipeline, scorer, B2 baseline, datasets, evaluation plan, risks, roadmap, supervisor/team explanations, Reviewer #2 critique | Before touching design decisions |
+| [`setup.md`](setup.md) | Install & verify guide (venv, deps, `.env`, tests, benchmark clones, harness commands) | First day / fresh machine |
+| [`experiments/README.md`](experiments/README.md) | Experiment hub: status matrix, E1–E10 index, datasets, pinned models, artifact map, reproduce commands, merge map, cross-cutting Q&A | To see what is done and how to reproduce it |
+| [`experiments/01_gate0_foundation.md`](experiments/01_gate0_foundation.md) | E1–E4: B1 reference/parity, MCPTox B1, Gate 0 scorer pilot (GO) | Understanding the trust checks and Assumption 2 |
+| [`experiments/02_parser_schema.md`](experiments/02_parser_schema.md) | E5–E6: parser v1 freeze and schema v1.1 unfreeze (`system_change`) | Parser/contract questions |
+| [`experiments/03_b2_toolgate.md`](experiments/03_b2_toolgate.md) | E7: ToolGate B2 contracts, coverage freeze, validation, divergence | Baseline-fairness questions |
+| [`experiments/04_gate2_gated_eval.md`](experiments/04_gate2_gated_eval.md) | E8–E10: gated integration run, threshold sweep/Pareto, error taxonomy | The main results and their caveats |
+| [`references.bib`](references.bib) | BibTeX citation basis (10 verified papers) | Writing/citing |
+
+Related roots outside `docs/`:
+
+- [`roadmap.md`](../roadmap.md) — status tracker (Phases 0–8, Gates 0–3, success criteria).
+- [`literature_review/`](../literature_review/) — frozen paper reviews + index (5 anchors + ToolGate).
+- [`CHANGELOG.md`](../CHANGELOG.md) — change log (`[Unreleased]` for the current PR window).
+- [`AGENTS.md`](../AGENTS.md) — conventions for AI coding agents working in this repo.
+
+## Status snapshot (2026-10-13)
+
+| Gate | Definition | Status |
+|---|---|---|
+| Gate 0 | B1 reproduces + 50-case pilot passes | ✅ 2026-09-11 |
+| Gate 1 | B2 reimpl validated (coverage reported) | ✅ 2026-09-16 |
+| Gate 2 | Gate integrated; tests green; p95 latency measured | ✅ 2026-09-16 |
+| Gate 3 | Full-suite results freeze | ✅ 2026-10-12 — InjecAgent 19.0%→0.7%, MCPTox 279→144 ([report](experiments/05_phase5_full_evaluation.md)) |
+
+**Phase 6 — Strengthening & Hardening: COMPLETE (2026-10-13)**
+| Experiment | Description | Result |
+|---|---|---|
+| E18 | Second-backbone pilot (Qwen + Luna) | Qwen 27.1% → 2.1% ASR; Luna prose-only, excluded |
+| E19 | B2 coverage curve (65 → 583 contracts) | 37.2% → 84.9% weighted; curve flat (structural weakness) |
+| E20 | Intent-mimicry probe | Avg S inflation +0.0112; 0/13 cross τ=0.75 |
+| E21 | Escalate precision (hand-labeled) | 80.5% precision, 14.8% false-escalate on 583 calls |
+| E22 | Power analysis + multiple-comparison | Power=1.0 at α=0.005; 10-risk Bonferroni survives |
+
+Frozen headline (Gate 3): ours takes InjecAgent ASR-valid **354 → 13 cases (19.0% → 0.7%)** and MCPTox
+attack-influenced **279 → 144**, B2 statistically indistinguishable from unprotected, p95 ≤ 20 ms,
+billed $9.64. E11–E17 are final; E1–E10 were the development slices that motivated the design.
+Phase 6 (E18–E22) is preliminary; it never rewrites E11–E17.
+
+## Conventions
+
+- The blueprint is the design source of truth; the roadmap is the status source. If they conflict,
+  flag it — do not silently pick one.
+- Experiment reports follow one template: **At a glance → Goal → Setup → Results → Artifacts →
+  Limitations → Supervisor Q&A** (see `experiments/README.md`).
+- Design or literature-review changes must update the affected docs **and** `roadmap.md` +
+  `CHANGELOG.md` in the same PR.
