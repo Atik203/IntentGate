@@ -5,11 +5,13 @@ constraint forces S=0 regardless of semantic score.
 """
 from __future__ import annotations
 
+import re
+
 from intent_gate.types import IntentContract, ToolCall
 
 FINANCIAL_TOOLS = {"transfer_money", "pay", "purchase", "buy", "send_money", "transferfunds", "pay_bill"}
 SEND_TOOLS = {"send_email", "send_message", "email", "post_external"}
-FILE_TOOLS = {"write_file", "delete_file", "rm", "shred"}
+FILE_TOOLS = {"write_file", "rm", "shred"}
 CODE_TOOLS = {"exec", "exec_code", "run_code", "run_shell", "python_exec"}
 
 FINANCIAL_KEYWORDS = (
@@ -30,13 +32,62 @@ SEND_KEYWORDS = ("send", "send_message", "sendmessage", "sendmail", "post_extern
 SHARE_KEYWORD = "share"
 SHARE_SENSITIVE = ("password", "credential", "cred", "secret", "file", "data", "result", "profile", "address", "payment", "contact")
 
+COMMAND_INJECTION_RE = re.compile(r"(&&|\|\||;|`|\$\()")
+COMMAND_TOOL_KEYWORDS = ("exec", "shell", "commit", "run_", "script")
+COMMAND_PARAM_KEYS = {"command", "cmd", "script", "code", "shell", "patch"}
+
 
 def _is_send_tool(n: str) -> bool:
     if any(k in n for k in SEND_KEYWORDS):
         return True
     return SHARE_KEYWORD in n and any(s in n for s in SHARE_SENSITIVE)
-FILE_KEYWORDS = ("write_file", "delete_file", "file_delete", "remove_file", "overwrite", "shred")
+
+
+FILE_KEYWORDS = (
+    "write_file",
+    "file_delete",
+    "remove_file",
+    "overwrite",
+    "shred",
+    "relocat",
+    "rename",
+    "move_item",
+    "moveitem",
+    "upload",
+)
 CODE_KEYWORDS = ("exec", "shell", "run_code", "python_exec")
+SYSTEM_TOKENS = {
+    "create",
+    "update",
+    "delete",
+    "deletion",
+    "unlink",
+    "truncate",
+    "disable",
+    "enable",
+    "grant",
+    "revoke",
+    "unlock",
+    "schedule",
+    "deploy",
+    "configure",
+    "manage",
+    "modify",
+    "terminate",
+    "kill",
+    "reset",
+    "cancel",
+    "admin",
+}
+_TOKEN_RE = re.compile(r"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z0-9]+|[A-Z]+")
+
+
+def _tokens(name: str) -> list[str]:
+    """Split snake_case/CamelCase tool names into lowercase action tokens."""
+    tokens: list[str] = []
+    for part in re.split(r"[_\-\s]+", name or ""):
+        tokens.extend(match.lower() for match in _TOKEN_RE.findall(part))
+    return tokens
 
 
 def tool_category(name: str) -> str:
@@ -50,7 +101,53 @@ def tool_category(name: str) -> str:
         return "file"
     if n in CODE_TOOLS or any(k in n for k in CODE_KEYWORDS):
         return "code"
+    if any(token in SYSTEM_TOKENS for token in _tokens(name)):
+        return "system"
     return "other"
+
+
+def _command_injection(call: ToolCall) -> bool:
+    """True when a command-like tool/parameter carries shell operators (injection payload)."""
+    name = (call.name or "").lower()
+    keys = {str(k).lower() for k in (call.parameters or {})}
+    command_like = any(k in name for k in COMMAND_TOOL_KEYWORDS) or bool(keys & COMMAND_PARAM_KEYS)
+    if not command_like:
+        return False
+    for value in (call.parameters or {}).values():
+        if isinstance(value, str) and COMMAND_INJECTION_RE.search(value):
+            return True
+    return False
+
+
+PATH_SCOPE_HINTS = ("path", "folder", "directory")
+
+
+def _authorized_paths(limit_val: str) -> list[str]:
+    return [
+        token.strip("'\"")
+        for token in re.split(r"[\s,;]+", limit_val or "")
+        if "/" in token or token.startswith("~")
+    ]
+
+
+def _path_matches(candidate: str, allowed: str) -> bool:
+    c = candidate.rstrip("/")
+    a = allowed.rstrip("/")
+    return c == a or c.startswith(a + "/") or a.startswith(c + "/")
+
+
+def _path_scope_ok(limit_val: str, params: dict) -> bool:
+    """When the contract names authorized paths, path-like arguments must fall inside them."""
+    allowed = _authorized_paths(limit_val)
+    if not allowed:
+        return True
+    for key, value in params.items():
+        if not isinstance(value, str) or not any(hint in key for hint in PATH_SCOPE_HINTS):
+            continue
+        for candidate in (p.strip() for p in re.split(r"[\s,;]+", value) if p.strip()):
+            if not any(_path_matches(candidate, allowed_path) for allowed_path in allowed):
+                return False
+    return True
 
 
 CLOSED_PREFIXES = ("disallow", "no ", "deny", "forbidden", "self-only")
@@ -79,10 +176,17 @@ def evaluate_rules(contract: IntentContract, call: ToolCall) -> tuple[float, boo
         if not _limit_allows(limits.get("code_exec", "disallow")):
             return 0.0, True, f"code_exec {call.name} disallowed by intent"
 
+    # System/config change veto (create/update/delete/disable/grant/schedule/...)
+    if cat == "system" and not _limit_allows(limits.get("system_change", "disallow")):
+        return 0.0, True, f"system change {call.name} not in intent (limit={limits.get('system_change')})"
+
     # File write veto
     if cat == "file":
-        if not _limit_allows(limits.get("file_write", "disallow")):
+        file_limit = limits.get("file_write", "disallow")
+        if not _limit_allows(file_limit):
             return 0.0, True, f"file tool {call.name} disallowed by intent"
+        if not _path_scope_ok(file_limit, params):
+            return 0.0, True, f"file path outside the authorized scope for {call.name}"
 
     # External send: block send to non-self recipient when limit is self-only/disallow
     if cat == "send":
@@ -94,5 +198,9 @@ def evaluate_rules(contract: IntentContract, call: ToolCall) -> tuple[float, boo
             # Heuristic: attacker address contains attacker/external domain
             if "attacker" in to or "@" in to:
                 return 0.0, True, f"external send to {to!r} outside self-only intent"
+
+    # Shell operators inside command-like parameters: treat as code execution payload
+    if _command_injection(call) and not _limit_allows(limits.get("code_exec", "disallow")):
+        return 0.0, True, f"shell operators in {call.name} parameters treated as code_exec"
 
     return 1.0, False, ""

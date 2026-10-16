@@ -9,7 +9,7 @@ labels: enhancement
 Which phase / Gate does this belong to? (one of Phase 0-8, Gate 0-3)
 
 **Problem**
-What gap does this close? Tie it to `blueprint.md` sections where possible.
+What gap does this close? Tie it to `docs/blueprint.md` sections where possible.
 
 **Proposed solution**
 Design sketch, files/modules affected, interfaces (`types.py` changes?).

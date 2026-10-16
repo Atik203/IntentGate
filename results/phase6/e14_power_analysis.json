@@ -1,0 +1,40 @@
+{
+  "injecagent_power": {
+    "n": 2108,
+    "p1": 0.19,
+    "p2": 0.007,
+    "delta": 0.183,
+    "alpha": 0.05,
+    "power": 1.0,
+    "sufficient_power": true
+  },
+  "injecagent_power_corrected": {
+    "n": 2108,
+    "p1": 0.19,
+    "p2": 0.007,
+    "delta": 0.183,
+    "alpha": 0.005,
+    "power": 1.0,
+    "sufficient_power": true
+  },
+  "mcptox_power": {
+    "n": 1348,
+    "p1": 0.208,
+    "p2": 0.107,
+    "delta": 0.101,
+    "alpha": 0.05,
+    "power": 1.0,
+    "sufficient_power": true
+  },
+  "mcptox_power_corrected": {
+    "n": 1348,
+    "p1": 0.208,
+    "p2": 0.107,
+    "delta": 0.101,
+    "alpha": 0.005,
+    "power": 1.0,
+    "sufficient_power": true
+  },
+  "bonferroni_10_comparisons": 0.005,
+  "bonferroni_5_comparisons": 0.01
+}

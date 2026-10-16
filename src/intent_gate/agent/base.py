@@ -1,22 +1,38 @@
 """LLM provider interface - API first (GPT-4o-mini / Qwen OpenAI-compatible, blueprint Sec 7).
 
 Keep the agent prompt IDENTICAL across B1/B2/ours: only the middleware differs.
+Tracks token usage per client for the Phase 5 cost reports.
 """
 from __future__ import annotations
 
 import os
+import sys
 
-from intent_gate.parser.prompts import build_messages  # reuse chat plumbing
+
+def _temperature_unsupported(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return "temperature" in message and "does not support" in message
 
 
 class LLMClient:
     """Thin OpenAI-compatible client; call() returns assistant text (temp 0)."""
 
-    def __init__(self, model_id: str = "gpt-4o-mini", base_url: str | None = None, api_key: str | None = None):
+    def __init__(
+        self,
+        model_id: str = "gpt-4o-mini",
+        base_url: str | None = None,
+        api_key: str | None = None,
+        reasoning_effort: str | None = None,
+    ):
         self.model_id = model_id
         self._base_url = base_url
         self._api_key = api_key
+        self._reasoning_effort = reasoning_effort
         self._client = None
+        self._send_temperature = True
+        self.calls = 0
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
 
     def _ensure(self):
         if self._client is None:
@@ -30,10 +46,39 @@ class LLMClient:
     def call(self, messages: list, temperature: float = 0.0, response_format: dict | None = None) -> str:
         self._ensure()
         kwargs = {"response_format": response_format} if response_format else {}
-        resp = self._client.chat.completions.create(
-            model=self.model_id, messages=messages, temperature=temperature, **kwargs
-        )
+        if self._reasoning_effort:
+            kwargs["reasoning_effort"] = self._reasoning_effort
+        if self._send_temperature:
+            kwargs["temperature"] = temperature
+        try:
+            resp = self._client.chat.completions.create(model=self.model_id, messages=messages, **kwargs)
+        except Exception as exc:
+            if not self._send_temperature or not _temperature_unsupported(exc):
+                raise
+            self._send_temperature = False
+            kwargs.pop("temperature", None)
+            print(
+                f"[warn] {self.model_id}: temperature={temperature} unsupported; "
+                "omitting temperature for the rest of this run",
+                file=sys.stderr,
+            )
+            resp = self._client.chat.completions.create(model=self.model_id, messages=messages, **kwargs)
+        self.calls += 1
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            self.prompt_tokens += int(getattr(usage, "prompt_tokens", 0) or 0)
+            self.completion_tokens += int(getattr(usage, "completion_tokens", 0) or 0)
         return resp.choices[0].message.content or ""
+
+    @property
+    def usage(self) -> dict:
+        return {
+            "model_id": self.model_id,
+            "calls": self.calls,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "total_tokens": self.prompt_tokens + self.completion_tokens,
+        }
 
     def chat(self, system: str, user: str) -> str:
         return self.call([{"role": "system", "content": system}, {"role": "user", "content": user}])
