@@ -151,6 +151,12 @@ backbones and compare ASR *deltas*, never absolutes.
   `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
   verify served ctx via `ollama show`; keep MiniLM embeddings on CPU. *(pulled + num_ctx set
   on dev box; num_ctx caveat remains documented for GPU box deployments)*
+  Dev-box note (Ollama v0.40.5): the server ignores `OLLAMA_NUM_CTX` /
+  `OLLAMA_CONTEXT_LENGTH` env and per-request `options.num_ctx` (VRAM-based default 4096
+  sticks) → baked-in variant instead: Modelfile with `FROM qwen3.5:4b` +
+  `PARAMETER num_ctx 16384` → `ollama create qwen3.5-16k`. Pilots pass
+  `--model-name qwen3.5-16k`. Verified: served `context_length` 16384 via `/api/ps`,
+  3.56 GB VRAM, warm inference ~4 s, `reasoning_effort: none` returns clean content.
 - [x] Smoke on Qwen re-run: dh 0/3, ds 2/3 (B1) → ours τ=0.75 blocks both (ds 0/3).
   Parser assertion: `usage.parser.calls > 0` ✓
 - [x] **Qwen pilot (~100-case B1 + ours completed):** ASR 27.1% → 2.1%, parser calls=100,
