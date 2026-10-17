@@ -240,8 +240,8 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       `07_phase7_pilots.md#e25`; if it fails to replicate, document the boundary condition
       instead (also publishable). Est. ~$1. If Luna-style prose-only output recurs, exclude
       with the same convention-#7 justification as E18.
-      → IN PROGRESS: key/base URL now configured (`.env` -> `DEEPSEEK_*`). Model: `deepseek-flash` (version DeepSeek-V4.1-Flash-1017); append `--agent-base-url https://api.deepseek.com/v1 --agent-api-key <from .env> --model-name deepseek-flash --agent-reasoning-effort none` to the E25 command above (thinking mode is default-on; none disables it and re-enables temperature). Smoke test with
-      gpt-4o confirmed the pipeline works with a different model ID (20 calls, ~$0.16).
+      → IN PROGRESS: key/base URL now configured (`.env` -> `DEEPSEEK_*`). Model: `deepseek-flash` (version DeepSeek-V4.1-Flash-1017); append `--agent-base-url https://api.deepseek.com/v1 --agent-api-key <from .env> --model-name deepseek-flash --agent-reasoning-effort none` to the E25 command above (thinking mode is default-on; none disables it and re-enables temperature). Smoke verified on `deepseek-flash`
+      (6 cases, 0 invalid, clean summary; `results/phase7/e25_third_backbone/deepseek_smoke/`).
       Full 50/50 run aborted mid-execution — needs completion.
 - [ ] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
       itself, live. Two arms, both on the InjecAgent pilot slice: (a) paraphrase-delivery —
