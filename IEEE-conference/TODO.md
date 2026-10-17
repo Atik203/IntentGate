@@ -38,13 +38,13 @@ Companions: guides `docs/prompt.md` + `docs/writing-guideline.md`; refs `IEEE-co
 - [x] Pronoun sweep — zero hits for `we|our|us` (verified with the build)
 - [x] Cited ↔ listed — all 30 bib entries cited; bibliography renders 30 (verified in build)
 
-## D. QA gates (submission day)
+## D. QA gates (PASSED)
 
-- [ ] ≤6 pages including references; PDF ≤3 MB; A4; fonts embedded; 0 Type 3
-- [ ] Double-blind scan: no names, emails, affiliations, self-identifying URLs
-- [ ] `docs/prompt.md` §11 pre-delivery checklist pass (banned words, sentence starts, rhythm, lists, endings, counts)
-- [ ] Notation audit: α, τ, δ, `S_sem`, `S_rule` defined at first use, consistent
-- [ ] Original prose only (no pasted dataset/model definitions) — IEEE similarity <30% policy
+- [x] ≤6 pages (exactly 6) including references; 228 KB ≤ 3 MB; A4 confirmed in the compile log; **all fonts Type 1 embedded, 0 Type 3** (the fonts must be embedded — IEEE + ICEEICT rule, verified via the PDF font audit)
+- [x] Double-blind scan clean: anonymous author block, no names/emails/affiliations/self-identifying URLs in tex or bib
+- [x] `docs/prompt.md` §11 pass: 0 banned words, no `When/If/While/...` sentence starts, no trailing `-ing`, no `etc.`, counts clean (em-dashes only as table placeholders)
+- [x] Notation audit: LLM/MCP/ASR expanded at first use; α/τ/δ/`S_sem`/`S_rule`/A/K/H/e_C/e_c defined at first use; "ReAct-style" terminology unified
+- [x] Original prose only; ICEEICT "Use of an LLM" policy read — acknowledgment complies (declared, non-intellectual preparation use, author review). Turnitin check not possible locally — upload-side task
 
 ## E. Bookkeeping
 
