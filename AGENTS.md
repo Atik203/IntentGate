@@ -24,7 +24,7 @@ harness/                    # run_injecagent.py, run_mcptox.py, compare_b2.py, c
 scripts/                    # pilot_score_dist.py, check_parser.py, clone_benchmarks.ps1
 configs/                    # intent_schema.json, parser_fewshots.json, thresholds.yaml, models.yaml
 tests/                      # pytest; fixtures/ has labeled hijack+legit cases
-docs/                       # team_guide.md (start here) + README hub + setup.md + blueprint.md (indexed) + references.bib + experiments/ (E1-E10)
+docs/                       # team_guide.md (start here) + README hub + setup.md + blueprint.md (indexed) + references.bib + experiments/ + prompt.md + writing-guideline.md (paper writing rules)
 data/                      # README.md tracked; raw/ gitignored (bootstrap via scripts/clone_benchmarks.ps1)
 results/                   # TRACKED on purpose: teammates read results/ instead of re-running evals
 ```
@@ -78,6 +78,7 @@ To maximize context cache hits (DeepSeek context caching, OpenAI automatic promp
 
 - Blueprint (`docs/blueprint.md`) is the design source of truth; roadmap (`roadmap.md`) is the status source. If they conflict, flag it — don't silently pick one.
 - Doc sync: literature-review changes (`literature_review/`, `docs/references.bib`) and design edits must update the affected docs (`docs/blueprint.md`, `README.md`, `literature_review/index.md`) **and** `roadmap.md` + `CHANGELOG.md` in the same PR. Experiment results go in `docs/experiments/` following its template (At a glance → Goal → Setup → Results → Artifacts → Limitations → Supervisor Q&A).
+- **Paper/thesis prose follows the repo guides:** read `docs/prompt.md` (voice: simple student register + anti-AI patterns; editing vs generation modes) and `docs/writing-guideline.md` (section-by-section structure and content) before writing or polishing any `IEEE-conference/` text or thesis chapter. References: edit `docs/references.bib` (verified source of truth), then re-copy to `IEEE-conference/references.bib`; the paper builds from the local copy.
 - Check the roadmap before starting work: a `[ ]` item in the current phase is the next thing to do. Mark `[~]` while working, `[x]` when done + tested.
 - Before touching `src/` or `harness/`, run `pytest -q` and keep it green.
 - **Never commit:** `.env`, `data/raw/`, `.venv/`, `node_modules/`, `config.bat`. These are gitignored.
