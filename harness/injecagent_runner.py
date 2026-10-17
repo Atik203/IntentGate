@@ -139,9 +139,10 @@ def _run_each(
     counts: dict,
     gate_blocked: int,
     rows: list,
+    prompt_type: str = "InjecAgent",
 ) -> tuple[dict, list, int]:
     for case in cases:
-        result = run_case(case, llm, tool_dict, policy_factory=policy_factory)
+        result = run_case(case, llm, tool_dict, prompt_type=prompt_type, policy_factory=policy_factory)
         counts[result.eval] = counts.get(result.eval, 0) + 1
         gate_blocked += int(result.gate_blocked)
         row = {
@@ -186,6 +187,7 @@ def run_cases(
     jsonl_path: str | Path | None = None,
     progress=None,
     resume: bool = False,
+    prompt_type: str = "InjecAgent",
 ) -> tuple[dict, list]:
     """Run cases and return (summary, rows); writes JSONL when a path is given.
 
@@ -210,11 +212,13 @@ def run_cases(
     if jsonl_path:
         with Path(jsonl_path).open(mode, encoding="utf-8") as handle:
             counts, rows, gate_blocked = _run_each(
-                remaining, llm, tool_dict, policy_factory, handle, progress, counts, gate_blocked, rows
+                remaining, llm, tool_dict, policy_factory, handle, progress, counts, gate_blocked, rows,
+                prompt_type=prompt_type,
             )
     else:
         counts, rows, gate_blocked = _run_each(
-            remaining, llm, tool_dict, policy_factory, None, progress, counts, gate_blocked, rows
+            remaining, llm, tool_dict, policy_factory, None, progress, counts, gate_blocked, rows,
+            prompt_type=prompt_type,
         )
     decided = counts["succ"] + counts["unsucc"]
     summary = {

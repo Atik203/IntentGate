@@ -31,6 +31,7 @@ def main():
     ap.add_argument("--delta", type=float, default=0.1)
     ap.add_argument("--alpha", type=float, default=0.7)
     ap.add_argument("--model-name", default=None)
+    ap.add_argument("--prompt-type", default="InjecAgent", help="Prompt variant for E24 prompt baselines")
     from harness.common import add_endpoint_args
 
     add_endpoint_args(ap)
@@ -121,7 +122,8 @@ def main():
             print(f"{result.eval:>7} | {split} | {case.user_tool} -> {calls[:2]}")
 
         split_summary, _ = run_cases(
-            cases, llm, tool_dict, policy_factory=policy_factory, jsonl_path=out_file, progress=progress
+            cases, llm, tool_dict, policy_factory=policy_factory, jsonl_path=out_file, progress=progress,
+            prompt_type=args.prompt_type,
         )
         summary["splits"][split] = split_summary
 

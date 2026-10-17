@@ -1,0 +1,161 @@
+{
+  "pairs": {
+    "mcptox": {
+      "total": 1291,
+      "stats": {
+        "ours_block_a1_block": 288,
+        "both_allow": 663,
+        "veto_saves": 664,
+        "a1_block_ours_allow": 290,
+        "ours_block_a1_allow": 22
+      },
+      "veto_saves": 664,
+      "risk_flips": {
+        "Infrastructure Damage": {
+          "ours_block_a1_allow": 0,
+          "a1_block_ours_allow": 11,
+          "total": 102
+        },
+        "Credential Leakage": {
+          "ours_block_a1_allow": 2,
+          "a1_block_ours_allow": 15,
+          "total": 110
+        },
+        "Privacy Leakage": {
+          "ours_block_a1_allow": 1,
+          "a1_block_ours_allow": 65,
+          "total": 266
+        },
+        "Service Disruption": {
+          "ours_block_a1_allow": 7,
+          "a1_block_ours_allow": 54,
+          "total": 200
+        },
+        "Instruction Tampering": {
+          "ours_block_a1_allow": 1,
+          "a1_block_ours_allow": 21,
+          "total": 57
+        },
+        "Code Injection": {
+          "ours_block_a1_allow": 0,
+          "a1_block_ours_allow": 8,
+          "total": 63
+        },
+        "Information Manipulation": {
+          "ours_block_a1_allow": 3,
+          "a1_block_ours_allow": 63,
+          "total": 273
+        },
+        "Financial Loss": {
+          "ours_block_a1_allow": 4,
+          "a1_block_ours_allow": 18,
+          "total": 53
+        },
+        "Other": {
+          "ours_block_a1_allow": 0,
+          "a1_block_ours_allow": 0,
+          "total": 4
+        },
+        "Message Hijacking": {
+          "ours_block_a1_allow": 2,
+          "a1_block_ours_allow": 9,
+          "total": 43
+        },
+        "Data Tampering": {
+          "ours_block_a1_allow": 2,
+          "a1_block_ours_allow": 26,
+          "total": 120
+        }
+      },
+      "ours_p95_latency_ms": 16.2,
+      "a1_p95_latency_ms": 16.59
+    },
+    "dh_base": {
+      "total": 116,
+      "stats": {
+        "a1_block_ours_allow": 6,
+        "veto_saves": 32,
+        "both_allow": 31,
+        "ours_block_a1_block": 51,
+        "ours_block_a1_allow": 5
+      },
+      "veto_saves": 32,
+      "risk_flips": {
+        "unknown": {
+          "ours_block_a1_allow": 5,
+          "a1_block_ours_allow": 6,
+          "total": 116
+        }
+      },
+      "ours_p95_latency_ms": 16.32,
+      "a1_p95_latency_ms": 18.02
+    },
+    "dh_enhanced": {
+      "total": 124,
+      "stats": {
+        "ours_block_a1_block": 56,
+        "both_allow": 40,
+        "veto_saves": 39,
+        "a1_block_ours_allow": 4,
+        "ours_block_a1_allow": 2
+      },
+      "veto_saves": 39,
+      "risk_flips": {
+        "unknown": {
+          "ours_block_a1_allow": 2,
+          "a1_block_ours_allow": 4,
+          "total": 124
+        }
+      },
+      "ours_p95_latency_ms": 17.66,
+      "a1_p95_latency_ms": 17.48
+    },
+    "ds_base": {
+      "total": 226,
+      "stats": {
+        "ours_block_a1_block": 136,
+        "a1_block_ours_allow": 8,
+        "veto_saves": 28,
+        "both_allow": 27,
+        "ours_block_a1_allow": 3
+      },
+      "veto_saves": 28,
+      "risk_flips": {
+        "unknown": {
+          "ours_block_a1_allow": 3,
+          "a1_block_ours_allow": 8,
+          "total": 226
+        }
+      },
+      "ours_p95_latency_ms": 18.69,
+      "a1_p95_latency_ms": 17.29
+    },
+    "ds_enhanced": {
+      "total": 256,
+      "stats": {
+        "ours_block_a1_block": 150,
+        "both_allow": 42,
+        "veto_saves": 44,
+        "a1_block_ours_allow": 14
+      },
+      "veto_saves": 44,
+      "risk_flips": {
+        "unknown": {
+          "ours_block_a1_allow": 0,
+          "a1_block_ours_allow": 14,
+          "total": 256
+        }
+      },
+      "ours_p95_latency_ms": 19.81,
+      "a1_p95_latency_ms": 17.2
+    }
+  },
+  "aggregate": {
+    "ours_block_a1_block": 681,
+    "both_allow": 803,
+    "veto_saves": 1614,
+    "a1_block_ours_allow": 322,
+    "ours_block_a1_allow": 32,
+    "total": 2013
+  }
+}

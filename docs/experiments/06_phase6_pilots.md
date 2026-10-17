@@ -246,7 +246,7 @@ filter rather than a noisy alert.
 ## E22 — Power analysis + multiple-comparison correction {#e22}
 
 **Goal.** (Phase 6 P1 stats discipline) Verify Phase 5's sample sizes provide adequate power;
-check whether 10-risk breakdowns survive Bonferroni correction; stratify FPR by contract
+check whether 10-risk breakdowns survive Bonferroni correction; stratify block rate by contract
 specificity (deferred from E15 limitations).
 
 **Setup.** `power_analysis()` and `bonferroni_alpha()` added to `src/intent_gate/eval/stats.py`;
@@ -269,11 +269,11 @@ specificity (deferred from E15 limitations).
 The Phase 5 per-risk McNemar results (E15) survive the correction — the B1→Ours effect is
 statistically significant even under the strictest threshold.
 
-### Per-specificity FPR stratification (deferred from E15 limitation)
+### Per-specificity block-rate stratification (deferred from E15 limitation)
 
 From Phase 5 `ours_*` traces (2,013 gated calls):
 
-| Specificity | Total calls | Blocked | FPR |
+| Specificity | Total calls | Blocked | Block rate |
 |---|---|---|---|
 | specific | 1,804 | 230 | **12.8%** |
 | vague | 209 | 20 | **9.6%** |
@@ -284,15 +284,17 @@ From Phase 5 `ours_*` traces (2,013 gated calls):
 1. **Power is sufficient:** Both benchmarks have power=1.0 at α=0.005 — Phase 5's sample sizes
    were more than adequate for the large effect sizes observed.
 2. **Multiple comparisons:** 10-risk breakdowns survive Bonferroni correction (α=0.005).
-3. **Per-specificity FPR:** The specific stratum has higher FPR (12.8%) than vague (9.6%).
-   This is expected — specific contracts have more side-effect rules active, so more
+3. **Per-specificity block rate:** The specific stratum has a higher block rate (12.8%) than vague
+   (9.6%). This is expected — specific contracts have more side-effect rules active, so more
    borderline calls hit the veto path. The overall 12.4% is within the acceptable range.
 
-**Note:** The 12.4% FPR is higher than the FPR proxy used in Phase 5 (valid-rate parity +
-E4 pilot 4%). This is because the per-call block rate (12.4%) includes escalate candidates
-that are caught near τ — not false positives on legitimate intent. The valid-rate parity
-criterion (Phase 5 valid-rate 86.9–89.7% vs B1 87.5–89.7%) is the more meaningful utility
-metric and remains satisfied.
+**Note:** The 12.4% block rate is higher than the block-rate proxy used in Phase 5 (valid-rate
+parity + E4 pilot 4%). This is because the per-call block rate (12.4%) includes escalate
+candidates that are caught near τ — not false-positive blocks on legitimate intent. The valid-rate
+parity criterion (Phase 5 valid-rate 86.9–89.7% vs B1 87.5–89.7%) is the more meaningful utility
+metric and remains satisfied. The metric is reported as block-rate-by-stratum, not FPR, because
+blocked calls include attacker calls correctly blocked plus legitimate escalate candidates; it is
+not a pure false-positive rate.
 
 ---
 
@@ -360,6 +362,6 @@ python scripts/e21_escalate_precision.py
   a gate deficit. A model that natively emits ReAct format would be the true third backbone.
 - E22 power analysis uses the normal approximation; exact power would differ slightly for
   rare-event proportions (ASR 0.7%).
-- The per-specificity FPR (12.4%) includes escalate-candidates near τ, not just false-positive
+- The per-specificity block rate (12.4%) includes escalate-candidates near τ, not just false-positive
   blocks. Valid-rate parity (86.9–89.7% vs B1 87.5–89.7%) is the meaningful utility metric and
   remains satisfied.
