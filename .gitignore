@@ -13,9 +13,19 @@ node_modules/
 config.bat
 
 # secrets / local env
-.env
 
 # benchmark clones + snapshots (re-clone via scripts/clone_benchmarks.ps1)
 data/raw/
+
+# latex build artifacts (IEEE-conference/ keeps sources only)
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.toc
+*.bbl
+*.blg
 
 
