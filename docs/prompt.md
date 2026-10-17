@@ -122,7 +122,7 @@ Human thesis writing is specific and cited, not generic praise. Check these befo
 
 - **Active voice first:** Write `The system retrieves passages` not `Passages are retrieved`. Clear and direct.
 - **Passive only when needed:** Use passive when the result matters more than who did it (Methods: `The dataset was preprocessed using...`). Mix subjects (`the study`, `the framework`, `the team`, system name) so you do not stack many `was ... by` sentences.
-- **No `I`/`We` in formal sections** (Abstract, Related Work, Methods, Conclusion) unless told to.
+- **No `I`/`We` in any formal section** (Abstract, Related Work, Methods, Conclusion): first-person pronouns are banned in this repo's paper and thesis. Write `this study`, `this paper`, `the proposed method`, or `the system` as the subject instead.
 - **Grammar:**
   - Do not start a formal sentence with `But,`, `And,`, or `So,`.
   - No contractions in formal sections (`do not` not `don't`).
@@ -252,6 +252,7 @@ Check every section before Overleaf:
 11. **Puff check:** No `pivotal moment / broader landscape / significant shift / testament to` vague praise. Just fact + citation.
 12. **Trailing `-ing`:** No sentence ends with `, highlighting... / , demonstrating... / , ensuring...`
 13. **Citations:** Every borrowed fact is cited in its own sentence. No paragraph ends with one trailing citation for several borrowed claims. The Introduction follows the three-paragraph structure in section 10.
+14. **Pronouns:** No `I`/`we`/`our`/`us` anywhere; the subject is `this study`, `this paper`, `the proposed method`, `the system`, or `the gate`.
 
 ---
 

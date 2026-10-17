@@ -332,6 +332,7 @@ evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings
 - [x] Related work: ToolGate "same gate, opposite policy source" framing (blueprint Sec 18) → COMPLETE: Progent (shi2025progent) added to references + cited.
 - [x] Results section: ASR/FPR/latency/setup-cost tables + Pareto + error taxonomy → COMPLETE: Table I headline results (InjecAgent 19.0%→0.7%, MCPTox 20.7%→10.7%, McNemar p=1.3e-33 / p=1.25e-07), setup cost 0 vs 145 contracts, p95 16–20 ms, error taxonomy (13 residuals), E31 contract-vs-semantic flips.
 - [x] Writing guides wired: `docs/prompt.md` + `docs/writing-guideline.md` adapted for the conference template (journal-only sections noted) and linked from `AGENTS.md`.
+- [ ] ICEEICT final pass to submission quality (≤6 pages incl. references, 29–31 verified refs, vector architecture figure, restyled tables, no first-person pronouns): step checklist in `IEEE-conference/TODO.md`.
 - [ ] Reviewer #2 checklist (blueprint Sec 18) cleared item by item
 - [ ] Reproducibility package: pip wrapper + contracts + logs + one-slide "ToolGate vs Ours" table
 - [ ] (Optional, after Findings) Expand to journal: Q2 security journal (e.g., JISA / Applied Intelligence)
