@@ -16,12 +16,12 @@ Companions: guides `docs/prompt.md` + `docs/writing-guideline.md`; refs `IEEE-co
 - [x] Re-copy `docs/references.bib` → `IEEE-conference/references.bib` — done (bibtex scratch-validated: 30 entries; cited ↔ listed final check happens in D)
 
 
-## B. Figures & tables
+## B. Figures & tables (DONE)
 
-- [ ] Fig. 1: redraw architecture as vector (TikZ preferred; 600-dpi raster fallback); fix "veto forces `S = 0`" so it matches block semantics
-- [ ] Fig. 2 (optional — drop first if page-tight): τ-sweep / Pareto curve from frozen `results/` data
-- [ ] Tables: booktabs style — no vertical rules, no `resizebox`, `\small`/`\footnotesize`, caption above, "Ours" bold, units in headers
-- [ ] Table set: (I) related-work comparison · (II) headline results · (III) ablations · (IV) utility/robustness (merge into text if tight)
+- [x] Fig. 1: redrawn as vector (inline TikZ in `IEEE-conference.tex`; `fig1.png` removed); veto semantics fixed ("veto $\Rightarrow$ block (fail-closed)")
+- [x] Fig. 2: τ-sweep (ASR/FPR vs τ, knee at τ=0.75) from frozen `results/gated/pareto.json`, vector pgfplots
+- [x] Tables: booktabs style, no vertical rules, no `resizebox`, captions above, "Ours" bold; stale A2 ablation numbers fixed (14.7% / 263 — the draft had B1's numbers)
+- [x] Table set: (I) related-work (full-width `table*`) · (II) headline · (III) ablations · (IV) utility/robustness pilots
 
 ## C. Sections (rewrite in order; compile after each)
 
