@@ -448,16 +448,19 @@ reproducibility.
 | **P0-2 (E19)** | B2 coverage curve (65 → 583 contracts) | 37.2% → 84.9% weighted; curve flat (structural weakness) |
 | **P1 (E20–E22)** | Mimicry / Escalate / Stats | Avg S inflation +0.0112; 80.5% escalate precision; Power=1.0 |
 
-All P0/P1 items complete — Phase 6 is DONE. Next: Phase 7 extra pilots (E23 paraphrase,
-E24 parser ablation) — see [`../roadmap.md`](../roadmap.md) §Phase 7. Live-server slice and
-drift pilot are deferred to future work (Ch 6 material).
+All P0/P1 items complete — Phase 6 is DONE. Next: Phase 7 Q1 hardening (E23–E30,
+all 9 submission-gate items) — see [`../roadmap.md`](../roadmap.md) §Phase 7. Live-server
+slice and drift pilot are deferred to future work (Ch 6 material).
 
-### Phase 7 — Extra Hardening Pilots
+### Phase 7 — Q1 Hardening
 
 | Pilot | What | Status |
 |---|---|---|
-| E23 | Paraphrase-robustness mini-pilot (20 cases, defense-aware) | ⏳ next |
-| E24 | Parser ablation on a subset (heuristic vs LLM parser) | ⏳ |
+| E23 | Legitimate-only utility suite (measured completion, gate ON vs OFF) | ⏳ next |
+| E24 | Prompt-level baselines (delimiters, instructional-prevention, sandwich) | ⏳ |
+| E25 | Third backbone pilot (new family, same 100-case protocol) | ⏳ |
+| E26 | Adaptive attacker (paraphrase-delivery + threshold-aware) | ⏳ |
+| E27–E31 | Progent comparison · formalism · conformal band · parser ablation · embedding swap · contract-vs-semantic · artifact | ⏳ |
 
 ### Phase 8 — Thesis + Paper Writing (merged)
 

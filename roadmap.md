@@ -151,6 +151,12 @@ backbones and compare ASR *deltas*, never absolutes.
   `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
   verify served ctx via `ollama show`; keep MiniLM embeddings on CPU. *(pulled + num_ctx set
   on dev box; num_ctx caveat remains documented for GPU box deployments)*
+  Dev-box note (Ollama v0.40.5): the server ignores `OLLAMA_NUM_CTX` /
+  `OLLAMA_CONTEXT_LENGTH` env and per-request `options.num_ctx` (VRAM-based default 4096
+  sticks) → baked-in variant instead: Modelfile with `FROM qwen3.5:4b` +
+  `PARAMETER num_ctx 16384` → `ollama create qwen3.5-16k`. Pilots pass
+  `--model-name qwen3.5-16k`. Verified: served `context_length` 16384 via `/api/ps`,
+  3.56 GB VRAM, warm inference ~4 s, `reasoning_effort: none` returns clean content.
 - [x] Smoke on Qwen re-run: dh 0/3, ds 2/3 (B1) → ours τ=0.75 blocks both (ds 0/3).
   Parser assertion: `usage.parser.calls > 0` ✓
 - [x] **Qwen pilot (~100-case B1 + ours completed):** ASR 27.1% → 2.1%, parser calls=100,
@@ -184,21 +190,101 @@ backbones and compare ASR *deltas*, never absolutes.
 
 **Team (done):** P0 items (E18/E19) · E20 (mimicry) · E21 (escalate precision) · E22 (stats).
 
-## Phase 7 — Extra Hardening Pilots (buffer time available)
+## Phase 7 — Q1 Hardening (all 10 submission-gate items)
 
-**Goal: two cheap, high-signal pilots the review recommended. Same rule as Phase 6: frozen
-Phase 5 numbers never touched — new work gets E23+ numbers framed as preliminary.**
+**Goal: close every gap the Q1 review named, in effort order. Same iron rule as Phase 6:
+frozen Phase 5 numbers (E11–E17) are never touched or re-run — all new work gets E23+
+numbers framed as preliminary, committed under `results/phase7/` and written up in
+`docs/experiments/07_phase7_pilots.md` (same At-a-glance → … → Supervisor-Q&A template as 06).
+Branch from `dev` (`feat/phase7-<topic>`), PR back to `dev`. Total est. API cost ~$8.**
 
-- [ ] **E23 paraphrase-robustness mini-pilot (defense-aware paraphrase, do first).**
-      20 cases: paraphrase hijacks to maximize semantic similarity while keeping malicious
-      params → re-score vs τ=0.75 → report ASR delta vs E20 mimicry finding. Complements E20
-      (E20 rephrased the *call*; this rephrases the *attack delivery*). ASB's 5 injection
-      phrasings are a ready-made set (`literature_review/papers/04-asb-zhang-2025.md`).
-- [ ] **E24 parser ablation (heuristic vs LLM parser on one subset).** What the LLM parser
-      buys: run one InjecAgent subset (B1 + ours) with `--ablation` off but parser swapped
-      for the heuristic fallback → compare ASR/valid-rate deltas. Answers the method-chapter
-      question directly; ~$1–2 on a 200-case subset.
-- [ ] Write up E23–E24 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
+**Numbering note (authoritative):** earlier drafts called the paraphrase pilot E23 and the
+parser ablation E24. Final mapping below wins — E23 = utility suite, E24 = prompt baselines,
+E25 = third backbone, E26 = adaptive attacker, E27 = Progent, E28 = parser ablation,
+E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supervisor Q5).
+
+### P0 — submission gate (do first, all parallelizable)
+
+- [ ] **E23 legitimate-only utility suite (Gap 3: utility is proxied, never measured).**
+      Goal: measure task-completion with gate ON vs OFF on benign tasks with zero attacks.
+      How: build ~100 benign tasks (ToolBench benign slice or AgentDojo benign tasks; new
+      loader under `harness/adapters/` only if needed) → run `harness/run_injecagent.py`
+      (or the matching runner) with `--gate none` vs `--gate ours --threshold 0.75`,
+      explicit `--report`/`--jsonl` under `results/phase7/e23_utility/`.
+      Done when: completion-rate table (ON vs OFF, Δ in pp) + block-rate on clean calls is
+      reported in `07_phase7_pilots.md#e23`; valid-rate-parity claim is replaced by a measured
+      number. Also relabel E22's 12.4% stratum metric from "FPR" to block-rate-by-stratum.
+- [ ] **E24 prompt-level baselines (Gap 1a: only one real baseline).** Goal: beat the field,
+      not a strawman. How: add system-text variants (delimiters, instructional-prevention,
+      sandwich/repeat-instruction from the ASB taxonomy) as new `--gate` modes or prompt
+      flags in `harness/gate_policy.py` (no new infra — same harness, same 100-case pilot
+      slice as E18) → run B1 vs ours vs each defense. Done when: one 5-metric panel
+      (ASR, utility, latency, setup cost, backbone) covers all conditions in
+      `07_phase7_pilots.md#e24`. Est. ~$2.
+- [ ] **E25 third backbone pilot (Gap 4: generality is n=1.5).** Goal: replicate the ASR
+      delta on a new model family with full ReAct participation. How: same 100-case protocol
+      as E18 (`scripts/run_injecagent_ours.py --per-split 50 --setting base --gate none|ours
+      --model-name <new-family-via-API>`, parser stays `gpt-4o-mini`, explicit `--out` under
+      `results/phase7/e25_third_backbone/`). Candidates: DeepSeek, Claude, or Llama-70B-class.
+      Done when: per-backbone delta table (B1 ASR → ours ASR) has 3 rows in
+      `07_phase7_pilots.md#e25`; if it fails to replicate, document the boundary condition
+      instead (also publishable). Est. ~$1. If Luna-style prose-only output recurs, exclude
+      with the same convention-#7 justification as E18.
+- [ ] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
+      itself, live. Two arms, both on the InjecAgent pilot slice: (a) paraphrase-delivery —
+      ASB's 5 injection phrasings (`literature_review/papers/04-asb-zhang-2025.md`) applied to
+      attack delivery, re-scored live vs τ=0.75, ASR delta vs E20; (b) threshold-aware —
+      attacker aiming at the E16 near-miss band (S ∈ [0.75, 0.79]) à la Kerckhoffs (τ public),
+      report how many crafted calls land above τ. Done when: ASR-under-adaptation table +
+      honest scope sentence (static vs adaptive) lands in `07_phase7_pilots.md#e26`.
+      Est. ~$1. Keep the static-attack scope claim prominent either way.
+
+### P1 — acceptance-makers (staff the starred ones first: specialist effort, not runner time)
+
+- [ ] **E27 Progent comparison (Gap 1b).** Goal: position vs the closest neighbor (policy-language
+      tool-call gate, 2025 — currently missing from related work). How: ★ needs someone to read
+      Progent, then either a faithful-mini port on the 100-case slice or a documented scope-out
+      (why a port is infeasible + a feature-by-feature table vs our gate). Done when: Progent is
+      cited in `literature_review/` + `docs/references.bib`, and `07_phase7_pilots.md#e27` holds
+      either delta numbers or the scope-out table. Absence here reads as unawareness — do not skip.
+- [ ] **Method formalism (Upgrade A, writing task, no new runs).** Goal: read as a contribution,
+      not just measurements. How: (a) one paragraph framing τ-selection as FPR-constrained ASR
+      minimization (Neyman–Pearson) pointing at the existing Pareto figure; (b) an
+      assumption-violation table (trusted request / untrusted tool content / single-turn scope →
+      what breaks when each is violated, with E16/E18/E26 as evidence). Done when: both land in
+      Ch 3 draft + blueprint Sec 9 pointer; Anderson reference-monitor framing added (2 sentences).
+- [ ] **E30 conformal escalate band (Upgrade A, offline, no LLM calls).** Goal: turn the
+      heuristic [τ−δ, τ+δ] band into a distribution-free guarantee. How: ★ needs conformal-prediction
+      comfort — calibrate a coverage guarantee on cached Phase 5 traces
+      (`results/phase5/ours_*_trace.jsonl`), report empirical coverage at the chosen α, add
+      `conformal_band()` next to `power_analysis()` in `src/intent_gate/eval/stats.py` + tests.
+      Done when: calibrated (α, empirical coverage) pair + method note in
+      `07_phase7_pilots.md#e30`. Highest leverage-per-line item in this phase.
+- [ ] **E28 parser ablation (Upgrade B).** Goal: answer "why not just heuristics." How: one
+      InjecAgent 200-case subset, B1 + ours with the LLM parser swapped for the heuristic
+      fallback → ASR/valid-rate deltas. Done when: delta table in `07_phase7_pilots.md#e28`.
+      Est. ~$1–2.
+- [ ] **E29 embedding swap + τ transfer (Upgrade B, offline, free).** Goal: show τ is a
+      procedure, not a magic number. How: re-score cached traces with one stronger embedding
+      (E5/MPNet) + report τ tuned on base tested on enhanced (and vice versa). Done when:
+      transfer table + recalibration note in `07_phase7_pilots.md#e29`.
+- [ ] **E31 contract-vs-semantic contribution (supervisor Q5).** Goal: E12 showed A1
+      (semantic-only) ≈ ours on headline ASR — locate *where* the full contract + rules +
+      escalate add value, or scope the claim honestly. How: offline on cached traces
+      (`results/phase5/ours_*` vs `a1_*` JSONLs, no LLM calls): (a) per-category/per-risk
+      outcome flips — ours blocks where A1 allows and vice versa (expect rules decisive on
+      high-severity veto categories); (b) escalate-band ablation — what the band loses
+      without S_rule/veto input; (c) cost/latency parity check (contract parse is
+      once-per-session, amortized). Done when: flip table + "where the contract
+      wins/ties/loses" verdict in `07_phase7_pilots.md#e31`; if A1 ties everywhere, the
+      contract claim is scoped to auditability + fail-closed guarantees (already stated in
+      E12 — this makes it measured, not asserted).
+- [ ] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
+      pinned `pip install` + `results/` manifest check (`scripts/run_phase5.py --check`
+      already exists — wire it into the container entrypoint). Done when: clean-machine
+      `docker build && docker run pytest -q` passes and the repro commands in
+      `docs/experiments/README.md` run unmodified inside the container.
+- [ ] Write up E23–E31 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
 
 **Explicitly deferred to future work (Ch 6 material, not pilots):** live-server MCPTox slice
 (static-snapshot limitation stands, blueprint Sec 8) · 20-case multi-turn drift pilot
