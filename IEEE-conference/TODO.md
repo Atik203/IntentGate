@@ -23,19 +23,20 @@ Companions: guides `docs/prompt.md` + `docs/writing-guideline.md`; refs `IEEE-co
 - [x] Tables: booktabs style, no vertical rules, no `resizebox`, captions above, "Ours" bold; stale A2 ablation numbers fixed (14.7% / 263 — the draft had B1's numbers)
 - [x] Table set: (I) related-work (full-width `table*`) · (II) headline · (III) ablations · (IV) utility/robustness pilots
 
-## C. Sections (rewrite in order; compile after each)
+## C. Sections (DONE; ICEEICT LLM-policy read pending in D)
 
-- [ ] Abstract — six questions serial (area → gap → objective → approach → justification → outcome), ~170 words, ≤3 headline numbers
-- [ ] I. Introduction — three paragraphs: context+gap+scope · merged lit review · gap+resolution+outcomes; cite at the claim
-- [ ] II. Background & Related Work — add attack origins, model-level defenses, guardrails, contract/policy systems (ToolGate / Progent / ClawGuard / Task Shield / PFI); honest positioning
-- [ ] III. Method — equations (contract, `S_sem`, `S`, veto, decision) + **Algorithm 1**; merge the two duplicate threshold paragraphs
-- [ ] IV. Baseline: ToolGate — keep; add one Hoare `{P}T{Q}` sentence
-- [ ] V. Evaluation — tighten; reproducibility sentence (gpt-4o-mini, all-MiniLM-L6-v2, seed 42, pinned commits)
-- [ ] VI. Results — final E23/E24 numbers; remove `[TBD]` cells; E25/E26 → preliminary or limitations; fix "Section VI-E" → `\ref`
-- [ ] VII. Discussion & Limitations — before Conclusion
-- [ ] VIII. Conclusion — objective → contribution → findings → significance → future work (no new refs)
-- [ ] Acknowledgment — LLM-usage disclosure; read ICEEICT "Use of a Large Language Model" policy first; keep anonymous-safe
-- [ ] Pronoun sweep: `Select-String '\b(we|our|us)\b' IEEE-conference/IEEE-conference.tex` → zero hits
+- [x] Abstract — six questions serial, ~150 words; headline set only (19.0→0.7%, 20.7→10.7%, 16–20 ms, 145 vs. 0)
+- [x] I. Introduction — three paragraphs: context+gap+scope · two-group lit review · gap+resolution+outcomes; cite at the claim
+- [x] II. Background & Related Work — attack origins (Greshake, Perez, Zou), model-level + data-level defenses, boundary systems (ToolGate / Progent / ClawGuard / Task Shield / PFI), ASB/OWASP/MCP cites; ClawGuard "user confirmation" nuance added; no claim of first
+- [x] III. Method — equations (contract tuple, `S_sem` cosine, `S`, decision) + **Algorithm 1**; duplicate threshold paragraphs merged into scorer
+- [x] IV. Baseline: ToolGate — Hoare `{P}T{Q}` sentence added
+- [x] V. Evaluation — reproducibility sentence (gpt-4o-mini, all-MiniLM-L6-v2 [cited], seed 42); McNemar [cited]; heuristic-evaluator note
+- [x] VI. Results — "Section VI-E pending E23" removed; E24 numbers in; E25/E26 → "in progress" sentence; `\ref` fixes; A2 ablation corrected
+- [x] VII. Limitations — before Conclusion; E23-pending text replaced; heuristic-evaluator caveat added
+- [x] VIII. Conclusion — objective → contribution → findings → significance → future work; no new refs
+- [~] Acknowledgment — LLM-usage disclosure kept; **still to read ICEEICT "Use of a Large Language Model" policy (step D)**
+- [x] Pronoun sweep — zero hits for `we|our|us` (verified with the build)
+- [x] Cited ↔ listed — all 30 bib entries cited; bibliography renders 30 (verified in build)
 
 ## D. QA gates (submission day)
 
