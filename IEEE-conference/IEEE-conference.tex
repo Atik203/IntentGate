@@ -13,6 +13,9 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xurl}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -29,39 +32,35 @@ anonymous@anonymous.org}
 \maketitle
 
 \begin{abstract}
-Tool-using LLM agents can be hijacked by instructions hidden in tool outputs or tool descriptions, causing actions the user never requested. We present IntentGate, a lightweight middleware gate that checks every proposed tool call against an intent contract derived once from the user's trusted request, before any untrusted content is loaded. Each call is scored by embedding similarity to the contract plus deterministic rule checks, then allowed, blocked or escalated, with no LLM call per action and no hand-written per-tool rules. On InjecAgent (2,108 cases) and MCPTox (1,348 cases), IntentGate reduces attack success from 19.0\% to 0.7\% and attack-influenced calls from 20.7\% to 10.7\%, at 16--20 ms p95 latency on CPU. A reimplementation of ToolGate with 145 hand-written contracts is statistically indistinguishable from the unprotected agent, and extending its coverage does not help. Ablations show semantic scoring does most of the detecting; the contract adds utility and auditability, shown by a measured benign-task comparison (50 clean cases: semantic-only blocks 42.9% of clean calls vs 25.0% for the full gate, while allowing fewer user tools: 8.0% vs 12.0%). We evaluate a second model family (qwen3.5:4b), prompt-level baselines, and adaptive-attack pilots, all labeled preliminary. We discuss limitations, including static-attack scope and a heuristic MCPTox evaluator.
+Tool-using LLM agents can be redirected by instructions hidden in tool output or tool descriptions, a risk that grows as agents reach email, calendars, and databases. Existing defenses modify the model, add a judge call per action, or require hand-authored per-tool policies. This paper presents IntentGate, a lightweight middleware gate that derives an intent contract once from the user's trusted request, before any attacker content is loaded. Every proposed tool call is scored by embedding similarity to the contract plus a deterministic rule veto, then allowed, blocked, or escalated, with no LLM call per action. The design targets the single chokepoint every attack crosses, and its policy comes from the user, not from text an attacker can touch. On InjecAgent and MCPTox, attack success falls from 19.0\% to 0.7\% and attack-influenced calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost against 145 hand-authored baseline contracts. Pilots on a second backbone, benign-task utility, and prompt baselines are reported as preliminary.
 \end{abstract}
 
 \begin{IEEEkeywords}
-LLM agents, indirect prompt injection, action gate, intent contract, ToolGate, MCPTox, InjecAgent
+LLM agents, prompt injection defense, tool poisoning, action gate, intent contract, middleware, MCP
 \end{IEEEkeywords}
 
 \section{Introduction}
 
-Large language model agents that act through tools---sending email, updating calendars, querying databases---combine the flexibility of natural language with the side effects of software. That flexibility is also the vulnerability: attacker content can be smuggled into the agent's context through indirect prompt injection (a malicious email instructing the agent to forward messages to an attacker) or tool-poisoning (a malicious tool description that causes the agent to call an attacker-controlled API). The result is \emph{excessive agency} (OWASP): the agent performs actions the user never authorized.
+Tool-using LLM agents act through mail, calendars, databases, and code in a reason-act loop~\cite{yao2023react}. That reach is also the attack surface. Instructions hidden in retrieved documents or tool output can redirect the agent through indirect prompt injection~\cite{greshake2023notwhat,perez2022ignore}, and a malicious tool description can redirect it through tool poisoning, documented on real MCP servers~\cite{wang2026mcptox,radosevich2025mcp}. In both cases the agent performs actions the user never authorized, the excessive-agency risk in the OWASP Top 10 for LLM applications~\cite{owasp2025llmtop10}. Current defenses sit at the model level, in a judge call per action, or in hand-authored per-tool policies, so a lightweight, model-agnostic check that derives its policy from the user's own request is missing. This paper introduces IntentGate: a middleware gate that scores every proposed tool call against an intent contract parsed once from the trusted user request, before any attacker content is loaded. The evaluation covers an injection benchmark (InjecAgent) and a tool-poisoning benchmark (MCPTox).
 
-Existing defenses patch symptoms rather than the chokepoint. Model-level approaches such as CaMeL~\cite{debenedetti2025camel} and StruQ~\cite{chen2025struq} wrap the model in a planner/executor design or fine-tune it to separate instructions from data, rather than changing the model itself; LLM-as-judge checkers add a costly language-model call before every action and can themselves be prompt-injected; ToolGate~\cite{liu2026toolgate} enforces hand-authored Hoare-style contracts per tool, which is sound where contracts exist but requires roughly one contract per tool---145 on the InjecAgent tool set---and misses attacker tools that have no contract at all. We validated ToolGate by contract review and recorded-call replay rather than a ToolBench run, so its fidelity to the published design is approximate.
+Prior defenses fall into two groups. Model-level methods change the model or its training data: CaMeL~\cite{debenedetti2025camel} wraps the model in a planner-executor design with capability tracking, StruQ~\cite{chen2025struq} and SecAlign~\cite{chen2025secalign} fine-tune the model to separate instructions from data, and instruction-hierarchy training~\cite{wallace2024instruction} teaches models to prioritize trusted instructions. These approaches need model cooperation and report no head-to-head evaluation on InjecAgent or MCPTox. Data-level methods mark or filter untrusted text: Spotlighting~\cite{hines2024defending} transforms it, and guardrail toolkits~\cite{rebedea2023nemo} enforce programmable rails, but the model still makes the final call. Boundary-level methods check the tool call itself. ToolGate~\cite{liu2026toolgate} enforces hand-authored Hoare-style contracts at the call boundary, the same chokepoint this paper uses, and its weakness is the policy source: one contract per tool (145 on InjecAgent) and none for attacker-registered tools. Progent~\cite{shi2025progent} enforces symbolic privilege rules per call, but the policies are authored per tool. ClawGuard~\cite{clawguard2026} derives task-specific constraints from the user's stated objective and enforces them deterministically, with a user confirmation step; it reports results on six injection benchmarks that include InjecAgent and MCPTox. Task Shield~\cite{taskshield2025} adds a judge model to every action.
 
-We argue the right place to defend is the single chokepoint every attack must pass: the tool call itself. And the right policy is the user's own intent, expressed in the trusted request before any attacker content arrives. IntentGate is a middleware action gate that derives an intent contract from the user's request once per session, then scores each proposed tool call against it with embedding similarity plus a hard-rule veto, deciding allow, block, or escalate. Because parsing happens before tool definitions or attacker observations are assembled, and because no attacker text reaches the parser, the gate is immune to prompt injection at the enforcement point.
-
-We evaluate IntentGate head-to-head against an unprotected baseline and a ToolGate reimplementation on two adversarial benchmarks: InjecAgent (indirect prompt injection, 2,108 cases) and MCPTox (tool poisoning, 1,348 static-snapshot cases). IntentGate reduces attack success from 19.0\% to 0.7\% on InjecAgent and attack-influenced calls from 20.7\% to 10.7\% on MCPTox (McNemar $p=1.3\mathrm{e}{-}33$ and $p=1.25\mathrm{e}{-}07$), at p95 per-call gate latency of 16--20 ms on CPU. ToolGate, despite 145 hand-authored contracts on InjecAgent, is statistically indistinguishable from the unprotected baseline on MCPTox (its contracts cover only 37.2\% availability-weighted of 801 registered tools). Ablations show semantic scoring does most of the detecting; the contract adds utility and auditability.
+Two problems remain unsolved. Policy setup stays manual or indirect, and no boundary defense reports a frozen head-to-head comparison on both classes of benchmark. IntentGate derives the contract automatically from the user request, scores each call by embedding similarity plus a deterministic veto, and decides allow, block, or escalate at the call boundary, with no LLM call per action. On the frozen evaluation, attack success on InjecAgent falls from 19.0\% to 0.7\% and attack-influenced MCPTox calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost; a ToolGate reimplementation with 145 contracts stays statistically indistinguishable from the unprotected agent.
 
 \section{Background and Related Work}
 
 \subsection{Threat model}
-We consider a tool-using LLM agent in a ReAct loop: given a trusted user request, the agent proposes tool calls, executes them, observes the results, and repeats until it produces a final answer. Attacker content arrives through tool descriptions (tool poisoning) or through retrieved/returned content (indirect injection). The attacker's goal is to cause the agent to execute a tool call the user did not authorize---data exfiltration, message forwarding, state mutation. The defender's goal is to block or escalate such calls while preserving legitimate task completion. We assume the user's initial request is trustworthy; everything after it---tool definitions returned by a registry, tool outputs, injected document text---is potentially attacker-controlled.
+The threat model is a tool-using LLM agent in a reason-act loop~\cite{yao2023react}: given a trusted user request, the agent proposes tool calls, executes them, observes the results, and repeats until it produces a final answer. Attacker content arrives through tool descriptions (tool poisoning) or through retrieved or returned content (indirect injection). The attacker's goal is to cause the agent to execute a tool call the user did not authorize: data exfiltration, message forwarding, or state mutation. The defender's goal is to block or escalate such calls while preserving legitimate task completion. The initial user request is assumed trustworthy; everything after it (tool definitions returned by a registry, tool outputs, injected document text) is potentially attacker-controlled. Attack content ranges from manually written text to optimized adversarial sequences~\cite{zou2023universal}, and earlier risk studies catalogue related failure modes in emulated agent environments~\cite{ruan2024identifying}.
 
 \subsection{Defenses}
-Model-level defenses track information flow at the model or runtime level. CaMeL~\cite{debenedetti2025camel} wraps the model in a planner/executor design with capability-based taint tracking to prevent data from attacker-controlled sources reaching tool arguments, without changing the model itself; StruQ~\cite{chen2025struq} fine-tunes the model to separate instructions from data using structured queries. Both require model-level cooperation and do not publish a head-to-head adversarial evaluation on InjecAgent or MCPTox.
+Model-level defenses track information flow at the model or runtime level. CaMeL~\cite{debenedetti2025camel} wraps the model in a planner-executor design with capability-based taint tracking, so data from attacker-controlled sources cannot reach tool arguments; StruQ~\cite{chen2025struq} fine-tunes the model to separate instructions from data with structured queries, SecAlign~\cite{chen2025secalign} applies preference optimization to the same end, and instruction-hierarchy training~\cite{wallace2024instruction} teaches the model to prioritize privileged instructions. All of these require model cooperation and publish no head-to-head adversarial evaluation on InjecAgent or MCPTox. Data-level defenses mark or transform untrusted text: Spotlighting~\cite{hines2024defending} converts retrieved content into clearly delimited forms, and guardrail toolkits such as NeMo Guardrails~\cite{rebedea2023nemo} enforce programmable rails around the model, but the model still makes the final call. Detection methods add training or inference cost: BIPIA fine-tunes a detector alongside its benchmark~\cite{yi2025benchmarking}, and MELON re-executes with masked tools and compares outputs~\cite{zhu2025melon}.
 
-LLM-as-judge defenses ask a second language model to vet each proposed call~\cite{taskshield2025}. They are flexible but add an LLM call (and cost and latency) on every action, introduce a new attack surface (the judge can be prompt-injected), and produce implicit, non-auditable policies. MELON~\cite{zhu2025melon} uses masked re-execution and tool comparison to detect injections, but is model-level and emulated rather than middleware-enforced.
+Judge-based defenses ask a second language model to vet each proposed call~\cite{taskshield2025}. They are flexible, but they add a language-model call (with cost and latency) on every action, introduce a new attack surface (the judge can be prompt-injected), and produce implicit policies that are hard to audit. Contract-based defenses come closest to the placement of this work. ToolGate~\cite{liu2026toolgate} enforces hand-authored Hoare-style pre/post-condition contracts per tool at the tool-call boundary, the same chokepoint used here; its weakness is the policy source, because contracts are written manually per tool, coverage is incomplete (65/801 MCPTox tools, 8.1\% distinct and 37.2\% availability-weighted) and attacker-registered tools have no contract at all. Progent~\cite{shi2025progent} also enforces symbolic per-call privilege rules at the tool-call layer (fail-closed, no LLM in the decision loop), but its policies are authored manually or by an LLM per tool rather than derived from the user's request, and it is evaluated on AgentDojo and ASB rather than InjecAgent and MCPTox. ClawGuard~\cite{clawguard2026} derives task-specific constraints from the user's stated objective and enforces them deterministically, with a user confirmation step; it reports results on six injection benchmarks including InjecAgent and MCPTox, so this paper does not claim to be the first to derive policy from the request. Prompt Flow Integrity~\cite{kim2025promptflow} prevents privilege escalation through agent isolation and data tracking, evaluated on AgentDojo and AgentBench. TrustAgent~\cite{hua2024trustagent} uses a hand-authored constitution and is evaluated by emulation, not live tool execution. A recent design-pattern survey~\cite{beurerkellner2025design} argues that the safest agent designs never let untrusted data steer privileged actions, which matches the boundary-placement argument of this paper.
 
-Contract-based defenses come closest to our placement. ToolGate~\cite{liu2026toolgate} enforces hand-authored Hoare-style pre/post-condition contracts per tool at the tool-call boundary---the same chokepoint we use. Its weakness is the policy source: contracts are written manually per tool, so coverage is incomplete (65/801 MCPTox tools, 8.1\% distinct / 37.2\% availability-weighted) and attacker-registered tools have no contract at all. Progent~\cite{shi2025progent} also enforces symbolic per-call privilege rules at the tool-call layer (fail-closed, no LLM in the decision loop), but requires manually- or LLM-authored policies per tool rather than auto-deriving the contract from the user's request, and evaluates on AgentDojo/ASB rather than InjecAgent/MCPTox. ClawGuard derives task-scoped constraints from the user's objective once and enforces them deterministically~\cite{clawguard2026}; it evaluates on both InjecAgent and MCPTox, so we do not claim to be the first to derive policy from the request. TrustAgent~\cite{hua2024trustagent} is a hand-constitution approach evaluated by emulation, not live tool execution.
-
-AgentDojo~\cite{debenedetti2024agentdojo} and InjecAgent~\cite{zhan2024injecagent} provide the injection benchmarks; MCPTox~\cite{wang2026mcptox} provides the tool-poisoning benchmark. Zhan et al.~\cite{zhan2025adaptive} show adaptive attackers break defenses that look strong under static attacks---a limitation we address explicitly by scoping our primary claims to static attacks and reporting adaptive-attacker pilots separately.
+AgentDojo~\cite{debenedetti2024agentdojo}, InjecAgent~\cite{zhan2024injecagent}, and Agent Security Bench~\cite{zhang2025asb} provide the injection benchmarks; MCPTox~\cite{wang2026mcptox} provides the tool-poisoning benchmark, and the MCP specification itself ships no defense against poisoned registrations~\cite{anthropic2024mcp,radosevich2025mcp}. Zhan et al.~\cite{zhan2025adaptive} show that adaptive attackers break defenses which look strong under static attacks, a limitation this paper addresses by scoping the primary claims to static attacks and reporting adaptive-attacker work as ongoing.
 
 \subsection{Research gap}
-No existing system automatically derives an allowed-behavior policy from the user's own request and enforces it at the tool-call chokepoint with embedding similarity plus a deterministic veto. Concurrent work (ClawGuard, Task Shield) derives task-scoped policies from the user's request; ClawGuard is evaluated on both InjecAgent and MCPTox. Our contribution is the lightweight, CPU-only, no-LLM-per-action enforcement, a frozen reproducible head-to-head against a ToolGate reimplementation on both injection and tool-poisoning benchmarks, and the direct measurement of manual contract setup cost (0 vs.\ 145).
+The missing piece is a boundary gate that needs no model change, no per-action LLM call, and no per-tool policy, and that is compared head-to-head against another boundary defense on both an injection benchmark and a tool-poisoning benchmark. Concurrent work (ClawGuard, Task Shield) derives task-scoped policies from the user's request; ClawGuard is evaluated on both benchmarks named above. The contribution of this paper is a lightweight, CPU-only gate with no LLM in the per-action loop, whose policy is derived automatically from the user's request, plus a frozen reproducible head-to-head against a ToolGate reimplementation on both benchmarks and the direct measurement of manual contract setup cost (0 vs.\ 145).
 
 \begin{table*}[t]
 \caption{Related-work comparison: policy source, enforcement, per-action LLM use, benchmarks, and setup cost.}
@@ -86,29 +85,37 @@ ToolGate & Manual Hoare contracts & Deterministic symbolic & No & Not reported &
 \section{Method}
 
 \subsection{System overview and ordering invariant}
-IntentGate sits between the agent and the executor. Figure~\ref{fig:gate} shows the pipeline. The ordering invariant is load-bearing: the intent contract is parsed from the trusted user request \emph{before} tool definitions or any attacker content (injected observations, poisoned tool descriptions) are assembled. Tool outputs are never passed to the parser. Every proposed tool call---user-initiated and attacker-influenced alike---passes through \texttt{GateMiddleware.execute()}; there is no bypass path.
+IntentGate sits between the agent and the executor. Figure~\ref{fig:gate} shows the pipeline. The ordering invariant is load-bearing: the intent contract is parsed from the trusted user request \emph{before} tool definitions or any attacker content (injected observations, poisoned tool descriptions) are assembled, and tool outputs are never passed to the parser. Every proposed tool call, user-initiated and attacker-influenced alike, passes through \texttt{GateMiddleware.execute()} with no bypass path.
 
 \subsection{Intent parser and contract schema}
-A trusted intent parser (LLM, temperature 0, JSON mode, one repair retry) reads the user request once per session and emits an intent contract: allowed entities, operations, and resources; constraints; and high-risk flags requiring veto. The contract schema is versioned and frozen for the evaluation. The contract is embedded once per session and reused; only the per-call request is embedded at decision time, keeping the agent prompt cacheable and the gate out of the prompt.
+A trusted intent parser (an LLM at temperature 0, JSON mode, one repair retry) reads the user request once per session and emits an intent contract
+\begin{equation}
+C = (A, K, H), \label{eq:contract}
+\end{equation}
+where $A$ is the set of allowed (entity, operation, resource) elements, $K$ is a set of numeric and path constraints, and $H$ is a set of high-risk flags. A call that touches an element outside $A$, violates a constraint in $K$, or matches a flag in $H$ fails the rule check and triggers the veto. The schema is versioned and frozen for the evaluation. The contract is embedded once per session and reused; only the per-call request is embedded at decision time, which keeps the agent prompt cacheable and the gate out of the prompt.
 
 \subsection{Scorer}
-Each proposed tool call $c$ is scored against the contract:
+Each proposed tool call $c$ is scored against the contract. The semantic component is the cosine similarity between the contract embedding $e_C$ and the call embedding $e_c$,
 \begin{equation}
-S = \alpha \cdot S_{sem} + (1 - \alpha) \cdot S_{rule} \label{eq:score}
+S_{\mathrm{sem}} = \cos(e_C, e_c) = \frac{e_C \cdot e_c}{\lVert e_C \rVert \, \lVert e_c \rVert}, \label{eq:sem}
 \end{equation}
-where $S_{sem}$ is the cosine similarity between the contract embedding and the tool-call embedding, and $S_{rule}\in\{0,1\}$ is the deterministic hard-rule check ($S_{rule}=1$ when the call passes all hard constraints, $0$ triggers the veto). Defaults: $\tau=0.75$ (decision threshold), $\delta=0.1$ (escalate half-width), $\alpha=0.7$. The threshold was fixed on a 50-call pilot before any benchmark run; we report the operating point rather than claiming cross-split transfer.
+and the rule component is deterministic, $S_{\mathrm{rule}} \in \{0,1\}$, with $S_{\mathrm{rule}}=1$ when $c$ passes all constraints in $K$ and $S_{\mathrm{rule}}=0$ when the veto fires. The combined score is
+\begin{equation}
+S = \alpha \, S_{\mathrm{sem}} + (1 - \alpha) \, S_{\mathrm{rule}}, \label{eq:score}
+\end{equation}
+with default $\alpha = 0.7$. The threshold $\tau = 0.75$ and half-width $\delta = 0.1$ were fixed on a 50-call pilot before any benchmark run; this paper reports the operating point and does not claim Neyman--Pearson optimality or cross-split transfer.
 
 \subsection{Gate middleware and escalate band}
 The middleware decides per call:
-\begin{itemize}
-\item \textbf{allow} if $S \ge \tau$ and no veto fires;
-\item \textbf{block} if $S < \tau-\delta$ or a veto fires (hard fail-closed);
-\item \textbf{escalate} if $S \in [\tau-\delta, \tau)$, routed to human review in benchmark mode (counted as block) or shown to the user in demo mode.
-\end{itemize}
-Escalate precision: of escalated calls, 60.7\% are attacker calls, 14.8\% user calls, and 23.5\% unclassified. The gate adds no LLM call per action; measured p95 per-call latency is 16--20 ms on CPU.
-
-\subsection{Threshold selection}
-The threshold $\tau=0.75$ and half-width $\delta=0.1$ were fixed on a 50-call pilot before any benchmark run. We do not claim Neyman--Pearson optimality or cross-split transfer; both remain future work.
+\begin{equation}
+\mathrm{decision}(c) =
+\begin{cases}
+\text{\textsc{block}}, & S_{\mathrm{rule}}=0 \ \text{or}\ S < \tau-\delta, \\
+\text{\textsc{escalate}}, & S_{\mathrm{rule}}=1 \ \text{and}\ \tau-\delta \le S < \tau, \\
+\text{\textsc{allow}}, & \text{otherwise},
+\end{cases} \label{eq:decision}
+\end{equation}
+where the block case is fail-closed and escalate routes to human review, counted as block in benchmark mode and shown to the user in demo mode. Algorithm~\ref{alg:gate} lists the full procedure. Of escalated calls, 60.7\% are attacker calls, 14.8\% user calls, and 23.5\% unclassified. The gate adds no LLM call per action; measured p95 per-call latency is 16--20 ms on CPU.
 
 \begin{figure}[t]
 \centering
@@ -161,30 +168,51 @@ The threshold $\tau=0.75$ and half-width $\delta=0.1$ were fixed on a 50-call pi
 \label{fig:gate}
 \end{figure}
 
+\begin{algorithm}[t]
+\caption{Gate decision for one proposed tool call}
+\label{alg:gate}
+\footnotesize
+\begin{algorithmic}[1]
+\Require contract $C=(A,K,H)$ with embedding $e_C$; tool call $c$ with embedding $e_c$; parameters $\alpha,\tau,\delta$
+\Ensure decision $d$: allow, block, or escalate
+\State $S_{\mathrm{sem}} \gets \cos(e_C, e_c)$
+\State $S_{\mathrm{rule}} \gets 1$ if $c$ satisfies $A$ and $K$, else $0$
+\State $S \gets \alpha S_{\mathrm{sem}} + (1-\alpha) S_{\mathrm{rule}}$
+\If{$S_{\mathrm{rule}}=0$ or $S < \tau-\delta$}
+  \State $d \gets \mathrm{block}$ \Comment{fail-closed hard veto}
+\ElsIf{$S < \tau$}
+  \State $d \gets \mathrm{escalate}$ \Comment{human-review band}
+\Else
+  \State $d \gets \mathrm{allow}$
+\EndIf
+\State \Return $d$
+\end{algorithmic}
+\end{algorithm}
+
 \section{ToolGate B2 Baseline}
 
-We implement a minimal reimplementation of ToolGate~\cite{liu2026toolgate} as the primary baseline: Hoare-style pre/post-condition contracts, a symbolic world state, and snapshot/rollback on post-condition violation. Contracts cover the evaluated tool subset only: InjecAgent 79/79 user+attacker tools (100\%), MCPTox 65/801 registered tools (8.1\% distinct / 37.2\% availability-weighted). Missing contracts are never silently allowed: they are counted as \texttt{no\_contract} and reported. ToolGate fidelity was validated by contract review and recorded-call replay rather than a ToolBench run.
+The primary baseline is a minimal reimplementation of ToolGate~\cite{liu2026toolgate}: Hoare-style contracts $\{P\}T\{Q\}$ with preconditions $P$ over a symbolic world state, postconditions $Q$, and snapshot/rollback on post-condition violation. Contracts cover the evaluated tool subset only: InjecAgent 79/79 user and attacker tools (100\%), MCPTox 65/801 registered tools (8.1\% distinct and 37.2\% availability-weighted). Missing contracts are never silently allowed: they are counted as \texttt{no\_contract} and reported. Fidelity was validated by contract review and recorded-call replay rather than a ToolBench run.
 
-Setup cost is measured directly: ToolGate requires 145 hand-authored contracts on InjecAgent versus zero setup for IntentGate (the contract is derived automatically from the request). On MCPTox, extending contracts toward 84.9\% weighted coverage does not meaningfully reduce attack success: the coverage-vs-ASR curve is flat because attack calls look like legitimate queries---the attack is in the poisoned registration, not in calling the wrong tool. ToolGate is statistically indistinguishable from the unprotected baseline on MCPTox, validating the head-to-head comparison.
+Setup cost is measured directly: ToolGate requires 145 hand-authored contracts on InjecAgent against zero setup for IntentGate, whose contract is derived from the request. On MCPTox, extending contracts toward 84.9\% weighted coverage does not meaningfully reduce attack success: the coverage-vs-ASR curve is flat because attack calls look like legitimate queries; the attack is in the poisoned registration, not in calling the wrong tool. ToolGate is statistically indistinguishable from the unprotected baseline on MCPTox, which validates the head-to-head comparison.
 
 \section{Evaluation}
 
 \subsection{Benchmarks and cases}
-\textbf{InjecAgent}~\cite{zhan2024injecagent}: indirect prompt injection in tool-integrated agents. 2,108 cases (dh/ds $\times$ base/enhanced), frozen at pinned commits. \textbf{MCPTox}~\cite{wang2026mcptox}: tool poisoning on real-world MCP servers, 1,348 static-snapshot cases. MCPTox results are explicitly scoped to the static snapshot (live-server evaluation is deferred work; the poisoning-at-registration logic is identical in both).
+\textbf{InjecAgent}~\cite{zhan2024injecagent}: indirect prompt injection in tool-integrated agents, 2,108 cases (dh/ds $\times$ base/enhanced), frozen at pinned commits. \textbf{MCPTox}~\cite{wang2026mcptox}: tool poisoning on real-world MCP servers, 1,348 static-snapshot cases. MCPTox results are explicitly scoped to the static snapshot (live-server evaluation is deferred; the poisoning-at-registration logic is identical in both).
 
 \subsection{Metrics}
-Attack success rate (ASR): share of attack cases where the attacker's objective is achieved. Block rate: share of gated calls blocked or escalated, reported as block-rate-by-stratum where stratified. Valid rate: share of legitimate task steps completed---the utility metric. Latency: p50/p95 per-call gate overhead. Setup cost: contracts required.
+Attack success rate (ASR): share of attack cases where the attacker's objective is achieved. For MCPTox, the same quantity is reported as attack-influenced calls because the heuristic evaluator flags payload or sensitive-path evidence rather than a strict objective. Block rate: share of gated calls blocked or escalated, reported by stratum where stratified. Valid rate: share of legitimate task steps completed, the utility metric. Latency: p50/p95 per-call gate overhead. Setup cost: hand-authored contracts required.
 
 \subsection{Baselines and ablations}
-B1---none (unprotected). B2---ToolGate reimplementation. Ours---IntentGate at $\tau=0.75,\delta=0.1,\alpha=0.7$. Ablations on the full matrix: A1 semantic-only (no rule veto), A2 rule-only (no embeddings), A3 raw-request embedding (no contract). All conditions run with identical prompts, tool blocks, model (gpt-4o-mini), embedding model (all-MiniLM-L6-v2), and seed 42.
+B1 is the unprotected agent. B2 is the ToolGate reimplementation. Ours is IntentGate at $\tau=0.75$, $\delta=0.1$, $\alpha=0.7$. The full matrix adds three ablations: A1 semantic-only (no rule veto), A2 rule-only (no embeddings), A3 raw-request embedding (similarity to the request text instead of the parsed contract). All conditions run with identical prompts, tool blocks, agent model (gpt-4o-mini), embedding model (all-MiniLM-L6-v2~\cite{reimers2019sentence}), and seed 42.
 
 \subsection{Statistics}
-Paired McNemar (continuity-corrected) and seeded bootstrap 95\% CIs (10k resamples) per benchmark and per-risk breakdown, with Bonferroni correction across the 10-risk breakdowns ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Results from the frozen matrix are reported as-is; pilot results are labeled preliminary.
+All comparisons use the paired McNemar test with continuity correction~\cite{dietterich1998approximate} and seeded bootstrap 95\% CIs (10k resamples) per benchmark and per-risk breakdown, with Bonferroni correction across the 10-risk breakdowns ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Results from the frozen matrix are reported as-is; pilot results are labeled preliminary.
 
 \section{Results}
 
 \subsection{Main results}
-Table~\ref{tab:headline} summarizes. IntentGate reduces ASR from 19.0\% to 0.7\% on InjecAgent and attack-influenced calls from 20.7\% to 10.7\% on MCPTox (McNemar $p=1.3\mathrm{e}{-}33$ and $p=1.25\mathrm{e}{-}07$). ToolGate vs.\ the unprotected baseline is not significant. Valid rate and block rate are reported as call-level utility in Section VI-E pending the E23 benign-task run.
+Table~\ref{tab:headline} summarizes the headline result. IntentGate reduces ASR from 19.0\% to 0.7\% on InjecAgent and attack-influenced calls from 20.7\% to 10.7\% on MCPTox (McNemar $p=1.3\mathrm{e}{-}33$ and $p=1.25\mathrm{e}{-}07$). The ToolGate baseline reduces ASR only slightly (17.2\% vs.\ 19.0\% on InjecAgent) and is not statistically distinguishable from the unprotected agent on MCPTox. Call-level utility is reported with the benign-task pilot in Section~\ref{sec:validation}.
 
 \begin{table}[t]
 \caption{Headline results (frozen matrix). MCPTox reports attack-influenced ASR; setup cost counts hand-authored contracts.}
@@ -207,7 +235,7 @@ B2 (ToolGate) & 17.2\% & 20.1\% & 145 contracts & --- \\
 IntentGate requires zero hand-authored contracts; ToolGate requires 145 on InjecAgent and 65 on MCPTox (frozen matrix), extendable to 583 without closing the gap. This is the metric ToolGate's own paper does not measure.
 
 \subsection{Ablations}
-Semantic scoring does most of the detecting: rule-only (A2) performs about the same as the unprotected agent on hard slices, while semantic-only (A1) leaves fewer attack-influenced MCPTox calls than the full gate (81 vs.\ 144). Raw-request embedding (A3) is about equal to ours on InjecAgent and better on MCPTox (116 vs.\ 144). The contract's value is therefore utility and auditability rather than headline ASR---a trade-off demonstrated by E23 (call-level benign-task utility run alongside the unprotected agent, semantic-only, and the full gate). The false-escalate rate is 14.8\% on 583 escalated calls.
+Semantic scoring does most of the detecting. The rule-only ablation (A2) is the weakest monitor, with 14.7\% ASR on InjecAgent and 263 attack-influenced MCPTox calls, close to the unprotected agent on the hard slices. Semantic-only (A1) detects more than the full gate on MCPTox (81 vs.\ 144 attack-influenced calls) but over-blocks legitimate calls, as the benign-task pilot shows. The raw-request ablation (A3) matches the full gate on InjecAgent (0.7\% both) and detects slightly more MCPTox calls (116 vs.\ 144). The contract's value is therefore utility and auditability rather than headline ASR. The false-escalate rate is 14.8\% on 583 escalated calls.
 
 \begin{table}[t]
 \caption{Ablations (frozen matrix). A1--A3 replace gate components; MCPTox reports attack-influenced calls (out of 1{,}348).}
@@ -227,7 +255,7 @@ A3 (raw-request) & 0.7\% & 116 & Equal to ours on InjecAgent; fewer MCPTox calls
 \end{table}
 
 \subsection{Pareto and threshold}
-The $\tau\times\delta$ sweep traces a Pareto curve; the default operating point sits near the knee. Cross-split transfer remains future work.
+Figure~\ref{fig:sweep} shows the threshold sweep on the pilot data: attack success falls to zero at the operating point $\tau=0.75$ while the false-positive rate stays at 4\%. Cross-split transfer remains future work.
 
 \begin{figure}[t]
 \centering
@@ -258,7 +286,8 @@ The $\tau\times\delta$ sweep traces a Pareto curve; the default operating point 
 Thirteen InjecAgent residuals remain: all with $S\in[0.75,0.79]$, read-only exfil calls just above $\tau$. Intent mimicry inflates $S$ by only +0.0112 on average, with 0/13 cases newly crossing $\tau$, so the semantic threshold is stable under rephrasing. MCPTox residuals cluster in poisoned-registration classes no contract covers.
 
 \subsection{Validation results (preliminary)}
-E18 replicates the ASR reduction on qwen3.5:4b (27.1\% $\rightarrow$ 2.1\%, 92.3\% relative reduction); gpt-6-luna is excluded (prose-only output, no ReAct participation). Block rate by stratum: specific 12.8\%, vague 9.6\%, overall 12.4\%. E23 (benign utility, 50 clean cases): user-tool-allowed rate 16.0\% (none), 12.0\% (ours), 8.0\% (semantic-only); clean-call block rate 0.0\% (none), 25.0\% (ours), 42.9\% (semantic-only) — semantic-only over-blocks legitimate calls, confirming the contract preserves utility. E24--E26 (prompt baselines, third backbone, adaptive attacks) are in progress; all pilot numbers preliminary.
+\label{sec:validation}
+E18 replicates the ASR reduction on a second backbone, qwen3.5:4b (27.1\% $\rightarrow$ 2.1\%); gpt-6-luna is excluded because its prose-only output never participates in the reason-act loop. Block rate by stratum: specific 12.8\%, vague 9.6\%, overall 12.4\%. The benign-task pilot (50 clean cases) compares the full gate with the unprotected agent and the semantic-only ablation: user-tool allowed 16.0\%, 12.0\%, and 8.0\% respectively, and clean-call block 0.0\%, 25.0\%, and 42.9\%. Semantic-only over-blocks legitimate calls, so the contract preserves utility in this comparison. The prompt-baseline pilot (50 attack cases per condition) gives ASR 6.8\% with no defense prompt, 4.3\% with delimiters, 4.3\% with sandwiching, and 8.9\% with instructional prevention. A third backbone and adaptive-attacker robustness remain in progress; all pilot numbers are preliminary.
 
 \begin{table}[t]
 \caption{Utility and robustness pilots (preliminary): benign-task utility, second backbone, and prompt-level baselines.}
@@ -278,11 +307,11 @@ E24 prompt baselines & delimiters 4.3\%, sandwich 4.3\%, no defense 6.8\%, instr
 
 \section{Limitations}
 
-Our primary claims are scoped to static attacks; adaptive-attacker robustness is reported honestly in pilots rather than claimed. MCPTox results are on a static snapshot, not live servers. The main matrix uses a single backbone (gpt-4o-mini); qwen3.5:4b replicates the delta but gpt-6-luna is incompatible with the shared ReAct prompt. The parser is an LLM call once per session (parser cost included); per-action enforcement uses no LLM. Contract coverage on MCPTox's long tail remains low by design (missing contracts = \texttt{no\_contract}, never silently allowed). Valid rate measures call-level allowance of the user's tool call, not end-to-end task success; a benign-task utility run (E23) is pending. Block rate includes escalate candidates and is not a pure false-positive rate.
+The primary claims are scoped to static attacks; adaptive-attacker robustness is reported as ongoing work rather than claimed. MCPTox results are on a static snapshot, not live servers. The main matrix uses a single backbone (gpt-4o-mini); qwen3.5:4b replicates the delta, and gpt-6-luna is incompatible with the shared reason-act prompt. The parser is an LLM call once per session, included in the cost; per-action enforcement uses no LLM. Contract coverage on the MCPTox long tail remains low by design (missing contracts are counted as \texttt{no\_contract} and never silently allowed). The valid rate measures call-level allowance of the user's tool call, not end-to-end task success; the benign-task pilot is a 50-case comparison and should be read as such. Block rate includes escalate candidates and is not a pure false-positive rate. The MCPTox attack-influenced metric comes from a heuristic evaluator (payload and sensitive-path evidence), which is coarser than a strict objective check.
 
 \section{Conclusion}
 
-IntentGate shows that an action gate can derive its policy automatically from the user's own request, enforce it with embedding similarity plus a deterministic veto at the tool-call chokepoint, and do so with zero setup cost, low latency (16--20 ms p95), and strong adversarial results on both injection and tool-poisoning benchmarks---outperforming both the unprotected baseline and a ToolGate reimplementation. The reproducible artifact is released after acceptance. Future work: adaptive-attacker hardening, live-server MCPTox, and multi-turn drift.
+This paper shows that an action gate can derive its policy automatically from the user's request, enforce it with embedding similarity plus a deterministic veto at the tool-call chokepoint, and operate with zero setup cost, 16--20 ms p95 latency, and a large measured reduction in attack success on both an injection and a tool-poisoning benchmark. The reproducible artifact is released after acceptance. Future work covers adaptive-attacker hardening, live-server MCPTox evaluation, and multi-turn drift.
 
 \section*{Acknowledgment}
 Large language models were used for drafting assistance, experiment code generation, and result summarization in preparing this paper. All experimental results, statistical claims, and the final manuscript were reviewed and verified by the authors; the LLM was not used to fabricate data.
