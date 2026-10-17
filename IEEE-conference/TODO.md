@@ -48,7 +48,7 @@ Companions: guides `docs/prompt.md` + `docs/writing-guideline.md`; refs `IEEE-co
 
 ## E. Bookkeeping
 
-- [ ] Update `roadmap.md` checkboxes + `CHANGELOG.md` in the same commit that completes each step
-- [ ] Author block: submission stays Anonymous; real block in gitignored `IEEE-conference/authors.local.tex` (Atik's info stored; 4 members + supervisor pending)
-- [ ] Decide whether the built `IEEE-conference.pdf` stays tracked
-- [ ] Push / PR to dev only when the team says go
+- [x] `roadmap.md` + `CHANGELOG.md` updated with every step (A–D commits)
+- [~] Author block: **active block now has the lead author's real details (Md. Atikur Rahaman, UIU, email, ORCID) + placeholders for the 4 team members and the supervisor**; the anonymous block is kept commented in the tex; structured record in gitignored `IEEE-conference/authors.local.tex`. **Before CMT: swap to the anonymous block (double-blind).**
+- [x] Built `IEEE-conference.pdf` stays tracked and is refreshed with each step
+- [ ] Push / PR to dev only when the team says go (atik pushed through the latest commit)
