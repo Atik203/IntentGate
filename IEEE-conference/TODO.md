@@ -19,9 +19,10 @@ Companions: guides `docs/prompt.md` + `docs/writing-guideline.md`; refs `IEEE-co
 ## B. Figures & tables (DONE)
 
 - [x] Fig. 1: redrawn as vector (inline TikZ in `IEEE-conference.tex`; `fig1.png` removed); veto semantics fixed ("veto $\Rightarrow$ block (fail-closed)")
-- [x] Fig. 2: τ-sweep (ASR/FPR vs τ, knee at τ=0.75) from frozen `results/gated/pareto.json`, vector pgfplots
-- [x] Tables: booktabs style, no vertical rules, no `resizebox`, captions above, "Ours" bold; stale A2 ablation numbers fixed (14.7% / 263 — the draft had B1's numbers)
+- [x] τ-sweep figure (ASR/FPR vs τ, knee at τ=0.75) from frozen `results/gated/pareto.json`, vector pgfplots
+- [x] Tables: `\hline` cell-grid style (per request), no `resizebox`, captions above, "Ours" bold; stale A2 ablation numbers fixed (14.7% / 263 — the draft had B1's numbers)
 - [x] Table set: (I) related-work (full-width `table*`) · (II) headline · (III) ablations · (IV) utility/robustness pilots
+- [x] Polish (2026-10-18): Fig. 1 overlap fixes (ingress arrows moved to the box edges so the gate title is clear; return-path label spacing); new ASR bar chart with per-bar value labels (renders as Fig. 2; τ-sweep becomes Fig. 3); larger axis fonts; all figures vector (no dpi limit). Still 6 pages clean.
 
 ## C. Sections (DONE; ICEEICT LLM-policy read pending in D)
 

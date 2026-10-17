@@ -108,18 +108,25 @@ The missing piece is a boundary gate that needs no model change, no per-action L
 \label{tab:relatedwork}
 \centering
 \footnotesize
-\begin{tabular}{@{}p{52pt} p{88pt} p{76pt} c p{104pt} p{80pt}@{}}
-\toprule
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|p{52pt}|p{88pt}|p{76pt}|c|p{104pt}|p{80pt}|}
+\hline
 System & Policy source & Enforcement & LLM/action & Benchmarks & Setup cost \\
-\midrule
+\hline
 CaMeL & Model-level & Capability taint tracking & No & Not reported & Model change \\
+\hline
 StruQ & Model-level & Fine-tuned model & No & Not reported & Model change \\
+\hline
 Task Shield & Task-scoped (LLM-derived) & LLM-as-judge & Yes & Not reported & Per-task LLM calls \\
+\hline
 ClawGuard & Task-scoped (from user objective) & Deterministic rules & No & InjecAgent, MCPTox & Once per request \\
+\hline
 Progent & Manual/LLM-authored DSL & Deterministic symbolic & No & AgentDojo, ASB & Per-tool policies \\
+\hline
 ToolGate & Manual Hoare contracts & Deterministic symbolic & No & Not reported & 145 contracts (InjecAgent) \\
+\hline
 \textbf{Ours} & \textbf{Auto-derived from user request} & \textbf{Embedding + rule veto} & No & InjecAgent, MCPTox & \textbf{0 contracts} \\
-\bottomrule
+\hline
 \end{tabular}
 \end{table*}
 
@@ -173,7 +180,7 @@ where the block case is fail-closed and escalate routes to human review, counted
 }
 % gate container
 \draw[rounded corners=4pt, draw=blue!60!black, fill=blue!4] (2,12) rectangle (238,148);
-\node[font=\sffamily\footnotesize\bfseries, text=blue!60!black] at (120,141) {ACTION GATE (middleware)};
+\node[font=\sffamily\footnotesize\bfseries, text=blue!60!black] at (134,141) {ACTION GATE (middleware)};
 % trusted / untrusted columns
 \node[trustedbox, text width=92pt] (user) at (54,256) {{\bfseries User request}\\[1pt]{\footnotesize (trusted)}};
 \node[untrustedbox, text width=100pt] (untrusted) at (180,256) {{\bfseries Untrusted content}\\[1pt]{\footnotesize tool defs and outputs}};
@@ -192,18 +199,19 @@ where the block case is fail-closed and escalate routes to human review, counted
 \draw[arr] (untrusted) -- (agent);
 \draw[arr] (parser) -- (contract);
 \draw[darr] (40,157) -- (40,135);
-\node[font=\sffamily\fontsize{6.5}{7}\selectfont, text=black!70, anchor=east] at (37,146) {contract};
-\draw[draw=black!75, line width=0.5pt] (agent.south) -- (180,151) -- (56,151);
+\node[font=\sffamily\fontsize{6.5}{7}\selectfont, text=black!70, anchor=west] at (42,146) {contract};
+\draw[draw=black!75, line width=0.5pt] (agent.south) -- (180,151) -- (30,151);
+\draw[draw=black!75, line width=0.5pt] (180,151) -- (210,151);
 \node[font=\sffamily\fontsize{6.5}{7}\selectfont, text=black!70, anchor=west] at (184,176) {proposed call};
-\draw[arr] (56,151) -- (sem.north);
-\draw[arr] (180,151) -- (rule.north);
+\draw[arr] (30,151) -- (30,135);
+\draw[arr] (210,151) -- (210,135);
 \draw[arr] (sem) -- (score);
 \draw[arr] (rule) -- (score);
 \draw[arr] (score) -- (block);
 \draw[arr] (score) -- (esc);
 \draw[arr] (score) -- (allow);
-\draw[arr] (allow.east) -- (244,45) -- (244,213) -- (agent.east);
-\node[rotate=90, font=\sffamily\fontsize{6.5}{7}\selectfont, inner sep=1pt] at (246.5,132) {tool result to agent};
+\draw[arr] (allow.east) -- (242,45) -- (242,213) -- (agent.east);
+\node[rotate=90, font=\sffamily\fontsize{6.5}{7}\selectfont, inner sep=1pt] at (247.5,132) {tool result to agent};
 \end{tikzpicture}
 \caption{IntentGate middleware architecture. The intent parser derives a contract once from the trusted request, before any attacker content (tool definitions, tool outputs) is loaded. The gate scores each proposed call with embedding similarity and a hard-rule veto, then decides allow, block, or escalate; per-action enforcement uses no LLM call.}
 \label{fig:gate}
@@ -253,7 +261,7 @@ All comparisons use the paired McNemar test with continuity correction~\cite{die
 \section{Results}
 
 \subsection{Main results}
-Table~\ref{tab:headline} summarizes the headline result. IntentGate reduces ASR from 19.0\% to 0.7\% on InjecAgent and attack-influenced calls from 20.7\% to 10.7\% on MCPTox (McNemar $p=1.3\mathrm{e}{-}33$ and $p=1.25\mathrm{e}{-}07$). The ToolGate baseline reduces ASR only slightly (17.2\% vs.\ 19.0\% on InjecAgent) and is not statistically distinguishable from the unprotected agent on MCPTox. Call-level utility is reported with the benign-task pilot in Section~\ref{sec:validation}.
+Table~\ref{tab:headline} and Figure~\ref{fig:bars} summarize the headline result. IntentGate reduces ASR from 19.0\% to 0.7\% on InjecAgent and attack-influenced calls from 20.7\% to 10.7\% on MCPTox (McNemar $p=1.3\mathrm{e}{-}33$ and $p=1.25\mathrm{e}{-}07$). The ToolGate baseline reduces ASR only slightly (17.2\% vs.\ 19.0\% on InjecAgent) and is not statistically distinguishable from the unprotected agent on MCPTox. Call-level utility is reported with the benign-task pilot in Section~\ref{sec:validation}.
 
 \begin{table}[t]
 \caption{Headline results (frozen matrix). MCPTox reports attack-influenced ASR; setup cost counts hand-authored contracts.}
@@ -261,16 +269,46 @@ Table~\ref{tab:headline} summarizes the headline result. IntentGate reduces ASR 
 \centering
 \footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}l c c c c@{}}
-\toprule
+\begin{tabular}{|l|c|c|c|c|}
+\hline
 Condition & \shortstack{InjecAgent\\ASR} & \shortstack{MCPTox\\ASR} & Setup cost & p95 latency \\
-\midrule
+\hline
 B1 (none) & 19.0\% & 20.7\% & --- & --- \\
+\hline
 B2 (ToolGate) & 17.2\% & 20.1\% & 145 contracts & --- \\
+\hline
 \textbf{Ours (IntentGate)} & \textbf{0.7\%} & \textbf{10.7\%} & \textbf{0} & 16--20 ms \\
-\bottomrule
+\hline
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth, height=4.1cm,
+  ybar, bar width=7pt,
+  symbolic x coords={InjecAgent, MCPTox},
+  xtick=data,
+  ymin=0, ymax=25,
+  ylabel={ASR (\%)},
+  ytick={0,5,10,15,20,25},
+  ymajorgrids, major grid style={black!10},
+  tick label style={font=\small}, label style={font=\small},
+  legend style={font=\small, at={(0.5,-0.26)}, anchor=north, legend columns=3, draw=black!25},
+  nodes near coords={\pgfmathprintnumber[fixed,zerofill,precision=1]{\pgfplotspointmeta}},
+  nodes near coords style={font=\fontsize{6.5}{7}\selectfont, rotate=90, anchor=west},
+  enlarge x limits=0.3,
+]
+\addplot[fill=black!25, draw=black!60] coordinates {(InjecAgent,19.0) (MCPTox,20.7)};
+\addplot[fill=orange!40, draw=orange!70!black] coordinates {(InjecAgent,17.2) (MCPTox,20.1)};
+\addplot[fill=green!35, draw=green!55!black] coordinates {(InjecAgent,0.7) (MCPTox,10.7)};
+\legend{B1 (none), B2 (ToolGate), Ours (IntentGate)}
+\end{axis}
+\end{tikzpicture}
+\caption{Attack success rate by condition on the frozen matrix (MCPTox reports attack-influenced ASR). IntentGate reaches 0.7\% on InjecAgent and 10.7\% on MCPTox, while the ToolGate baseline stays close to the unprotected agent.}
+\label{fig:bars}
+\end{figure}
 
 \subsection{Setup cost}
 IntentGate requires zero hand-authored contracts; ToolGate requires 145 on InjecAgent and 65 on MCPTox (frozen matrix), extendable to 583 without closing the gap. This is the metric ToolGate's own paper does not measure.
@@ -283,15 +321,19 @@ Semantic scoring does most of the detecting. The rule-only ablation (A2) is the 
 \label{tab:ablation}
 \centering
 \footnotesize
-\begin{tabular}{@{}l c c p{84pt}@{}}
-\toprule
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|l|c|c|p{84pt}|}
+\hline
 Condition & \shortstack{InjecAgent\\ASR} & \shortstack{MCPTox\\calls} & Notes \\
-\midrule
+\hline
 A1 (semantic-only) & 0.0\% & 81 & Detects more; over-blocks legitimate calls \\
+\hline
 A2 (rule-only) & 14.7\% & 263 & Closest to unprotected on hard slices \\
+\hline
 A3 (raw-request) & 0.7\% & 116 & Equal to ours on InjecAgent; fewer MCPTox calls \\
+\hline
 \textbf{Ours (full)} & \textbf{0.7\%} & \textbf{144} & Contract adds utility and auditability \\
-\bottomrule
+\hline
 \end{tabular}
 \end{table}
 
@@ -308,8 +350,8 @@ Figure~\ref{fig:sweep} shows the threshold sweep on the pilot data: attack succe
   xtick={0.4,0.5,0.6,0.7,0.75,0.8},
   ytick={0,0.2,0.4,0.6},
   grid=major, grid style={black!10},
-  tick label style={font=\footnotesize}, label style={font=\footnotesize},
-  legend style={font=\footnotesize, cells={anchor=west}, at={(0.03,0.04)}, anchor=south west, draw=black!25},
+  tick label style={font=\small}, label style={font=\small},
+  legend style={font=\small, cells={anchor=west}, at={(0.03,0.04)}, anchor=south west, draw=black!25},
   line width=0.7pt, mark size=1.3pt,
 ]
 \addplot[color=blue!65!black, mark=*] coordinates {(0.40,0.56) (0.45,0.56) (0.50,0.56) (0.55,0.56) (0.60,0.56) (0.65,0.56) (0.70,0.28) (0.75,0.00) (0.80,0.00)};
@@ -335,14 +377,17 @@ E18 replicates the ASR reduction on a second backbone, qwen3.5:4b (27.1\% $\righ
 \label{tab:validation}
 \centering
 \footnotesize
-\begin{tabular}{@{}l p{146pt}@{}}
-\toprule
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|l|p{142pt}|}
+\hline
 Pilot & Result \\
-\midrule
+\hline
 E23 benign utility & user-tool allowed: none 16.0\%, ours 12.0\%, semantic-only 8.0\%; clean-call block: none 0.0\%, ours 25.0\%, semantic-only 42.9\% \\
+\hline
 E18 second backbone & qwen3.5:4b: ASR 27.1\% $\rightarrow$ 2.1\% \\
+\hline
 E24 prompt baselines & delimiters 4.3\%, sandwich 4.3\%, no defense 6.8\%, instructional prevention 8.9\% (50 cases each) \\
-\bottomrule
+\hline
 \end{tabular}
 \end{table}
 
