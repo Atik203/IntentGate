@@ -20,10 +20,14 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{IntentGate: Lightweight Action Gating Against Prompt Injection in Tool-Using LLM Agents}
+\title{IntentGate: Action Gating Against Prompt Injection and Tool Poisoning in Tool-Using LLM Agents}
 
 
-% Author block: lead author is real; teammates and supervisor are placeholders.
+% Author block: 5 authors total (4 members + supervisor). Lead author real; the three
+% remaining members and the supervisor are placeholders. The 3+2 two-row layout is
+% forced with a break inside the \and separator.
+% Camera-ready compact option: if all authors share one affiliation, collapse to the
+% single-block style (names on one line + shared affiliation + emails) to save space.
 % Before the double-blind CMT submission: comment out this block, uncomment the anonymous block below.
 \author{
 \IEEEauthorblockN{Md. Atikur Rahaman}
@@ -34,32 +38,22 @@ atikurrahaman0305@gmail.com\\
 ORCID: 0009-0008-2945-4117}
 \and
 \IEEEauthorblockN{Second Author}
-\IEEEauthorblockA{\textit{Department}\\
-\textit{Institution}\\
+\IEEEauthorblockA{\textit{dept. name of organization}\\
 City, Country\\
 email@example.com}
 \and
 \IEEEauthorblockN{Third Author}
-\IEEEauthorblockA{\textit{Department}\\
-\textit{Institution}\\
+\IEEEauthorblockA{\textit{dept. name of organization}\\
 City, Country\\
 email@example.com}
-\and
+\and[\hfill\break]
 \IEEEauthorblockN{Fourth Author}
-\IEEEauthorblockA{\textit{Department}\\
-\textit{Institution}\\
+\IEEEauthorblockA{\textit{dept. name of organization}\\
 City, Country\\
 email@example.com}
 \and
-\IEEEauthorblockN{Fifth Author}
-\IEEEauthorblockA{\textit{Department}\\
-\textit{Institution}\\
-City, Country\\
-email@example.com}
-\and
-\IEEEauthorblockN{Sixth Author (Supervisor)}
-\IEEEauthorblockA{\textit{Department}\\
-\textit{Institution}\\
+\IEEEauthorblockN{Fifth Author (Supervisor)}
+\IEEEauthorblockA{\textit{dept. name of organization}\\
 City, Country\\
 email@example.com}
 }
@@ -73,7 +67,7 @@ email@example.com}
 \maketitle
 
 \begin{abstract}
-Tool-using agents built on large language models (LLMs) can be redirected by instructions hidden in tool output or tool descriptions, a risk that grows as agents reach email, calendars, and databases. Existing defenses modify the model, add a judge call per action, or require hand-authored per-tool policies. This paper presents IntentGate, a lightweight middleware gate that derives an intent contract once from the user's trusted request, before any attacker content is loaded. Every proposed tool call is scored by embedding similarity to the contract plus a deterministic rule veto, then allowed, blocked, or escalated, with no LLM call per action. The design targets the single chokepoint every attack crosses, and its policy comes from the user, not from text an attacker can touch. On InjecAgent and MCPTox, attack success falls from 19.0\% to 0.7\% and attack-influenced calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost against 145 hand-authored baseline contracts. Pilots on a second backbone, benign-task utility, and prompt baselines are reported as preliminary.
+Tool-using agents built on large language models (LLMs) can be redirected by instructions hidden in tool output or tool descriptions, a risk that grows as agents reach email, calendars, and databases. Existing defenses modify the model, add a judge call per action, or require manually authored per-tool policies, so enforcement stays costly or incomplete. This paper presents IntentGate, a lightweight middleware gate that derives an intent contract once from the user's trusted request, before any attacker content is loaded. Every proposed tool call is scored by embedding similarity to the contract plus a deterministic rule veto, then allowed, blocked, or escalated, with no LLM call per action. The design targets the single chokepoint every attack crosses, and its policy comes from the user, not from text an attacker can touch. On InjecAgent and MCPTox, attack success falls from 19.0\% to 0.7\% and attack-influenced calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost against 145 hand-authored baseline contracts. Pilots on a second backbone, benign-task utility, and prompt baselines are reported as preliminary.
 \end{abstract}
 
 \begin{IEEEkeywords}
