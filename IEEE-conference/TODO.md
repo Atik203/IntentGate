@@ -7,14 +7,14 @@ Official rules (checked on iceeict.mist.ac.bd): **≤6 pages including figures, 
 
 Companions: guides `docs/prompt.md` + `docs/writing-guideline.md`; refs `IEEE-conference/references.bib` (copy of `docs/references.bib`).
 
-## A. References (target 29–31, each verified)
+## A. References (30 entries, each verified — DONE)
 
-- [ ] Fetch missing author lists via arXiv API: ClawGuard `2604.11790`, Task Shield `2412.16682`, ToolGate `2601.04688`, Progent `2504.11703`, MCP Safety Audit `2504.03767`
-- [ ] Fix `docs/references.bib` placeholders: MCPTox authors (Z. Wang, Y. Gao, Y. Wang, S. Liu, H. Sun, H. Cheng, G. Shi, H. Du, X.-Y. Li); adaptive attacks author → "Henil Shalin Panchal" + exact ACL Anthology page; MELON → ICML 2025; Progent title → "Progent: Securing AI Agents with Privilege Control"
-- [ ] Re-read ClawGuard (2604.11790): correct the related-work claim if the draft misstates what it does (no misrepresentation of concurrent work)
-- [ ] Add ~16 verified entries: Greshake'23 · Perez & Ribeiro'22 · Zou'23 (GCG) · Spotlighting · Instruction Hierarchy · BIPIA (KDD'25) · SecAlign (CCS'25) · NeMo Guardrails · PFI (Kim et al., `2503.15547`) · ReAct · Sentence-BERT · ToolEmu · Design Patterns (`2506.08837`) · MCP Safety Audit · OWASP LLM Top 10 · MCP spec (Anthropic)
-- [ ] Optional adds: Dietterich'98 (McNemar) · Trustworthy-LLM-Agents survey (`2503.09648`)
-- [ ] Re-copy `docs/references.bib` → `IEEE-conference/references.bib`; cited ↔ listed consistency check
+- [x] Fetch missing author lists via arXiv API — done (ClawGuard: Zhao, Li, Zhang, Sun; Task Shield: Jia, Wu, Qin, Squicciarini; ToolGate: Liu et al. 8 authors; Progent verified; MCP Safety Audit: Radosevich, Halloran)
+- [x] Fix `docs/references.bib` placeholders — done (MCPTox full authors + pages 35811–35819; adaptive attacks author "Panchal, Henil Shalin" + pages 7101–7117 + DOI; MELON → ICML 2025; Progent title → "Securing AI Agents with Privilege Control"; Task Shield → ACL 2025 long, DOI/pages)
+- [x] Re-read ClawGuard — claim CONFIRMED: it evaluates on InjecAgent + MCPTox (among six benchmarks) and derives constraints from the stated objective; note the "user-confirmed rule set" nuance when rewriting §II
+- [x] Add ~16 verified entries — done, 17 added (Greshake'23 · Perez & Ribeiro'22 · Zou'23 · Spotlighting · Instruction Hierarchy · BIPIA KDD'25 · SecAlign CCS'25 · NeMo · PFI · ReAct · Sentence-BERT · ToolEmu · Design Patterns · MCP Safety Audit · OWASP LLM Top 10 · MCP spec · Dietterich'98); survey skipped (target met)
+- [x] Re-copy `docs/references.bib` → `IEEE-conference/references.bib` — done (bibtex scratch-validated: 30 entries; cited ↔ listed final check happens in D)
+
 
 ## B. Figures & tables
 
