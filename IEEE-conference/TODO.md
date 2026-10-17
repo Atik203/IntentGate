@@ -23,6 +23,7 @@ Companions: guides `docs/prompt.md` + `docs/writing-guideline.md`; refs `IEEE-co
 - [x] Tables: `\hline` cell-grid style (per request), no `resizebox`, captions above, "Ours" bold; stale A2 ablation numbers fixed (14.7% / 263 — the draft had B1's numbers)
 - [x] Table set: (I) related-work (full-width `table*`) · (II) headline · (III) ablations · (IV) utility/robustness pilots
 - [x] Polish (2026-10-18): Fig. 1 overlap fixes (ingress arrows moved to the box edges so the gate title is clear; return-path label spacing); new ASR bar chart with per-bar value labels (renders as Fig. 2; τ-sweep becomes Fig. 3); larger axis fonts; all figures vector (no dpi limit). Still 6 pages clean.
+- [x] Expert review pass (2026-10-18, second round): Fig. 1 reworked — single agent→gate arrow (horizontal bus removed), gate title given ≥2.5 pt clearance from the border, all annotation labels repositioned (no overlaps at 400–600 dpi), annotation fonts raised to 8 pt; table column widths fixed — zero stray hyphenations left ('track-ing', 'InjecA-gent', 'de-fense' all gone, verified in the PDF text); `dh/ds` expanded in §V-A; §IV renamed "ToolGate Baseline (B2)"; abstract wording unified ("hand-authored"); BibTeX casing fix for [3] (NeurIPS).
 
 ## C. Sections (DONE; ICEEICT LLM-policy read pending in D)
 

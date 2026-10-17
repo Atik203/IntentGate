@@ -67,7 +67,7 @@ email@example.com}
 \maketitle
 
 \begin{abstract}
-Tool-using agents built on large language models (LLMs) can be redirected by instructions hidden in tool output or tool descriptions, a risk that grows as agents reach email, calendars, and databases. Existing defenses modify the model, add a judge call per action, or require manually authored per-tool policies, so enforcement stays costly or incomplete. This paper presents IntentGate, a lightweight middleware gate that derives an intent contract once from the user's trusted request, before any attacker content is loaded. Every proposed tool call is scored by embedding similarity to the contract plus a deterministic rule veto, then allowed, blocked, or escalated, with no LLM call per action. The design targets the single chokepoint every attack crosses, and its policy comes from the user, not from text an attacker can touch. On InjecAgent and MCPTox, attack success falls from 19.0\% to 0.7\% and attack-influenced calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost against 145 hand-authored baseline contracts. Pilots on a second backbone, benign-task utility, and prompt baselines are reported as preliminary.
+Tool-using agents built on large language models (LLMs) can be redirected by instructions hidden in tool output or tool descriptions, a risk that grows as agents reach email, calendars, and databases. Existing defenses modify the model, add a judge call per action, or require hand-authored per-tool policies, so enforcement stays costly or incomplete. This paper presents IntentGate, a lightweight middleware gate that derives an intent contract once from the user's trusted request, before any attacker content is loaded. Every proposed tool call is scored by embedding similarity to the contract plus a deterministic rule veto, then allowed, blocked, or escalated, with no LLM call per action. The design targets the single chokepoint every attack crosses, and its policy comes from the user, not from text an attacker can touch. On InjecAgent and MCPTox, attack success falls from 19.0\% to 0.7\% and attack-influenced calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost against 145 hand-authored baseline contracts. Pilots on a second backbone, benign-task utility, and prompt baselines are reported as preliminary.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -103,7 +103,7 @@ The missing piece is a boundary gate that needs no model change, no per-action L
 \centering
 \footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{|p{52pt}|p{88pt}|p{76pt}|c|p{104pt}|p{80pt}|}
+\begin{tabular}{|p{56pt}|p{82pt}|p{92pt}|c|p{88pt}|p{88pt}|}
 \hline
 System & Policy source & Enforcement & LLM/action & Benchmarks & Setup cost \\
 \hline
@@ -174,7 +174,7 @@ where the block case is fail-closed and escalate routes to human review, counted
 }
 % gate container
 \draw[rounded corners=4pt, draw=blue!60!black, fill=blue!4] (2,12) rectangle (238,148);
-\node[font=\sffamily\footnotesize\bfseries, text=blue!60!black] at (134,141) {ACTION GATE (middleware)};
+\node[font=\sffamily\footnotesize\bfseries, text=blue!60!black] at (120,139) {ACTION GATE (middleware)};
 % trusted / untrusted columns
 \node[trustedbox, text width=92pt] (user) at (54,256) {{\bfseries User request}\\[1pt]{\footnotesize (trusted)}};
 \node[untrustedbox, text width=100pt] (untrusted) at (180,256) {{\bfseries Untrusted content}\\[1pt]{\footnotesize tool defs and outputs}};
@@ -182,8 +182,8 @@ where the block case is fail-closed and escalate routes to human review, counted
 \node[agentbox, text width=100pt] (agent) at (180,213) {{\bfseries Agent (ReAct)}\\[1pt]{\footnotesize any backbone}};
 \node[trustedbox, text width=92pt] (contract) at (54,169) {{\bfseries Intent contract}\\[1pt]{\footnotesize frozen, read-only}};
 % gate internals
-\node[gatebox, text width=86pt] (sem) at (56,122) {{\bfseries Semantic score}\\[1pt]{\footnotesize $S_{\mathrm{sem}}$ = embedding cosine similarity}};
-\node[gatebox, text width=86pt] (rule) at (180,122) {{\bfseries Rule engine}\\[1pt]{\footnotesize hard constraints, $S_{\mathrm{rule}}\!\in\!\{0,1\}$}};
+\node[gatebox, text width=86pt] (sem) at (56,119) {{\bfseries Semantic score}\\[1pt]{\footnotesize $S_{\mathrm{sem}}$ = embedding cosine similarity}};
+\node[gatebox, text width=86pt] (rule) at (180,119) {{\bfseries Rule engine}\\[1pt]{\footnotesize hard constraints, $S_{\mathrm{rule}}\!\in\!\{0,1\}$}};
 \node[gatebox, text width=208pt] (score) at (120,86) {{\bfseries Combined score}\\[1pt]{\footnotesize $S=\alpha\,S_{\mathrm{sem}}+(1-\alpha)\,S_{\mathrm{rule}}$\quad veto $\Rightarrow$ block (fail-closed)}};
 \node[decbox, text width=64pt, fill=red!10, draw=red!65!black] (block) at (48,45) {{\bfseries BLOCK}\\[1pt]{\footnotesize $S<\tau-\delta$ or veto}};
 \node[decbox, text width=70pt, fill=yellow!18, draw=orange!70!black] (esc) at (128,45) {{\bfseries ESCALATE}\\[1pt]{\footnotesize $\tau-\delta\leq S<\tau$}};
@@ -192,20 +192,17 @@ where the block case is fail-closed and escalate routes to human review, counted
 \draw[arr] (user) -- (parser);
 \draw[arr] (untrusted) -- (agent);
 \draw[arr] (parser) -- (contract);
-\draw[darr] (40,157) -- (40,135);
-\node[font=\sffamily\fontsize{6.5}{7}\selectfont, text=black!70, anchor=west] at (42,146) {contract};
-\draw[draw=black!75, line width=0.5pt] (agent.south) -- (180,151) -- (30,151);
-\draw[draw=black!75, line width=0.5pt] (180,151) -- (210,151);
-\node[font=\sffamily\fontsize{6.5}{7}\selectfont, text=black!70, anchor=west] at (184,176) {proposed call};
-\draw[arr] (30,151) -- (30,135);
-\draw[arr] (210,151) -- (210,135);
+\draw[darr] (40,157) -- (40,132);
+\node[font=\sffamily\footnotesize, text=black!70, anchor=west] at (42,152.5) {contract};
+\draw[arr] (agent.south) -- (180,148);
+\node[font=\sffamily\footnotesize, text=black!70, anchor=east] at (178,178) {proposed call};
 \draw[arr] (sem) -- (score);
 \draw[arr] (rule) -- (score);
 \draw[arr] (score) -- (block);
 \draw[arr] (score) -- (esc);
 \draw[arr] (score) -- (allow);
-\draw[arr] (allow.east) -- (242,45) -- (242,213) -- (agent.east);
-\node[rotate=90, font=\sffamily\fontsize{6.5}{7}\selectfont, inner sep=1pt] at (247.5,132) {tool result to agent};
+\draw[arr] (allow.east) -- (240,45) -- (240,213) -- (agent.east);
+\node[rotate=90, font=\sffamily\footnotesize, inner sep=1pt] at (247,132) {tool result to agent};
 \end{tikzpicture}
 \caption{IntentGate middleware architecture. The intent parser derives a contract once from the trusted request, before any attacker content (tool definitions, tool outputs) is loaded. The gate scores each proposed call with embedding similarity and a hard-rule veto, then decides allow, block, or escalate; per-action enforcement uses no LLM call.}
 \label{fig:gate}
@@ -232,7 +229,7 @@ where the block case is fail-closed and escalate routes to human review, counted
 \end{algorithmic}
 \end{algorithm}
 
-\section{ToolGate B2 Baseline}
+\section{ToolGate Baseline (B2)}
 
 The primary baseline is a minimal reimplementation of ToolGate~\cite{liu2026toolgate}: Hoare-style contracts $\{P\}T\{Q\}$ with preconditions $P$ over a symbolic world state, postconditions $Q$, and snapshot/rollback on post-condition violation. Contracts cover the evaluated tool subset only: InjecAgent 79/79 user and attacker tools (100\%), MCPTox 65/801 registered tools (8.1\% distinct and 37.2\% availability-weighted). Missing contracts are never silently allowed: they are counted as \texttt{no\_contract} and reported. Fidelity was validated by contract review and recorded-call replay rather than a ToolBench run.
 
@@ -241,7 +238,7 @@ Setup cost is measured directly: ToolGate requires 145 hand-authored contracts o
 \section{Evaluation}
 
 \subsection{Benchmarks and cases}
-\textbf{InjecAgent}~\cite{zhan2024injecagent}: indirect prompt injection in tool-integrated agents, 2,108 cases (dh/ds $\times$ base/enhanced), frozen at pinned commits. \textbf{MCPTox}~\cite{wang2026mcptox}: tool poisoning on real-world MCP servers, 1,348 static-snapshot cases. MCPTox results are explicitly scoped to the static snapshot (live-server evaluation is deferred; the poisoning-at-registration logic is identical in both).
+\textbf{InjecAgent}~\cite{zhan2024injecagent}: indirect prompt injection in tool-integrated agents, 2,108 cases (direct-harm and data-stealing attacker intents, in base and enhanced settings), frozen at pinned commits. \textbf{MCPTox}~\cite{wang2026mcptox}: tool poisoning on real-world MCP servers, 1,348 static-snapshot cases. MCPTox results are explicitly scoped to the static snapshot (live-server evaluation is deferred; the poisoning-at-registration logic is identical in both).
 
 \subsection{Metrics}
 Attack success rate (ASR): share of attack cases where the attacker's objective is achieved. For MCPTox, the same quantity is reported as attack-influenced calls because the heuristic evaluator flags payload or sensitive-path evidence rather than a strict objective. Block rate: share of gated calls blocked or escalated, reported by stratum where stratified. Valid rate: share of legitimate task steps completed, the utility metric. Latency: p50/p95 per-call gate overhead. Setup cost: hand-authored contracts required.
@@ -316,7 +313,7 @@ Semantic scoring does most of the detecting. The rule-only ablation (A2) is the 
 \centering
 \footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{|l|c|c|p{84pt}|}
+\begin{tabular}{|l|c|c|p{88pt}|}
 \hline
 Condition & \shortstack{InjecAgent\\ASR} & \shortstack{MCPTox\\calls} & Notes \\
 \hline
@@ -324,7 +321,7 @@ A1 (semantic-only) & 0.0\% & 81 & Detects more; over-blocks legitimate calls \\
 \hline
 A2 (rule-only) & 14.7\% & 263 & Closest to unprotected on hard slices \\
 \hline
-A3 (raw-request) & 0.7\% & 116 & Equal to ours on InjecAgent; fewer MCPTox calls \\
+A3 (raw-request) & 0.7\% & 116 & Equal to ours on \mbox{InjecAgent}; fewer MCPTox calls \\
 \hline
 \textbf{Ours (full)} & \textbf{0.7\%} & \textbf{144} & Contract adds utility and auditability \\
 \hline
@@ -380,7 +377,7 @@ E23 benign utility & user-tool allowed: none 16.0\%, ours 12.0\%, semantic-only 
 \hline
 E18 second backbone & qwen3.5:4b: ASR 27.1\% $\rightarrow$ 2.1\% \\
 \hline
-E24 prompt baselines & delimiters 4.3\%, sandwich 4.3\%, no defense 6.8\%, instructional prevention 8.9\% (50 cases each) \\
+E24 prompt baselines & delimiters 4.3\%, sandwich 4.3\%, no \mbox{defense} 6.8\%, instructional prevention 8.9\% (50 cases each) \\
 \hline
 \end{tabular}
 \end{table}
