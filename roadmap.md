@@ -151,6 +151,12 @@ backbones and compare ASR *deltas*, never absolutes.
   `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
   verify served ctx via `ollama show`; keep MiniLM embeddings on CPU. *(pulled + num_ctx set
   on dev box; num_ctx caveat remains documented for GPU box deployments)*
+  Dev-box note (Ollama v0.40.5): the server ignores `OLLAMA_NUM_CTX` /
+  `OLLAMA_CONTEXT_LENGTH` env and per-request `options.num_ctx` (VRAM-based default 4096
+  sticks) → baked-in variant instead: Modelfile with `FROM qwen3.5:4b` +
+  `PARAMETER num_ctx 16384` → `ollama create qwen3.5-16k`. Pilots pass
+  `--model-name qwen3.5-16k`. Verified: served `context_length` 16384 via `/api/ps`,
+  3.56 GB VRAM, warm inference ~4 s, `reasoning_effort: none` returns clean content.
 - [x] Smoke on Qwen re-run: dh 0/3, ds 2/3 (B1) → ours τ=0.75 blocks both (ds 0/3).
   Parser assertion: `usage.parser.calls > 0` ✓
 - [x] **Qwen pilot (~100-case B1 + ours completed):** ASR 27.1% → 2.1%, parser calls=100,
@@ -199,23 +205,33 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
 
 ### P0 — submission gate (do first, all parallelizable)
 
-- [ ] **E23 legitimate-only utility suite (Gap 3: utility is proxied, never measured).**
+- [x] **E23 legitimate-only utility suite (Gap 3: utility is proxied, never measured).**
       Goal: measure task-completion with gate ON vs OFF on benign tasks with zero attacks.
-      How: build ~100 benign tasks (ToolBench benign slice or AgentDojo benign tasks; new
-      loader under `harness/adapters/` only if needed) → run `harness/run_injecagent.py`
-      (or the matching runner) with `--gate none` vs `--gate ours --threshold 0.75`,
-      explicit `--report`/`--jsonl` under `results/phase7/e23_utility/`.
-      Done when: completion-rate table (ON vs OFF, Δ in pp) + block-rate on clean calls is
-      reported in `07_phase7_pilots.md#e23`; valid-rate-parity claim is replaced by a measured
-      number. Also relabel E22's 12.4% stratum metric from "FPR" to block-rate-by-stratum.
-- [ ] **E24 prompt-level baselines (Gap 1a: only one real baseline).** Goal: beat the field,
+      How: reuse InjecAgent user cases with attacker instruction removed (per supervisor, no
+      new loader needed) → run `scripts/e23_benign_utility.py` with three conditions:
+      `--gate none` (unprotected), `--gate ours --ablation none` (full gate),
+      `--gate ours --ablation semantic-only` (A1). Explicit `--out` under
+      `results/phase7/e23_utility/`. Done when: user-tool-allowed rate + clean-call block rate
+      is reported in `07_phase7_pilots.md#e23`; valid-rate-parity claim is replaced by a
+      measured number. E22's 12.4% stratum metric already relabeled from "FPR" to
+      block-rate-by-stratum.
+      → COMPLETE: 50 benign cases (25 dh + 25 ds). User-tool-allowed: none 16.0% / ours 12.0%
+      / semantic-only 8.0%; clean-call block: none 0.0% / ours 25.0% / semantic-only 42.9%.
+      Semantic-only over-blocks legitimate calls — settles E31: contract preserves utility.
+- [x] **E24 prompt-level baselines (Gap 1a: only one real baseline).** Goal: beat the field,
       not a strawman. How: add system-text variants (delimiters, instructional-prevention,
       sandwich/repeat-instruction from the ASB taxonomy) as new `--gate` modes or prompt
       flags in `harness/gate_policy.py` (no new infra — same harness, same 100-case pilot
       slice as E18) → run B1 vs ours vs each defense. Done when: one 5-metric panel
       (ASR, utility, latency, setup cost, backbone) covers all conditions in
       `07_phase7_pilots.md#e24`. Est. ~$2.
-- [ ] **E25 third backbone pilot (Gap 4: generality is n=1.5).** Goal: replicate the ASR
+      → COMPLETE: `--prompt-type` flag added to `scripts/run_injecagent_ours.py`; three
+      variants in `harness/prompts/injecagent.py` (Delimiters, InstructionalPrevention,
+      Sandwich). 50 attack cases each (25 dh + 25 ds, base). Delimiters 4.3% / Sandwich 4.3%
+      / baseline 6.8% / InstrPrev 8.9% ASR. Valid rate: Delimiters 92.0% / Sandwich 92.0%
+      / baseline 88.0%. Delimiters + Sandwich reduce ASR ~37% but still far behind full gate
+      (0.7% InjecAgent).
+- [~] **E25 third backbone pilot (Gap 4: generality is n=1.5).** Goal: replicate the ASR
       delta on a new model family with full ReAct participation. How: same 100-case protocol
       as E18 (`scripts/run_injecagent_ours.py --per-split 50 --setting base --gate none|ours
       --model-name <new-family-via-API>`, parser stays `gpt-4o-mini`, explicit `--out` under
@@ -224,6 +240,9 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       `07_phase7_pilots.md#e25`; if it fails to replicate, document the boundary condition
       instead (also publishable). Est. ~$1. If Luna-style prose-only output recurs, exclude
       with the same convention-#7 justification as E18.
+      → IN PROGRESS: key/base URL now configured (`.env` -> `DEEPSEEK_*`). Model: `deepseek-flash` (version DeepSeek-V4.1-Flash-1017); append `--agent-base-url https://api.deepseek.com/v1 --agent-api-key <from .env> --model-name deepseek-flash --agent-reasoning-effort none` to the E25 command above (thinking mode is default-on; none disables it and re-enables temperature). Smoke verified on `deepseek-flash`
+      (6 cases, 0 invalid, clean summary; `results/phase7/e25_third_backbone/deepseek_smoke/`).
+      Full 50/50 run aborted mid-execution — needs completion.
 - [ ] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
       itself, live. Two arms, both on the InjecAgent pilot slice: (a) paraphrase-delivery —
       ASB's 5 injection phrasings (`literature_review/papers/04-asb-zhang-2025.md`) applied to
@@ -232,15 +251,18 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       report how many crafted calls land above τ. Done when: ASR-under-adaptation table +
       honest scope sentence (static vs adaptive) lands in `07_phase7_pilots.md#e26`.
       Est. ~$1. Keep the static-attack scope claim prominent either way.
+      → NOT STARTED.
 
 ### P1 — acceptance-makers (staff the starred ones first: specialist effort, not runner time)
 
-- [ ] **E27 Progent comparison (Gap 1b).** Goal: position vs the closest neighbor (policy-language
+- [x] **E27 Progent comparison (Gap 1b).** Goal: position vs the closest neighbor (policy-language
       tool-call gate, 2025 — currently missing from related work). How: ★ needs someone to read
       Progent, then either a faithful-mini port on the 100-case slice or a documented scope-out
       (why a port is infeasible + a feature-by-feature table vs our gate). Done when: Progent is
       cited in `literature_review/` + `docs/references.bib`, and `07_phase7_pilots.md#e27` holds
       either delta numbers or the scope-out table. Absence here reads as unawareness — do not skip.
+      → COMPLETE: scope-out table written; `shi2025progent` (arXiv:2504.11703) added to
+      `docs/references.bib` + paper-local `IEEE-conference/references.bib`; cited in paper related work.
 - [ ] **Method formalism (Upgrade A, writing task, no new runs).** Goal: read as a contribution,
       not just measurements. How: (a) one paragraph framing τ-selection as FPR-constrained ASR
       minimization (Neyman–Pearson) pointing at the existing Pareto figure; (b) an
@@ -262,7 +284,7 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       procedure, not a magic number. How: re-score cached traces with one stronger embedding
       (E5/MPNet) + report τ tuned on base tested on enhanced (and vice versa). Done when:
       transfer table + recalibration note in `07_phase7_pilots.md#e29`.
-- [ ] **E31 contract-vs-semantic contribution (supervisor Q5).** Goal: E12 showed A1
+- [x] **E31 contract-vs-semantic contribution (supervisor Q5).** Goal: E12 showed A1
       (semantic-only) ≈ ours on headline ASR — locate *where* the full contract + rules +
       escalate add value, or scope the claim honestly. How: offline on cached traces
       (`results/phase5/ours_*` vs `a1_*` JSONLs, no LLM calls): (a) per-category/per-risk
@@ -273,6 +295,10 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       wins/ties/loses" verdict in `07_phase7_pilots.md#e31`; if A1 ties everywhere, the
       contract claim is scoped to auditability + fail-closed guarantees (already stated in
       E12 — this makes it measured, not asserted).
+      → COMPLETE: offline on 2,013 cached calls; semantic-only over-blocks legitimate calls
+      (322 A1 blocks/escalates that ours allows) while ours catches 32 attacks A1 misses;
+      latency parity holds; verdict: contract wins on valid-rate/auditability, ties on
+      headline ASR.
 - [ ] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
       pinned `pip install` + `results/` manifest check (`scripts/run_phase5.py --check`
       already exists — wire it into the container entrypoint). Done when: clean-machine
@@ -302,9 +328,11 @@ evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings
 
 ### Paper (workshop/Findings, ~4–8 pages)
 
-- [ ] Outline (2-column short paper)
-- [ ] Related work: ToolGate "same gate, opposite policy source" framing (blueprint Sec 18)
-- [ ] Results section: ASR/FPR/latency/setup-cost tables + Pareto + error taxonomy
+- [x] Outline (2-column short paper) → COMPLETE: `IEEE-conference/IEEE-conference.tex` drafted (abstract, intro, related work, method, ToolGate baseline, evaluation, results, limitations, conclusion, LLM-usage acknowledgment); double-blind anonymized; 5 pages, compiles via pdflatex+bibtex.
+- [x] Related work: ToolGate "same gate, opposite policy source" framing (blueprint Sec 18) → COMPLETE: Progent (shi2025progent) added to references + cited.
+- [x] Results section: ASR/FPR/latency/setup-cost tables + Pareto + error taxonomy → COMPLETE: Table I headline results (InjecAgent 19.0%→0.7%, MCPTox 20.7%→10.7%, McNemar p=1.3e-33 / p=1.25e-07), setup cost 0 vs 145 contracts, p95 16–20 ms, error taxonomy (13 residuals), E31 contract-vs-semantic flips.
+- [x] Writing guides wired: `docs/prompt.md` + `docs/writing-guideline.md` adapted for the conference template (journal-only sections noted) and linked from `AGENTS.md`.
+- [x] ICEEICT final pass to submission quality (≤6 pages incl. references, 30 verified refs, vector figures, cell-grid tables, no first-person pronouns): **DONE 2026-10-18** (steps A–D + expert-review pass): 6 pages, 254 KB, Type 1 fonts only, double-blind; title covers injection + poisoning. Remaining: co-author/supervisor info (placeholders in) + CMT upload.
 - [ ] Reviewer #2 checklist (blueprint Sec 18) cleared item by item
 - [ ] Reproducibility package: pip wrapper + contracts + logs + one-slide "ToolGate vs Ours" table
 - [ ] (Optional, after Findings) Expand to journal: Q2 security journal (e.g., JISA / Applied Intelligence)

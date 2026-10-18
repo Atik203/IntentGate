@@ -29,4 +29,7 @@ data/raw/
 *.bbl
 *.blg
 
+# local author info (double-blind submission - never commit)
+IEEE-conference/authors.local.*
+
 
