@@ -200,6 +200,38 @@ def bonferroni_alpha(alpha: float, n_comparisons: int) -> float:
     return alpha / max(1, n_comparisons)
 
 
+def conformal_band(scores: list[float], tau: float, alpha: float = 0.1) -> dict:
+    """Calibrate a distribution-free symmetric band around ``tau``.
+
+    The calibration set is treated as exchangeable nonconformity scores
+    ``abs(score - tau)``.  The finite-sample split-conformal quantile uses the
+    conservative order statistic ``ceil((n + 1) * (1 - alpha))``.  The returned
+    empirical coverage is measured on the supplied calibration set and is
+    reported separately from the guaranteed target coverage.
+    """
+    if not 0 < alpha < 1:
+        raise ValueError("alpha must be between 0 and 1")
+    if not scores:
+        raise ValueError("scores must not be empty")
+    if not 0 <= tau <= 1:
+        raise ValueError("tau must be between 0 and 1")
+    values = np.sort(np.abs(np.asarray(scores, dtype=float) - tau))
+    rank = min(len(values) - 1, max(0, int(np.ceil((len(values) + 1) * (1 - alpha))) - 1))
+    delta = float(values[rank])
+    coverage = float(np.mean(np.abs(np.asarray(scores, dtype=float) - tau) <= delta))
+    return {
+        "n": len(values),
+        "tau": tau,
+        "alpha": alpha,
+        "delta": delta,
+        "lower": max(0.0, tau - delta),
+        "upper": min(1.0, tau + delta),
+        "target_coverage": 1.0 - alpha,
+        "empirical_coverage": coverage,
+        "method": "split_conformal_absolute_deviation",
+    }
+
+
 def per_specificity_fpr(trace_entries: list[dict]) -> dict:
     """Per-specificity FPR stratification (Phase 6 P1, deferred from E15).
 
