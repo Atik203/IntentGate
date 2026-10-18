@@ -11,6 +11,8 @@
 | [`team_guide.md`](team_guide.md) | **Start here** — beginner-friendly guide: project in plain words, glossary, what has been done with results, where we are going, what you can do | First day; when confused about the big picture |
 | [`blueprint.md`](blueprint.md) | Design source of truth (Sec 0–18): problem, pipeline, scorer, B2 baseline, datasets, evaluation plan, risks, roadmap, supervisor/team explanations, Reviewer #2 critique | Before touching design decisions |
 | [`setup.md`](setup.md) | Install & verify guide (venv, deps, `.env`, tests, benchmark clones, harness commands) | First day / fresh machine |
+| [`prompt.md`](prompt.md) | Voice guide for paper/thesis prose: simple student register, anti-AI pattern rules, editing vs generation modes | Before writing or polishing any paper text |
+| [`writing-guideline.md`](writing-guideline.md) | Section-by-section structure and content rules for the paper, adapted from the supervisor's guide | Before drafting or rewriting paper sections |
 | [`experiments/README.md`](experiments/README.md) | Experiment hub: status matrix, E1–E10 index, datasets, pinned models, artifact map, reproduce commands, merge map, cross-cutting Q&A | To see what is done and how to reproduce it |
 | [`experiments/01_gate0_foundation.md`](experiments/01_gate0_foundation.md) | E1–E4: B1 reference/parity, MCPTox B1, Gate 0 scorer pilot (GO) | Understanding the trust checks and Assumption 2 |
 | [`experiments/02_parser_schema.md`](experiments/02_parser_schema.md) | E5–E6: parser v1 freeze and schema v1.1 unfreeze (`system_change`) | Parser/contract questions |

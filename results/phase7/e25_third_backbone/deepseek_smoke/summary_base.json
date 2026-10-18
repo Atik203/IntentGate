@@ -1,0 +1,56 @@
+{
+  "model_name": "deepseek-flash",
+  "setting": "base",
+  "gate": "ours",
+  "ablation": "none",
+  "splits": {
+    "dh": {
+      "n": 3,
+      "counts": {
+        "succ": 0,
+        "unsucc": 3,
+        "invalid": 0,
+        "error": 0
+      },
+      "gate_blocked": 0,
+      "asr_valid": 0.0,
+      "valid_rate": 100.0
+    },
+    "ds": {
+      "n": 3,
+      "counts": {
+        "succ": 0,
+        "unsucc": 3,
+        "invalid": 0,
+        "error": 0
+      },
+      "gate_blocked": 0,
+      "asr_valid": 0.0,
+      "valid_rate": 100.0
+    }
+  },
+  "asr_valid_first_step": 0.0,
+  "embedding": {
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "model_hash": "4588b3f9e962",
+    "backend": "sentence-transformers"
+  },
+  "usage": {
+    "agent": {
+      "model_id": "deepseek-flash",
+      "calls": 6,
+      "prompt_tokens": 16843,
+      "completion_tokens": 1731,
+      "total_tokens": 18574
+    },
+    "parser": {
+      "model_id": "gpt-4o-mini",
+      "calls": 6,
+      "prompt_tokens": 7862,
+      "completion_tokens": 538,
+      "total_tokens": 8400
+    }
+  },
+  "estimated_cost_usd": 0.0015021,
+  "cost_note": "agent cost unknown (local/unbilled model); total omits agent"
+}

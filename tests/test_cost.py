@@ -13,6 +13,10 @@ def test_estimate_cost_known_model():
     assert estimate_cost_usd("gpt-4o-mini", 1_000_000, 1_000_000) == pytest.approx(0.75)
 
 
+def test_estimate_cost_deepseek_flash():
+    assert estimate_cost_usd("deepseek-flash", 1_000_000, 1_000_000) == pytest.approx(1.50)
+
+
 def test_estimate_cost_unknown_model():
     assert estimate_cost_usd("mystery-model", 1000, 1000) is None
 

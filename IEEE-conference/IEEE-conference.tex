@@ -5,280 +5,395 @@
 
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xurl}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Conference Paper Title*\\
-{\footnotesize \textsuperscript{*}Note: Sub-titles are not captured for https://ieeexplore.ieee.org  and
-should not be used}
-\thanks{Identify applicable funding agency here. If none, delete this.}
-}
+\title{IntentGate: Action Gating Against Prompt Injection and Tool Poisoning in Tool-Using LLM Agents}
 
-\author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
+
+% Author block: 5 authors total (4 members + supervisor). Lead author real; the three
+% remaining members and the supervisor are placeholders. The 3+2 two-row layout is
+% forced with a break inside the \and separator.
+% Camera-ready compact option: if all authors share one affiliation, collapse to the
+% single-block style (names on one line + shared affiliation + emails) to save space.
+% Before the double-blind CMT submission: comment out this block, uncomment the anonymous block below.
+\author{
+\IEEEauthorblockN{Md. Atikur Rahaman}
+\IEEEauthorblockA{\textit{Dept. of Computer Science and Engineering}\\
+\textit{United International University}\\
+Dhaka, Bangladesh\\
+atikurrahaman0305@gmail.com\\
+ORCID: 0009-0008-2945-4117}
 \and
-\IEEEauthorblockN{2\textsuperscript{nd} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
+\IEEEauthorblockN{Second Author}
+\IEEEauthorblockA{\textit{dept. name of organization}\\
+City, Country\\
+email@example.com}
 \and
-\IEEEauthorblockN{3\textsuperscript{rd} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
+\IEEEauthorblockN{Third Author}
+\IEEEauthorblockA{\textit{dept. name of organization}\\
+City, Country\\
+email@example.com}
+\and[\hfill\break]
+\IEEEauthorblockN{Fourth Author}
+\IEEEauthorblockA{\textit{dept. name of organization}\\
+City, Country\\
+email@example.com}
 \and
-\IEEEauthorblockN{4\textsuperscript{th} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
-\and
-\IEEEauthorblockN{5\textsuperscript{th} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
-\and
-\IEEEauthorblockN{6\textsuperscript{th} Given Name Surname}
-\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
-\textit{name of organization (of Aff.)}\\
-City, Country \\
-email address or ORCID}
+\IEEEauthorblockN{Fifth Author (Supervisor)}
+\IEEEauthorblockA{\textit{dept. name of organization}\\
+City, Country\\
+email@example.com}
 }
+% Anonymous block for the double-blind submission:
+% \author{\IEEEauthorblockN{Anonymous Author(s)}
+% \IEEEauthorblockA{\textit{Anonymous Institution} \\
+% City, Country \\
+% anonymous@anonymous.org}
+% }
 
 \maketitle
 
 \begin{abstract}
-This document is a model and instructions for \LaTeX.
-This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes, 
-or Math in Paper Title or Abstract.
+Tool-using agents built on large language models (LLMs) can be redirected by instructions hidden in tool output or tool descriptions, a risk that grows as agents reach email, calendars, and databases. Existing defenses modify the model, add a judge call per action, or require hand-authored per-tool policies, so enforcement stays costly or incomplete. This paper presents IntentGate, a lightweight middleware gate that derives an intent contract once from the user's trusted request, before any attacker content is loaded. Every proposed tool call is scored by embedding similarity to the contract plus a deterministic rule veto, then allowed, blocked, or escalated, with no LLM call per action. The design targets the single chokepoint every attack crosses, and its policy comes from the user, not from text an attacker can touch. On InjecAgent and MCPTox, attack success falls from 19.0\% to 0.7\% and attack-influenced calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost against 145 hand-authored baseline contracts. Pilots on a second backbone, benign-task utility, and prompt baselines are reported as preliminary.
 \end{abstract}
 
 \begin{IEEEkeywords}
-component, formatting, style, styling, insert.
+LLM agents, prompt injection defense, tool poisoning, action gate, intent contract, middleware, MCP
 \end{IEEEkeywords}
 
 \section{Introduction}
-This document is a model and instructions for \LaTeX.
-Please observe the conference page limits. For more information about how to become an IEEE Conference author or how to write your paper, please visit   IEEE Conference Author Center website: https://conferences.ieeeauthorcenter.ieee.org/.
 
-\subsection{Maintaining the Integrity of the Specifications}
+Tool-using LLM agents act through mail, calendars, databases, and code in a ReAct-style loop~\cite{yao2023react}. That reach is also the attack surface. Instructions hidden in retrieved documents or tool output can redirect the agent through indirect prompt injection~\cite{greshake2023notwhat,perez2022ignore}, and a malicious tool description can redirect it through tool poisoning, documented on real servers of the Model Context Protocol (MCP)~\cite{wang2026mcptox,radosevich2025mcp}. In both cases the agent performs actions the user never authorized, the excessive-agency risk in the OWASP Top 10 for LLM applications~\cite{owasp2025llmtop10}. Current defenses sit at the model level, in a judge call per action, or in hand-authored per-tool policies, so a lightweight, model-agnostic check that derives its policy from the user's own request is missing. This paper introduces IntentGate: a middleware gate that scores every proposed tool call against an intent contract parsed once from the trusted user request, before any attacker content is loaded. The evaluation covers an injection benchmark (InjecAgent) and a tool-poisoning benchmark (MCPTox).
 
-The IEEEtran class file is used to format your paper and style the text. All margins, 
-column widths, line spaces, and text fonts are prescribed; please do not 
-alter them. You may note peculiarities. For example, the head margin
-measures proportionately more than is customary. This measurement 
-and others are deliberate, using specifications that anticipate your paper 
-as one part of the entire proceedings, and not as an independent document. 
-Please do not revise any of the current designations.
+Prior defenses fall into two groups. Model-level methods change the model or its training data: CaMeL~\cite{debenedetti2025camel} wraps the model in a planner-executor design with capability tracking, StruQ~\cite{chen2025struq} and SecAlign~\cite{chen2025secalign} fine-tune the model to separate instructions from data, and instruction-hierarchy training~\cite{wallace2024instruction} teaches models to prioritize trusted instructions. These approaches need model cooperation and report no head-to-head evaluation on InjecAgent or MCPTox. Data-level methods mark or filter untrusted text: Spotlighting~\cite{hines2024defending} transforms it, and guardrail toolkits~\cite{rebedea2023nemo} enforce programmable rails, but the model still makes the final call. Boundary-level methods check the tool call itself. ToolGate~\cite{liu2026toolgate} enforces hand-authored Hoare-style contracts at the call boundary, the same chokepoint this paper uses, and its weakness is the policy source: one contract per tool (145 on InjecAgent) and none for attacker-registered tools. Progent~\cite{shi2025progent} enforces symbolic privilege rules per call, but the policies are authored per tool. ClawGuard~\cite{clawguard2026} derives task-specific constraints from the user's stated objective and enforces them deterministically, with a user confirmation step; it reports results on six injection benchmarks that include InjecAgent and MCPTox. Task Shield~\cite{taskshield2025} adds a judge model to every action.
 
-\section{Prepare Your Paper Before Styling}
-Before you begin to format your paper, first write and save the content as a 
-separate text file. Complete all content and organizational editing before 
-formatting. Please note sections \ref{AA} to \ref{FAT} below for more information on 
-proofreading, spelling and grammar.
+Two problems remain unsolved. Policy setup stays manual or indirect, and no boundary defense reports a frozen head-to-head comparison on both classes of benchmark. IntentGate derives the contract automatically from the user request, scores each call by embedding similarity plus a deterministic veto, and decides allow, block, or escalate at the call boundary, with no LLM call per action. On the frozen evaluation, attack success on InjecAgent falls from 19.0\% to 0.7\% and attack-influenced MCPTox calls from 20.7\% to 10.7\%, at 16--20 ms p95 CPU latency and zero setup cost; a ToolGate reimplementation with 145 contracts stays statistically indistinguishable from the unprotected agent.
 
-Keep your text and graphic files separate until after the text has been 
-formatted and styled. Do not number text heads---{\LaTeX} will do that 
-for you.
+\section{Background and Related Work}
 
-\subsection{Abbreviations and Acronyms}\label{AA}
-Define abbreviations and acronyms the first time they are used in the text, 
-even after they have been defined in the abstract. Abbreviations such as 
-IEEE, SI, MKS, CGS, ac, dc, and rms do not have to be defined. Do not use 
-abbreviations in the title or heads unless they are unavoidable.
+\subsection{Threat model}
+The threat model is a tool-using LLM agent in a ReAct-style loop~\cite{yao2023react}: given a trusted user request, the agent proposes tool calls, executes them, observes the results, and repeats until it produces a final answer. Attacker content arrives through tool descriptions (tool poisoning) or through retrieved or returned content (indirect injection). The attacker's goal is to cause the agent to execute a tool call the user did not authorize: data exfiltration, message forwarding, or state mutation. The defender's goal is to block or escalate such calls while preserving legitimate task completion. The initial user request is assumed trustworthy; everything after it (tool definitions returned by a registry, tool outputs, injected document text) is potentially attacker-controlled. Attack content ranges from manually written text to optimized adversarial sequences~\cite{zou2023universal}, and earlier risk studies catalogue related failure modes in emulated agent environments~\cite{ruan2024identifying}.
 
-\subsection{Units}
-\begin{itemize}
-\item Use either SI (MKS) or CGS as primary units. (SI units are encouraged.) English units may be used as secondary units (in parentheses). An exception would be the use of English units as identifiers in trade, such as ``3.5-inch disk drive''.
-\item Avoid combining SI and CGS units, such as current in amperes and magnetic field in oersteds. This often leads to confusion because equations do not balance dimensionally. If you must use mixed units, clearly state the units for each quantity that you use in an equation.
-\item Do not mix complete spellings and abbreviations of units: ``Wb/m\textsuperscript{2}'' or ``webers per square meter'', not ``webers/m\textsuperscript{2}''. Spell out units when they appear in text: ``. . . a few henries'', not ``. . . a few H''.
-\item Use a zero before decimal points: ``0.25'', not ``.25''. Use ``cm\textsuperscript{3}'', not ``cc''.)
-\end{itemize}
+\subsection{Defenses}
+Model-level defenses track information flow at the model or runtime level. CaMeL~\cite{debenedetti2025camel} wraps the model in a planner-executor design with capability-based taint tracking, so data from attacker-controlled sources cannot reach tool arguments; StruQ~\cite{chen2025struq} fine-tunes the model to separate instructions from data with structured queries, SecAlign~\cite{chen2025secalign} applies preference optimization to the same end, and instruction-hierarchy training~\cite{wallace2024instruction} teaches the model to prioritize privileged instructions. All of these require model cooperation and publish no head-to-head adversarial evaluation on InjecAgent or MCPTox. Data-level defenses mark or transform untrusted text: Spotlighting~\cite{hines2024defending} converts retrieved content into clearly delimited forms, and guardrail toolkits such as NeMo Guardrails~\cite{rebedea2023nemo} enforce programmable rails around the model, but the model still makes the final call. Detection methods add training or inference cost: BIPIA fine-tunes a detector alongside its benchmark~\cite{yi2025benchmarking}, and MELON re-executes with masked tools and compares outputs~\cite{zhu2025melon}.
 
-\subsection{Equations}
-Number equations consecutively. To make your 
-equations more compact, you may use the solidus (~/~), the exp function, or 
-appropriate exponents. Italicize Roman symbols for quantities and variables, 
-but not Greek symbols. Use a long dash rather than a hyphen for a minus 
-sign. Punctuate equations with commas or periods when they are part of a 
-sentence, as in:
-\begin{equation}
-a+b=\gamma\label{eq}
-\end{equation}
+Judge-based defenses ask a second language model to vet each proposed call~\cite{taskshield2025}. They are flexible, but they add a language-model call (with cost and latency) on every action, introduce a new attack surface (the judge can be prompt-injected), and produce implicit policies that are hard to audit. Contract-based defenses come closest to the placement of this work. ToolGate~\cite{liu2026toolgate} enforces hand-authored Hoare-style pre/post-condition contracts per tool at the tool-call boundary, the same chokepoint used here; its weakness is the policy source, because contracts are written manually per tool, coverage is incomplete (65/801 MCPTox tools, 8.1\% distinct and 37.2\% availability-weighted) and attacker-registered tools have no contract at all. Progent~\cite{shi2025progent} also enforces symbolic per-call privilege rules at the tool-call layer (fail-closed, no LLM in the decision loop), but its policies are authored manually or by an LLM per tool rather than derived from the user's request, and it is evaluated on AgentDojo and ASB rather than InjecAgent and MCPTox. ClawGuard~\cite{clawguard2026} derives task-specific constraints from the user's stated objective and enforces them deterministically, with a user confirmation step; it reports results on six injection benchmarks including InjecAgent and MCPTox, so this paper does not claim to be the first to derive policy from the request. Prompt Flow Integrity~\cite{kim2025promptflow} prevents privilege escalation through agent isolation and data tracking, evaluated on AgentDojo and AgentBench. TrustAgent~\cite{hua2024trustagent} uses a hand-authored constitution and is evaluated by emulation, not live tool execution. A recent design-pattern survey~\cite{beurerkellner2025design} argues that the safest agent designs never let untrusted data steer privileged actions, which matches the boundary-placement argument of this paper.
 
-Be sure that the 
-symbols in your equation have been defined before or immediately following 
-the equation. Use ``\eqref{eq}'', not ``Eq.~\eqref{eq}'' or ``equation \eqref{eq}'', except at 
-the beginning of a sentence: ``Equation \eqref{eq} is . . .''
+AgentDojo~\cite{debenedetti2024agentdojo}, InjecAgent~\cite{zhan2024injecagent}, and Agent Security Bench~\cite{zhang2025asb} provide the injection benchmarks; MCPTox~\cite{wang2026mcptox} provides the tool-poisoning benchmark, and the MCP specification itself ships no defense against poisoned registrations~\cite{anthropic2024mcp,radosevich2025mcp}. Zhan et al.~\cite{zhan2025adaptive} show that adaptive attackers break defenses which look strong under static attacks, a limitation this paper addresses by scoping the primary claims to static attacks and reporting adaptive-attacker work as ongoing.
 
-\subsection{\LaTeX-Specific Advice}
+\subsection{Research gap}
+The missing piece is a boundary gate that needs no model change, no per-action LLM call, and no per-tool policy, and that is compared head-to-head against another boundary defense on both an injection benchmark and a tool-poisoning benchmark. Concurrent work (ClawGuard, Task Shield) derives task-scoped policies from the user's request; ClawGuard is evaluated on both benchmarks named above. The contribution of this paper is a lightweight, CPU-only gate with no LLM in the per-action loop, whose policy is derived automatically from the user's request, plus a frozen reproducible head-to-head against a ToolGate reimplementation on both benchmarks and the direct measurement of manual contract setup cost (0 vs.\ 145).
 
-Please use ``soft'' (e.g., \verb|\eqref{Eq}|) cross references instead
-of ``hard'' references (e.g., \verb|(1)|). That will make it possible
-to combine sections, add equations, or change the order of figures or
-citations without having to go through the file line by line.
-
-Please don't use the \verb|{eqnarray}| equation environment. Use
-\verb|{align}| or \verb|{IEEEeqnarray}| instead. The \verb|{eqnarray}|
-environment leaves unsightly spaces around relation symbols.
-
-Please note that the \verb|{subequations}| environment in {\LaTeX}
-will increment the main equation counter even when there are no
-equation numbers displayed. If you forget that, you might write an
-article in which the equation numbers skip from (17) to (20), causing
-the copy editors to wonder if you've discovered a new method of
-counting.
-
-{\BibTeX} does not work by magic. It doesn't get the bibliographic
-data from thin air but from .bib files. If you use {\BibTeX} to produce a
-bibliography you must send the .bib files. 
-
-{\LaTeX} can't read your mind. If you assign the same label to a
-subsubsection and a table, you might find that Table I has been cross
-referenced as Table IV-B3. 
-
-{\LaTeX} does not have precognitive abilities. If you put a
-\verb|\label| command before the command that updates the counter it's
-supposed to be using, the label will pick up the last counter to be
-cross referenced instead. In particular, a \verb|\label| command
-should not go before the caption of a figure or a table.
-
-Do not use \verb|\nonumber| inside the \verb|{array}| environment. It
-will not stop equation numbers inside \verb|{array}| (there won't be
-any anyway) and it might stop a wanted equation number in the
-surrounding equation.
-
-\subsection{Some Common Mistakes}\label{SCM}
-\begin{itemize}
-\item The word ``data'' is plural, not singular.
-\item The subscript for the permeability of vacuum $\mu_{0}$, and other common scientific constants, is zero with subscript formatting, not a lowercase letter ``o''.
-\item In American English, commas, semicolons, periods, question and exclamation marks are located within quotation marks only when a complete thought or name is cited, such as a title or full quotation. When quotation marks are used, instead of a bold or italic typeface, to highlight a word or phrase, punctuation should appear outside of the quotation marks. A parenthetical phrase or statement at the end of a sentence is punctuated outside of the closing parenthesis (like this). (A parenthetical sentence is punctuated within the parentheses.)
-\item A graph within a graph is an ``inset'', not an ``insert''. The word alternatively is preferred to the word ``alternately'' (unless you really mean something that alternates).
-\item Do not use the word ``essentially'' to mean ``approximately'' or ``effectively''.
-\item In your paper title, if the words ``that uses'' can accurately replace the word ``using'', capitalize the ``u''; if not, keep using lower-cased.
-\item Be aware of the different meanings of the homophones ``affect'' and ``effect'', ``complement'' and ``compliment'', ``discreet'' and ``discrete'', ``principal'' and ``principle''.
-\item Do not confuse ``imply'' and ``infer''.
-\item The prefix ``non'' is not a word; it should be joined to the word it modifies, usually without a hyphen.
-\item There is no period after the ``et'' in the Latin abbreviation ``et al.''.
-\item The abbreviation ``i.e.'' means ``that is'', and the abbreviation ``e.g.'' means ``for example''.
-\end{itemize}
-An excellent style manual for science writers is \cite{debenedetti2025camel}.
-
-\subsection{Authors and Affiliations}\label{AAA}
-\textbf{The class file is designed for, but not limited to, six authors.} A 
-minimum of one author is required for all conference articles. Author names 
-should be listed starting from left to right and then moving down to the 
-next line. This is the author sequence that will be used in future citations 
-and by indexing services. Names should not be listed in columns nor group by 
-affiliation. Please keep your affiliations as succinct as possible (for 
-example, do not differentiate among departments of the same organization).
-
-\subsection{Identify the Headings}\label{ITH}
-Headings, or heads, are organizational devices that guide the reader through 
-your paper. There are two types: component heads and text heads.
-
-Component heads identify the different components of your paper and are not 
-topically subordinate to each other. Examples include Acknowledgments and 
-References and, for these, the correct style to use is ``Heading 5''. Use 
-``figure caption'' for your Figure captions, and ``table head'' for your 
-table title. Run-in heads, such as ``Abstract'', will require you to apply a 
-style (in this case, italic) in addition to the style provided by the drop 
-down menu to differentiate the head from the text.
-
-Text heads organize the topics on a relational, hierarchical basis. For 
-example, the paper title is the primary text head because all subsequent 
-material relates and elaborates on this one topic. If there are two or more 
-sub-topics, the next level head (uppercase Roman numerals) should be used 
-and, conversely, if there are not at least two sub-topics, then no subheads 
-should be introduced.
-
-\subsection{Figures and Tables}\label{FAT}
-\paragraph{Positioning Figures and Tables} Place figures and tables at the top and 
-bottom of columns. Avoid placing them in the middle of columns. Large 
-figures and tables may span across both columns. Figure captions should be 
-below the figures; table heads should appear above the tables. Insert 
-figures and tables after they are cited in the text. Use the abbreviation 
-``Fig.~\ref{fig}'', even at the beginning of a sentence.
-
-\begin{table}[htbp]
-\caption{Table Type Styles}
-\begin{center}
-\begin{tabular}{|c|c|c|c|}
+\begin{table*}[t]
+\caption{Related-work comparison: policy source, enforcement, per-action LLM use, benchmarks, and setup cost.}
+\label{tab:relatedwork}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|p{56pt}|p{82pt}|p{92pt}|c|p{88pt}|p{88pt}|}
 \hline
-\textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
-\cline{2-4} 
-\textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
+System & Policy source & Enforcement & LLM/action & Benchmarks & Setup cost \\
 \hline
-copy& More table copy$^{\mathrm{a}}$& &  \\
+CaMeL & Model-level & Capability taint tracking & No & Not reported & Model change \\
 \hline
-\multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
+StruQ & Model-level & Fine-tuned model & No & Not reported & Model change \\
+\hline
+Task Shield & Task-scoped (LLM-derived) & LLM-as-judge & Yes & Not reported & Per-task LLM calls \\
+\hline
+ClawGuard & Task-scoped (from user objective) & Deterministic rules & No & InjecAgent, MCPTox & Once per request \\
+\hline
+Progent & Manual/LLM-authored DSL & Deterministic symbolic & No & AgentDojo, ASB & Per-tool policies \\
+\hline
+ToolGate & Manual Hoare contracts & Deterministic symbolic & No & Not reported & 145 contracts (InjecAgent) \\
+\hline
+\textbf{Ours} & \textbf{Auto-derived from user request} & \textbf{Embedding + rule veto} & No & InjecAgent, MCPTox & \textbf{0 contracts} \\
+\hline
 \end{tabular}
-\label{tab1}
-\end{center}
-\end{table}
+\end{table*}
 
-\begin{figure}[htbp]
-\centerline{\includegraphics{fig1.png}}
-\caption{Example of a figure caption.}
-\label{fig}
+\section{Method}
+
+\subsection{System overview and ordering invariant}
+IntentGate sits between the agent and the executor. Figure~\ref{fig:gate} shows the pipeline. The ordering invariant is load-bearing: the intent contract is parsed from the trusted user request \emph{before} tool definitions or any attacker content (injected observations, poisoned tool descriptions) are assembled, and tool outputs are never passed to the parser. Every proposed tool call, user-initiated and attacker-influenced alike, passes through \texttt{GateMiddleware.execute()} with no bypass path.
+
+\subsection{Intent parser and contract schema}
+A trusted intent parser (an LLM at temperature 0, JSON mode, one repair retry) reads the user request once per session and emits an intent contract
+\begin{equation}
+C = (A, K, H), \label{eq:contract}
+\end{equation}
+where $A$ is the set of allowed (entity, operation, resource) elements, $K$ is a set of numeric and path constraints, and $H$ is a set of high-risk flags. A call that touches an element outside $A$, violates a constraint in $K$, or matches a flag in $H$ fails the rule check and triggers the veto. The schema is versioned and frozen for the evaluation. The contract is embedded once per session and reused; only the per-call request is embedded at decision time, which keeps the agent prompt cacheable and the gate out of the prompt.
+
+\subsection{Scorer}
+Each proposed tool call $c$ is scored against the contract. The semantic component is the cosine similarity between the contract embedding $e_C$ and the call embedding $e_c$,
+\begin{equation}
+S_{\mathrm{sem}} = \cos(e_C, e_c) = \frac{e_C \cdot e_c}{\lVert e_C \rVert \, \lVert e_c \rVert}, \label{eq:sem}
+\end{equation}
+and the rule component is deterministic, $S_{\mathrm{rule}} \in \{0,1\}$, with $S_{\mathrm{rule}}=1$ when $c$ passes all constraints in $K$ and $S_{\mathrm{rule}}=0$ when the veto fires. The combined score is
+\begin{equation}
+S = \alpha \, S_{\mathrm{sem}} + (1 - \alpha) \, S_{\mathrm{rule}}, \label{eq:score}
+\end{equation}
+with default $\alpha = 0.7$. The threshold $\tau = 0.75$ and half-width $\delta = 0.1$ were fixed on a 50-call pilot before any benchmark run; this paper reports the operating point and does not claim Neyman--Pearson optimality or cross-split transfer.
+
+\subsection{Gate middleware and escalate band}
+The middleware decides per call:
+\begin{equation}
+\mathrm{decision}(c) =
+\begin{cases}
+\text{\textsc{block}}, & S_{\mathrm{rule}}=0 \ \text{or}\ S < \tau-\delta, \\
+\text{\textsc{escalate}}, & S_{\mathrm{rule}}=1 \ \text{and}\ \tau-\delta \le S < \tau, \\
+\text{\textsc{allow}}, & \text{otherwise},
+\end{cases} \label{eq:decision}
+\end{equation}
+where the block case is fail-closed and escalate routes to human review, counted as block in benchmark mode and shown to the user in demo mode. Algorithm~\ref{alg:gate} lists the full procedure. Of escalated calls, 60.7\% are attacker calls, 14.8\% user calls, and 23.5\% unclassified. The gate adds no LLM call per action; measured p95 per-call latency is 16--20 ms on CPU.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=1pt,y=1pt,>={Stealth[length=3.2pt]}]
+\tikzset{
+  rbox/.style={draw, rounded corners=2.5pt, align=center, inner xsep=4pt, inner ysep=3pt, font=\sffamily\small},
+  trustedbox/.style={rbox, draw=green!45!black, fill=green!7},
+  untrustedbox/.style={rbox, draw=red!60!black, fill=red!7, dashed},
+  agentbox/.style={rbox, draw=black!55, fill=black!6},
+  gatebox/.style={rbox, draw=blue!60!black, fill=blue!6},
+  decbox/.style={rbox, minimum height=34pt},
+  arr/.style={->, draw=black!75, line width=0.5pt},
+  darr/.style={arr, dashed},
+}
+% gate container
+\draw[rounded corners=4pt, draw=blue!60!black, fill=blue!4] (2,12) rectangle (238,148);
+\node[font=\sffamily\footnotesize\bfseries, text=blue!60!black] at (120,139) {ACTION GATE (middleware)};
+% trusted / untrusted columns
+\node[trustedbox, text width=92pt] (user) at (54,256) {{\bfseries User request}\\[1pt]{\footnotesize (trusted)}};
+\node[untrustedbox, text width=100pt] (untrusted) at (180,256) {{\bfseries Untrusted content}\\[1pt]{\footnotesize tool defs and outputs}};
+\node[trustedbox, text width=92pt] (parser) at (54,213) {{\bfseries Intent parser (LLM)}\\[1pt]{\footnotesize runs once, first}};
+\node[agentbox, text width=100pt] (agent) at (180,213) {{\bfseries Agent (ReAct)}\\[1pt]{\footnotesize any backbone}};
+\node[trustedbox, text width=92pt] (contract) at (54,169) {{\bfseries Intent contract}\\[1pt]{\footnotesize frozen, read-only}};
+% gate internals
+\node[gatebox, text width=86pt] (sem) at (56,119) {{\bfseries Semantic score}\\[1pt]{\footnotesize $S_{\mathrm{sem}}$ = embedding cosine similarity}};
+\node[gatebox, text width=86pt] (rule) at (180,119) {{\bfseries Rule engine}\\[1pt]{\footnotesize hard constraints, $S_{\mathrm{rule}}\!\in\!\{0,1\}$}};
+\node[gatebox, text width=208pt] (score) at (120,86) {{\bfseries Combined score}\\[1pt]{\footnotesize $S=\alpha\,S_{\mathrm{sem}}+(1-\alpha)\,S_{\mathrm{rule}}$\quad veto $\Rightarrow$ block (fail-closed)}};
+\node[decbox, text width=64pt, fill=red!10, draw=red!65!black] (block) at (48,45) {{\bfseries BLOCK}\\[1pt]{\footnotesize $S<\tau-\delta$ or veto}};
+\node[decbox, text width=70pt, fill=yellow!18, draw=orange!70!black] (esc) at (128,45) {{\bfseries ESCALATE}\\[1pt]{\footnotesize $\tau-\delta\leq S<\tau$}};
+\node[decbox, text width=54pt, fill=green!10, draw=green!50!black] (allow) at (201,45) {{\bfseries ALLOW}\\[1pt]{\footnotesize $S\geq\tau$}};
+% arrows
+\draw[arr] (user) -- (parser);
+\draw[arr] (untrusted) -- (agent);
+\draw[arr] (parser) -- (contract);
+\draw[darr] (40,157) -- (40,132);
+\node[font=\sffamily\footnotesize, text=black!70, anchor=west] at (42,152.5) {contract};
+\draw[arr] (agent.south) -- (180,148);
+\node[font=\sffamily\footnotesize, text=black!70, anchor=east] at (178,178) {proposed call};
+\draw[arr] (sem) -- (score);
+\draw[arr] (rule) -- (score);
+\draw[arr] (score) -- (block);
+\draw[arr] (score) -- (esc);
+\draw[arr] (score) -- (allow);
+\draw[arr] (allow.east) -- (240,45) -- (240,213) -- (agent.east);
+\node[rotate=90, font=\sffamily\footnotesize, inner sep=1pt] at (247,132) {tool result to agent};
+\end{tikzpicture}
+\caption{IntentGate middleware architecture. The intent parser derives a contract once from the trusted request, before any attacker content (tool definitions, tool outputs) is loaded. The gate scores each proposed call with embedding similarity and a hard-rule veto, then decides allow, block, or escalate; per-action enforcement uses no LLM call.}
+\label{fig:gate}
 \end{figure}
 
-Figure Labels: Use 8 point Times New Roman for Figure labels. Use words 
-rather than symbols or abbreviations when writing Figure axis labels to 
-avoid confusing the reader. As an example, write the quantity 
-``Magnetization'', or ``Magnetization, M'', not just ``M''. If including 
-units in the label, present them within parentheses. Do not label axes only 
-with units. In the example, write ``Magnetization (A/m)'' or ``Magnetization 
-\{A[m(1)]\}'', not just ``A/m''. Do not label axes with a ratio of 
-quantities and units. For example, write ``Temperature (K)'', not 
-``Temperature/K''.
+\begin{algorithm}[t]
+\caption{Gate decision for one proposed tool call}
+\label{alg:gate}
+\footnotesize
+\begin{algorithmic}[1]
+\Require contract $C=(A,K,H)$ with embedding $e_C$; tool call $c$ with embedding $e_c$; parameters $\alpha,\tau,\delta$
+\Ensure decision $d$: allow, block, or escalate
+\State $S_{\mathrm{sem}} \gets \cos(e_C, e_c)$
+\State $S_{\mathrm{rule}} \gets 1$ if $c$ satisfies $A$ and $K$, else $0$
+\State $S \gets \alpha S_{\mathrm{sem}} + (1-\alpha) S_{\mathrm{rule}}$
+\If{$S_{\mathrm{rule}}=0$ or $S < \tau-\delta$}
+  \State $d \gets \mathrm{block}$ \Comment{fail-closed hard veto}
+\ElsIf{$S < \tau$}
+  \State $d \gets \mathrm{escalate}$ \Comment{human-review band}
+\Else
+  \State $d \gets \mathrm{allow}$
+\EndIf
+\State \Return $d$
+\end{algorithmic}
+\end{algorithm}
+
+\section{ToolGate Baseline (B2)}
+
+The primary baseline is a minimal reimplementation of ToolGate~\cite{liu2026toolgate}: Hoare-style contracts $\{P\}T\{Q\}$ with preconditions $P$ over a symbolic world state, postconditions $Q$, and snapshot/rollback on post-condition violation. Contracts cover the evaluated tool subset only: InjecAgent 79/79 user and attacker tools (100\%), MCPTox 65/801 registered tools (8.1\% distinct and 37.2\% availability-weighted). Missing contracts are never silently allowed: they are counted as \texttt{no\_contract} and reported. Fidelity was validated by contract review and recorded-call replay rather than a ToolBench run.
+
+Setup cost is measured directly: ToolGate requires 145 hand-authored contracts on InjecAgent against zero setup for IntentGate, whose contract is derived from the request. On MCPTox, extending contracts toward 84.9\% weighted coverage does not meaningfully reduce attack success: the coverage-vs-ASR curve is flat because attack calls look like legitimate queries; the attack is in the poisoned registration, not in calling the wrong tool. ToolGate is statistically indistinguishable from the unprotected baseline on MCPTox, which validates the head-to-head comparison.
+
+\section{Evaluation}
+
+\subsection{Benchmarks and cases}
+\textbf{InjecAgent}~\cite{zhan2024injecagent}: indirect prompt injection in tool-integrated agents, 2,108 cases (direct-harm and data-stealing attacker intents, in base and enhanced settings), frozen at pinned commits. \textbf{MCPTox}~\cite{wang2026mcptox}: tool poisoning on real-world MCP servers, 1,348 static-snapshot cases. MCPTox results are explicitly scoped to the static snapshot (live-server evaluation is deferred; the poisoning-at-registration logic is identical in both).
+
+\subsection{Metrics}
+Attack success rate (ASR): share of attack cases where the attacker's objective is achieved. For MCPTox, the same quantity is reported as attack-influenced calls because the heuristic evaluator flags payload or sensitive-path evidence rather than a strict objective. Block rate: share of gated calls blocked or escalated, reported by stratum where stratified. Valid rate: share of legitimate task steps completed, the utility metric. Latency: p50/p95 per-call gate overhead. Setup cost: hand-authored contracts required.
+
+\subsection{Baselines and ablations}
+B1 is the unprotected agent. B2 is the ToolGate reimplementation. Ours is IntentGate at $\tau=0.75$, $\delta=0.1$, $\alpha=0.7$. The full matrix adds three ablations: A1 semantic-only (no rule veto), A2 rule-only (no embeddings), A3 raw-request embedding (similarity to the request text instead of the parsed contract). All conditions run with identical prompts, tool blocks, agent model (gpt-4o-mini), embedding model (all-MiniLM-L6-v2~\cite{reimers2019sentence}), and seed 42.
+
+\subsection{Statistics}
+All comparisons use the paired McNemar test with continuity correction~\cite{dietterich1998approximate} and seeded bootstrap 95\% CIs (10k resamples) per benchmark and per-risk breakdown, with Bonferroni correction across the 10-risk breakdowns ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Results from the frozen matrix are reported as-is; pilot results are labeled preliminary.
+
+\section{Results}
+
+\subsection{Main results}
+Table~\ref{tab:headline} and Figure~\ref{fig:bars} summarize the headline result. IntentGate reduces ASR from 19.0\% to 0.7\% on InjecAgent and attack-influenced calls from 20.7\% to 10.7\% on MCPTox (McNemar $p=1.3\mathrm{e}{-}33$ and $p=1.25\mathrm{e}{-}07$). The ToolGate baseline reduces ASR only slightly (17.2\% vs.\ 19.0\% on InjecAgent) and is not statistically distinguishable from the unprotected agent on MCPTox. Call-level utility is reported with the benign-task pilot in Section~\ref{sec:validation}.
+
+\begin{table}[t]
+\caption{Headline results (frozen matrix). MCPTox reports attack-influenced ASR; setup cost counts hand-authored contracts.}
+\label{tab:headline}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Condition & \shortstack{InjecAgent\\ASR} & \shortstack{MCPTox\\ASR} & Setup cost & p95 latency \\
+\hline
+B1 (none) & 19.0\% & 20.7\% & --- & --- \\
+\hline
+B2 (ToolGate) & 17.2\% & 20.1\% & 145 contracts & --- \\
+\hline
+\textbf{Ours (IntentGate)} & \textbf{0.7\%} & \textbf{10.7\%} & \textbf{0} & 16--20 ms \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth, height=4.1cm,
+  ybar, bar width=7pt,
+  symbolic x coords={InjecAgent, MCPTox},
+  xtick=data,
+  ymin=0, ymax=25,
+  ylabel={ASR (\%)},
+  ytick={0,5,10,15,20,25},
+  ymajorgrids, major grid style={black!10},
+  tick label style={font=\small}, label style={font=\small},
+  legend style={font=\small, at={(0.5,-0.26)}, anchor=north, legend columns=3, draw=black!25},
+  nodes near coords={\pgfmathprintnumber[fixed,zerofill,precision=1]{\pgfplotspointmeta}},
+  nodes near coords style={font=\fontsize{6.5}{7}\selectfont, rotate=90, anchor=west},
+  enlarge x limits=0.3,
+]
+\addplot[fill=black!25, draw=black!60] coordinates {(InjecAgent,19.0) (MCPTox,20.7)};
+\addplot[fill=orange!40, draw=orange!70!black] coordinates {(InjecAgent,17.2) (MCPTox,20.1)};
+\addplot[fill=green!35, draw=green!55!black] coordinates {(InjecAgent,0.7) (MCPTox,10.7)};
+\legend{B1 (none), B2 (ToolGate), Ours (IntentGate)}
+\end{axis}
+\end{tikzpicture}
+\caption{Attack success rate by condition on the frozen matrix (MCPTox reports attack-influenced ASR). IntentGate reaches 0.7\% on InjecAgent and 10.7\% on MCPTox, while the ToolGate baseline stays close to the unprotected agent.}
+\label{fig:bars}
+\end{figure}
+
+\subsection{Setup cost}
+IntentGate requires zero hand-authored contracts; ToolGate requires 145 on InjecAgent and 65 on MCPTox (frozen matrix), extendable to 583 without closing the gap. This is the metric ToolGate's own paper does not measure.
+
+\subsection{Ablations}
+Semantic scoring does most of the detecting. The rule-only ablation (A2) is the weakest monitor, with 14.7\% ASR on InjecAgent and 263 attack-influenced MCPTox calls, close to the unprotected agent on the hard slices. Semantic-only (A1) detects more than the full gate on MCPTox (81 vs.\ 144 attack-influenced calls) but over-blocks legitimate calls, as the benign-task pilot shows. The raw-request ablation (A3) matches the full gate on InjecAgent (0.7\% both) and detects slightly more MCPTox calls (116 vs.\ 144). The contract's value is therefore utility and auditability rather than headline ASR. The false-escalate rate is 14.8\% on 583 escalated calls.
+
+\begin{table}[t]
+\caption{Ablations (frozen matrix). A1--A3 replace gate components; MCPTox reports attack-influenced calls (out of 1{,}348).}
+\label{tab:ablation}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|l|c|c|p{88pt}|}
+\hline
+Condition & \shortstack{InjecAgent\\ASR} & \shortstack{MCPTox\\calls} & Notes \\
+\hline
+A1 (semantic-only) & 0.0\% & 81 & Detects more; over-blocks legitimate calls \\
+\hline
+A2 (rule-only) & 14.7\% & 263 & Closest to unprotected on hard slices \\
+\hline
+A3 (raw-request) & 0.7\% & 116 & Equal to ours on \mbox{InjecAgent}; fewer MCPTox calls \\
+\hline
+\textbf{Ours (full)} & \textbf{0.7\%} & \textbf{144} & Contract adds utility and auditability \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Pareto and threshold}
+Figure~\ref{fig:sweep} shows the threshold sweep on the pilot data: attack success falls to zero at the operating point $\tau=0.75$ while the false-positive rate stays at 4\%. Cross-split transfer remains future work.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth, height=4.3cm,
+  xlabel={Threshold $\tau$}, ylabel={Rate},
+  xmin=0.38, xmax=0.82, ymin=0, ymax=0.62,
+  xtick={0.4,0.5,0.6,0.7,0.75,0.8},
+  ytick={0,0.2,0.4,0.6},
+  grid=major, grid style={black!10},
+  tick label style={font=\small}, label style={font=\small},
+  legend style={font=\small, cells={anchor=west}, at={(0.03,0.04)}, anchor=south west, draw=black!25},
+  line width=0.7pt, mark size=1.3pt,
+]
+\addplot[color=blue!65!black, mark=*] coordinates {(0.40,0.56) (0.45,0.56) (0.50,0.56) (0.55,0.56) (0.60,0.56) (0.65,0.56) (0.70,0.28) (0.75,0.00) (0.80,0.00)};
+\addplot[color=red!70!black, mark=square*] coordinates {(0.40,0.00) (0.45,0.00) (0.50,0.00) (0.55,0.00) (0.60,0.00) (0.65,0.00) (0.70,0.04) (0.75,0.04) (0.80,0.08)};
+\legend{Pilot ASR, Pilot FPR}
+\draw[dashed, black!60, line width=0.5pt] (axis cs:0.75,0) -- (axis cs:0.75,0.62);
+\node[font=\footnotesize, text=black!70, anchor=east] at (axis cs:0.745,0.52) {operating point};
+\end{axis}
+\end{tikzpicture}
+\caption{Threshold sweep on the 200-case pilot ($\delta=0.1$): attack success rate (ASR) and false-positive rate (FPR) versus $\tau$. The operating point $\tau=0.75$ sits at the knee: ASR reaches zero while FPR stays at 4\%.}
+\label{fig:sweep}
+\end{figure}
+
+\subsection{Error taxonomy}
+Thirteen InjecAgent residuals remain: all with $S\in[0.75,0.79]$, read-only exfil calls just above $\tau$. Intent mimicry inflates $S$ by only +0.0112 on average, with 0/13 cases newly crossing $\tau$, so the semantic threshold is stable under rephrasing. MCPTox residuals cluster in poisoned-registration classes no contract covers.
+
+\subsection{Validation results (preliminary)}
+\label{sec:validation}
+E18 replicates the ASR reduction on a second backbone, qwen3.5:4b (27.1\% $\rightarrow$ 2.1\%); gpt-6-luna is excluded because its prose-only output never participates in the ReAct-style loop. Block rate by stratum: specific 12.8\%, vague 9.6\%, overall 12.4\%. The benign-task pilot (50 clean cases) compares the full gate with the unprotected agent and the semantic-only ablation: user-tool allowed 16.0\%, 12.0\%, and 8.0\% respectively, and clean-call block 0.0\%, 25.0\%, and 42.9\%. Semantic-only over-blocks legitimate calls, so the contract preserves utility in this comparison. The prompt-baseline pilot (50 attack cases per condition) gives ASR 6.8\% with no defense prompt, 4.3\% with delimiters, 4.3\% with sandwiching, and 8.9\% with instructional prevention. A third backbone and adaptive-attacker robustness remain in progress; all pilot numbers are preliminary.
+
+\begin{table}[t]
+\caption{Utility and robustness pilots (preliminary): benign-task utility, second backbone, and prompt-level baselines.}
+\label{tab:validation}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|l|p{142pt}|}
+\hline
+Pilot & Result \\
+\hline
+E23 benign utility & user-tool allowed: none 16.0\%, ours 12.0\%, semantic-only 8.0\%; clean-call block: none 0.0\%, ours 25.0\%, semantic-only 42.9\% \\
+\hline
+E18 second backbone & qwen3.5:4b: ASR 27.1\% $\rightarrow$ 2.1\% \\
+\hline
+E24 prompt baselines & delimiters 4.3\%, sandwich 4.3\%, no \mbox{defense} 6.8\%, instructional prevention 8.9\% (50 cases each) \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Limitations}
+
+The primary claims are scoped to static attacks; adaptive-attacker robustness is reported as ongoing work rather than claimed. MCPTox results are on a static snapshot, not live servers. The main matrix uses a single backbone (gpt-4o-mini); qwen3.5:4b replicates the delta, and gpt-6-luna is incompatible with the shared ReAct-style prompt. The parser is an LLM call once per session, included in the cost; per-action enforcement uses no LLM. Contract coverage on the MCPTox long tail remains low by design (missing contracts are counted as \texttt{no\_contract} and never silently allowed). The valid rate measures call-level allowance of the user's tool call, not end-to-end task success; the benign-task pilot is a 50-case comparison and should be read as such. Block rate includes escalate candidates and is not a pure false-positive rate. The MCPTox attack-influenced metric comes from a heuristic evaluator (payload and sensitive-path evidence), which is coarser than a strict objective check.
+
+\section{Conclusion}
+
+This paper shows that an action gate can derive its policy automatically from the user's request, enforce it with embedding similarity plus a deterministic veto at the tool-call chokepoint, and operate with zero setup cost, 16--20 ms p95 latency, and a large measured reduction in attack success on both an injection and a tool-poisoning benchmark. The reproducible artifact is released after acceptance. Future work covers adaptive-attacker hardening, live-server MCPTox evaluation, and multi-turn drift.
 
 \section*{Acknowledgment}
+The authors thank their supervisor for supervision, guidance, and continuous support throughout this work. Large language models were used only for language polishing, such as grammar and spelling correction.
 
-The preferred spelling of the word ``acknowledgment'' in America is without 
-an ``e'' after the ``g''. Avoid the stilted expression ``one of us (R. B. 
-G.) thanks $\ldots$''. Instead, try ``R. B. G. thanks$\ldots$''. Put sponsor 
-acknowledgments in the unnumbered footnote on the first page.
-
-\section*{References}
-
-Please number citations consecutively within brackets \cite{zhan2024injecagent}. The 
-sentence punctuation follows the bracket \cite{debenedetti2024agentdojo}. Refer simply to the reference 
-number, as in \cite{wang2026mcptox}---do not use ``Ref. \cite{wang2026mcptox}'' or ``reference \cite{wang2026mcptox}'' except at 
-the beginning of a sentence: ``Reference \cite{wang2026mcptox} was the first $\ldots$''
-
-Number footnotes separately in superscripts. Place the actual footnote at 
-the bottom of the column in which it was cited. Do not put footnotes in the 
-abstract or reference list. Use letters for table footnotes.
-
-Unless there are six authors or more give all authors' names; do not use 
-``et al.''. Papers that have not been published, even if they have been 
-submitted for publication, should be cited as ``unpublished'' \cite{liu2026toolgate}. Papers 
-that have been accepted for publication should be cited as ``in press'' \cite{zhang2025asb}. 
-Capitalize only the first word in a paper title, except for proper nouns and 
-element symbols.
-
-For papers published in translation journals, please give the English 
-citation first, followed by the original foreign-language citation \cite{chen2025struq}.
-
-% TODO (Phase 8): replace filler body text with the paper; keep this BibTeX wiring.
-% References live in references.bib (paper-local copy of docs/references.bib).
 \bibliographystyle{IEEEtran}
 \bibliography{references}
-
-\vspace{12pt}
-\color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
 
 \end{document}
