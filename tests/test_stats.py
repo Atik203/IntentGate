@@ -6,6 +6,7 @@ import pytest
 from intent_gate.eval.stats import (
     _norm_ppf,
     bonferroni_alpha,
+    conformal_band,
     bootstrap_ci,
     exact_binomial_p,
     mcnemar,
@@ -99,6 +100,20 @@ def test_bonferroni_alpha_basic():
 
 def test_bonferroni_alpha_zero_comparisons():
     assert bonferroni_alpha(0.05, 0) == pytest.approx(0.05)
+
+
+def test_conformal_band_calibrates_target_coverage():
+    result = conformal_band([0.70, 0.72, 0.74, 0.76, 0.80], tau=0.75, alpha=0.2)
+    assert result["method"] == "split_conformal_absolute_deviation"
+    assert result["delta"] == pytest.approx(0.05)
+    assert result["empirical_coverage"] >= result["target_coverage"]
+
+
+def test_conformal_band_rejects_invalid_inputs():
+    with pytest.raises(ValueError):
+        conformal_band([], tau=0.75)
+    with pytest.raises(ValueError):
+        conformal_band([0.5], tau=0.75, alpha=1.0)
 
 
 def test_per_specificity_fpr_stratification():
