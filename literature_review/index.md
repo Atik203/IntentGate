@@ -2,7 +2,7 @@
 
 **Project:** Intent-Consistency Verification at the Action Gate for Tool-Using LLM Agents
 
-**Last updated:** 2026-08-24
+**Last updated:** 2026-10-18 (Phase 7 Progent addition, earlier reviews retained)
 
 > **FROZEN for Phase 2 (Gate 0, 2026-09-11).** This index and the 5 detailed paper reviews
 > are the citation basis for the thesis/paper (BibTeX: `docs/references.bib`). Re-verification of
@@ -19,6 +19,7 @@
 | 3 | MCPTox (Wang et al.) | 2025 | arXiv (AAAI 2026 submission) | **Anchor (Benchmark)** | Low | 2026-08-24 | [papers/03-mcptox-wang-2025.md](papers/03-mcptox-wang-2025.md) |
 | 4 | Agent Security Bench / ASB (Zhang et al.) | 2025 | ICLR 2025 | **Anchor (Benchmark)** | Low | 2026-08-24 | [papers/04-asb-zhang-2025.md](papers/04-asb-zhang-2025.md) |
 | 5 | ToolGate (Liu et al.) | 2026 | arXiv preprint (2601.04688v1) | **Closest (System)** | High | 2026-08-24 | [papers/05-toolgate-liu-2026.md](papers/05-toolgate-liu-2026.md) |
+| 6 | Progent (Shi et al.) | 2025, revised 2026 | arXiv preprint (2504.11703v3) | **Closest (System)** | High | 2026-10-18 | [papers/06-progent-shi-2025.md](papers/06-progent-shi-2025.md) |
 | — | TrustAgent (Hua et al.) | 2024 | Findings of EMNLP | Pending | Pending | — | — |
 | — | MELON (Zhu et al.) | 2025 | arXiv preprint | Pending | Pending | — | — |
 | — | StruQ (Chen et al.) | 2025 | USENIX Security | Pending | Pending | — | — |
@@ -63,7 +64,7 @@
 
 | What our idea does | Who else does it | Gap remaining |
 |---|---|---|
-| Intent-consistency check at action gate (pre-execution verification) | **None** (claimed gap) | Novel |
+| Request-derived policy at action gate | Progent v3 | Compare policy lifecycle and enforcement, not uniqueness of request-derived gating |
 | Block tool calls diverging from user intent under injection | TrustAgent (EMNLP 2024) — via hand-authored Agent Constitution pre/in/post-planning | TrustAgent uses static natural-language constitution + GPT-4 sandbox emulation; no live tool evaluation; requires hand-authoring per domain |
 | Contract-grounded tool execution | ToolGate (Liu et al., 2026) — Hoare-style pre/postconditions on symbolic world-state | ToolGate requires manual contract per tool, never evaluated on injection/poisoning benchmarks (InjecAgent/MCPTox), no adaptive-attack testing |
 | Indirect prompt injection benchmarking | InjecAgent (ACL 2024), AgentDojo (NeurIPS 2024), ASB (ICLR 2025) | All reveal high ASR but propose no defense — we reuse as evaluation harness |
@@ -83,5 +84,6 @@
 | 2026-08-24 | MCPTox | Verified full html 2508.14925v1: 1,312 cases (224/548/725 paradigms), 45 live servers / 353 tools, o1-mini 72.8% ASR, <3% refusal, IPI→TPA 0% | arXiv html + https://anonymous.4open.science/r/AAAI26-7C02 |
 | 2026-08-24 | ASB | Verified full html 2410.02644v4: 10 scenarios, 400+ tools, 27 methods, 13 backbones, mixed 84.3% ASR, NRP metric | arXiv html + https://github.com/agiresearch/ASB |
 | 2026-08-24 | ToolGate | Verified full html 2601.04688v1 (52k chars + App G): Hoare {P}T{Q}, 29.4% rejection, GPT-5.2 85.5/93.0/91.8 ToolBench, no adversarial eval | arXiv html + https://github.com/OceannTwT/ToolGate |
+| 2026-10-18 | Progent | Verified v3 policy lifecycle and update approval; positional E27 scope-out, no benchmark port | [Paper](https://arxiv.org/html/2504.11703v3), [artifact](https://github.com/sunblaze-ucb/progent) |
 | — | TrustAgent | Pending — Findings of EMNLP 2024, staged constitution approach | — |
 | — | MELON / StruQ / CaMeL / Adaptive Attacks | Pending | — |
