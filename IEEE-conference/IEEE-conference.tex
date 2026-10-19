@@ -19,6 +19,7 @@
 \usepackage{orcidlink}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\providecommand{\PaperAnonymous}{1}
 \begin{document}
 
 \title{IntentGate: Action Gating Against Prompt Injection and Tool Poisoning in Tool-Using LLM Agents}
@@ -27,22 +28,25 @@
 % Author block: 5 authors, all real. Affiliations: superscript 1 = United International University
 % (Atikur Rahaman, Salman Rohoman Nayeem); 2 = Independent University (Faiaz); 3 = Khulna University
 % (Farid); 4 = BRAC University (Aquib Azmain). ORCID iD badges on authors 1-3 and 5; no printed emails.
-% Double-blind submission: the real block is kept commented for the camera-ready version.
-% \author{
-% \IEEEauthorblockN{Md. Atikur Rahaman\,\orcidlink{0009-0008-2945-4117}\textsuperscript{1},
-% Faiaz Hossain Nirob\,\orcidlink{0009-0005-4168-4263}\textsuperscript{2}, Md. Farid Hossen Rehad\,\orcidlink{0009-0008-0200-0705}\textsuperscript{3},\\
-% Md. Salman Rohoman Nayeem\textsuperscript{1}, and Md. Aquib Azmain\,\orcidlink{0000-0002-1141-1695}\textsuperscript{4}}
-% \IEEEauthorblockA{\textsuperscript{1}\textit{Department of Computer Science and Engineering, United International University, Dhaka, Bangladesh}\\
-% \textsuperscript{2}\textit{Department of Computer Science and Engineering, Independent University, Dhaka, Bangladesh}\\
-% \textsuperscript{3}\textit{Department of Computer Science and Engineering, Khulna University, Khulna, Bangladesh}\\
-% \textsuperscript{4}\textit{Department of Computer Science and Engineering, BRAC University, Dhaka, Bangladesh}}
-% }
-% Anonymous block (active for the double-blind submission):
+% The default build is anonymous for the double-blind submission. For the named version:
+% pdflatex -jobname=IEEE-conference_authors "\def\PaperAnonymous{0}\input{IEEE-conference.tex}"
+\ifnum\PaperAnonymous=1
 \author{\IEEEauthorblockN{Anonymous Author(s)}
 \IEEEauthorblockA{\textit{Anonymous Institution} \\
 City, Country \\
 anonymous@anonymous.org}
 }
+\else
+\author{
+\IEEEauthorblockN{Md. Atikur Rahaman\,\orcidlink{0009-0008-2945-4117}\textsuperscript{1},
+Faiaz Hossain Nirob\,\orcidlink{0009-0005-4168-4263}\textsuperscript{2}, Md. Farid Hossen Rehad\,\orcidlink{0009-0008-0200-0705}\textsuperscript{3},\\
+Md. Salman Rohoman Nayeem\textsuperscript{1}, and Md. Aquib Azmain\,\orcidlink{0000-0002-1141-1695}\textsuperscript{4}}
+\IEEEauthorblockA{\textsuperscript{1}\textit{Department of Computer Science and Engineering, United International University, Dhaka, Bangladesh}\\
+\textsuperscript{2}\textit{Department of Computer Science and Engineering, Independent University, Dhaka, Bangladesh}\\
+\textsuperscript{3}\textit{Department of Computer Science and Engineering, Khulna University, Khulna, Bangladesh}\\
+\textsuperscript{4}\textit{Department of Computer Science and Engineering, BRAC University, Dhaka, Bangladesh}}
+}
+\fi
 
 \maketitle
 
@@ -51,12 +55,12 @@ Tool-using agents built on large language models (LLMs) can be redirected by ins
 \end{abstract}
 
 \begin{IEEEkeywords}
-LLM agents, prompt injection defense, tool poisoning, action gate, intent contract, middleware, MCP
+action gate, intent contract, LLM agents, MCP, middleware, prompt injection defense, tool poisoning
 \end{IEEEkeywords}
 
 \section{Introduction}
 
-Tool-using LLM agents act through mail, calendars, databases, and code in a ReAct-style loop~\cite{yao2023react}. That reach is also the attack surface. Instructions hidden in retrieved documents or tool output can redirect the agent through indirect prompt injection~\cite{greshake2023notwhat,perez2022ignore}. A malicious tool description can redirect it through tool poisoning, documented on real servers of the Model Context Protocol (MCP)~\cite{wang2026mcptox,radosevich2025mcp}. In both cases the agent performs actions the user never authorized, which is the excessive-agency risk in the OWASP Top 10 for LLM applications~\cite{owasp2025llmtop10}. Existing defenses include model-level changes, judge calls, manual contracts, and automatically derived task policies~\cite{shi2025progent}. This study tests a frozen request contract with CPU embedding scores and deterministic vetoes at the tool boundary. This paper introduces IntentGate: a middleware gate that scores every proposed tool call against an intent contract parsed once from the trusted user request, before any attacker content is loaded. The evaluation covers an injection benchmark (InjecAgent) and a tool-poisoning benchmark (MCPTox).
+Tool-using LLM agents act through mail, calendars, databases, and code in a ReAct-style loop~\cite{yao2023react}. That reach is also the attack surface. Instructions hidden in retrieved documents or tool output can redirect the agent through indirect prompt injection~\cite{greshake2023notwhat,perez2022ignore}. A malicious tool description can redirect it through tool poisoning, documented on real servers of the Model Context Protocol (MCP)~\cite{wang2026mcptox,radosevich2025mcp}. In both cases the agent performs actions the user never authorized, which is the excessive-agency risk in the OWASP Top 10 for LLM applications~\cite{owasp2025llmtop10}. Recent surveys list more than thirty attack techniques across agent workflows and protocol layers~\cite{ferrag2026survey}. Existing defenses include model-level changes, judge calls, manual contracts, and automatically derived task policies~\cite{shi2025progent}. This study tests a frozen request contract with CPU embedding scores and deterministic vetoes at the tool boundary. This paper introduces IntentGate: a middleware gate that scores every proposed tool call against an intent contract parsed once from the trusted user request, before any attacker content is loaded. The evaluation covers an injection benchmark (InjecAgent) and a tool-poisoning benchmark (MCPTox).
 
 Prior defenses differ in where they enforce control. Model-level methods change the model or its training data. CaMeL~\cite{debenedetti2025camel} wraps the model in a planner-executor design with capability tracking. StruQ~\cite{chen2025struq} and SecAlign~\cite{chen2025secalign} fine-tune the model to separate instructions from data, and instruction-hierarchy training~\cite{wallace2024instruction} teaches models to prioritize trusted instructions. These approaches need model cooperation and report no head-to-head evaluation on InjecAgent or MCPTox. Data-level methods mark or filter untrusted text. Spotlighting~\cite{hines2024defending} transforms it. Guardrail toolkits~\cite{rebedea2023nemo} enforce programmable rails, but the model still makes the final call.
 
@@ -65,7 +69,7 @@ The empirical question is whether a score gate built from a frozen request contr
 \section{Background and Related Work}
 
 \subsection{Threat model}
-The threat model is a tool-using LLM agent in a ReAct-style loop~\cite{yao2023react}. Given a trusted user request, the agent proposes tool calls, executes them, observes the results, and repeats until it produces a final answer. Attacker content arrives through tool descriptions (tool poisoning) or through retrieved or returned content (indirect injection). The attacker's goal is to cause the agent to execute a tool call the user did not authorize: data exfiltration, message forwarding, state mutation, or credential access. The defender's goal is to block or escalate such calls while preserving legitimate task completion. The initial user request is assumed trustworthy. Everything after it (tool definitions returned by a registry, tool outputs, injected document text) is potentially attacker-controlled. Attack content ranges from manually written text to optimized adversarial sequences~\cite{zou2023universal}, and earlier risk studies describe related failure modes in emulated agent environments~\cite{ruan2024identifying}.
+The threat model is a tool-using LLM agent in a ReAct-style loop~\cite{yao2023react}. Given a trusted user request, the agent proposes tool calls, executes them, observes the results, and repeats until it produces a final answer. Attacker content arrives through tool descriptions (tool poisoning) or through retrieved or returned content (indirect injection). Tool-selection attacks can also make the agent choose an attacker-registered tool even when the user's task is benign~\cite{shi2025toolhijacker}. The attacker's goal is to cause the agent to execute a tool call the user did not authorize: data exfiltration, message forwarding, state mutation, or credential access. The defender's goal is to block or escalate such calls while preserving legitimate task completion. The initial user request is assumed trustworthy. Everything after it (tool definitions returned by a registry, tool outputs, injected document text) is potentially attacker-controlled. Attack content ranges from manually written text to optimized adversarial sequences~\cite{zou2023universal}, and earlier risk studies describe related failure modes in emulated agent environments~\cite{ruan2024identifying}.
 
 \subsection{Defenses}
 Model-level defenses track information flow at the model or runtime level. CaMeL~\cite{debenedetti2025camel} wraps the model in a planner-executor design with capability-based taint tracking, so data from attacker-controlled sources cannot reach tool arguments. StruQ~\cite{chen2025struq} fine-tunes the model to separate instructions from data with structured queries, and SecAlign~\cite{chen2025secalign} applies preference optimization to the same end. Instruction-hierarchy training~\cite{wallace2024instruction} teaches the model to prioritize privileged instructions. All of these require model cooperation and publish no head-to-head adversarial evaluation on InjecAgent or MCPTox. Data-level defenses mark or transform untrusted text. Spotlighting~\cite{hines2024defending} converts retrieved content into clearly delimited forms. Guardrail toolkits such as NeMo Guardrails~\cite{rebedea2023nemo} enforce programmable rails around the model, but the model still makes the final call. Detection methods add training or inference cost: BIPIA fine-tunes a detector alongside its benchmark~\cite{yi2025benchmarking}, and MELON re-executes with masked tools and compares outputs~\cite{zhu2025melon}.
