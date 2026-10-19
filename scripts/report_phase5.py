@@ -119,10 +119,13 @@ def injecagent_meta() -> dict:
 
 
 def mcptox_meta() -> dict:
+    path = ROOT / "data/raw/mcptox/response_all.json"
+    if not path.exists():
+        return {}
     from harness.adapters.mcptox import load_mcptox_cases
 
     meta: dict = {}
-    for case in load_mcptox_cases(ROOT / "data/raw/mcptox/response_all.json"):
+    for case in load_mcptox_cases(path):
         meta[case.case_id] = {
             "benchmark": "mcptox",
             "split": "snapshot",
