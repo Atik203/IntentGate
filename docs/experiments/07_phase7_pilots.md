@@ -80,28 +80,40 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
 - Supervisor Q&A: TBD
 
 ## E27 — Progent comparison (Gap 1b)
-- Status: [x] complete (scope-out table; no port — Progent targets AgentDojo/ASB, not InjecAgent/MCPTox, and requires per-tool policy authoring)
-- Goal: position vs. closest neighbor (policy-language tool-call gate, arXiv:2504.11703, Shi et al. 2025). Cited in `literature_review/` + `docs/references.bib` + paper-local `IEEE-conference/references.bib` (`shi2025progent`).
-- Setup: read Progent (web/arXiv). Deterministic symbolic privilege-control DSL over tool names/args, fail-closed (no rule → block), no LLM in the decision loop, but policies are manually/LLM-authored per tool and dynamically updated per step; evaluated on AgentDojo/ASB/AgentPoison. A faithful-mini port on our 100-case InjecAgent slice would require re-implementing the DSL + authoring policies for 79 tools + re-running on our benchmarks — scoped out as disproportionate effort for a workshop paper; a feature-by-feature scope-out table is the honest substitute.
-- Results (scope-out table):
+- At a glance: [x] scope-out complete, re-verified 2026-10-18 against
+  [arXiv v3](https://arxiv.org/html/2504.11703v3) (2026-05-14).
+- Goal: compare enforcement design without inventing a benchmark comparison.
+- Setup: inspected the paper and the
+  [authors' artifact](https://github.com/sunblaze-ucb/progent). The earlier
+  unversioned summary is superseded by this v3 comparison.
+- Results:
 
-| Dimension | IntentGate (ours) | Progent (arXiv:2504.11703) |
+| Dimension | IntentGate | Progent v3 |
 |---|---|---|
-| Policy source | Auto-derived from user's trusted request (zero setup) | Manually- or LLM-authored symbolic DSL policies per tool |
-| Enforcement | Embedding similarity $S_{sem}$ + hard rule veto $S_{rule}$ + escalate band | Deterministic symbolic match over tool name/args (JSON Schema) |
-| LLM in decision loop | No (parser once per session) | No (deterministic runtime check) |
-| LLM for policy authoring | None | Per-task + per-step policy generation/update (LLM-authored) |
-| Setup cost | 0 contracts | Per-tool policy authoring (non-zero; not measured on our tools) |
-| Default on no match | `no_contract` → never silently allowed | Block by default (fail-closed) |
-| Human-in-the-loop | Escalate band ($[\tau-\delta,\tau)$) | Fallback action on blocked call |
-| Benchmarks | InjecAgent + MCPTox (injection + tool-poisoning) | AgentDojo + ASB + AgentPoison (injection) |
-| Adaptive-attack surface | Threshold-aware ($\tau$ public); $S\in[0.75,0.79]$ near-misses | Policy-update model can be tricked to widen the allowlist |
-| Verdict | Complementary, not substitutable: Progent = explicit least-privilege with setup cost; Ours = zero-setup auto-derived intent + auditability | Closest neighbor; cited to avoid appearing unaware |
+| Policy source | LLM parser, once per trusted request | LLM initial policy and runtime updates |
+| Call check | Embeddings plus deterministic veto | Symbolic rules over tool names and arguments |
+| Policy change | Frozen during the session | SMT checks narrowing, approval for expansion |
+| Unmatched operation | Scored against the contract, high-risk defaults apply | No matching permission blocks the call |
+| User decision | Escalate band, auto-blocked in benchmark mode | Configurable expansion approver and fallback |
+| Evaluation | InjecAgent and static MCPTox | AgentDojo, ASB, and MCP integration |
+| Authoring cost | No manual per-tool contracts, one parser call per session | Automatic policies, no cost measured on this repository's tools |
 
-- Artifacts: `docs/experiments/07_phase7_pilots.md#e27` (this section)
-- Limitations: scope-out table is positional, not a head-to-head delta; Progent numbers (AgentDojo/ASB) not directly comparable to our InjecAgent/MCPTox numbers.
+  Progent's update control prevents unapproved policy expansion. The old
+  claim that its updater silently widens the allowlist is withdrawn.
+  This source does not establish a manual-authoring disadvantage for Progent.
+- Artifacts: `literature_review/papers/06-progent-shi-2025.md`,
+  `literature_review/index.md`, citation `shi2025progent` in both BibTeX files.
+- Limitations: no port or head-to-head run was performed. The released
+  experiment commands use AgentDojo and ASB. An InjecAgent/MCPTox comparison
+  needs an adapter, evaluator validation, and a specified expansion-approval
+  policy. Those items are outside this bounded comparison. No mandatory
+  count of 79 hand-authored policies or comparative setup-cost advantage is claimed.
 - Supervisor Q&A:
-  - Q: Why isn't Progent in the results tables? A: Progent evaluates on AgentDojo/ASB with per-tool policy authoring; porting to InjecAgent/MCPTox + authoring 79 policies is disproportionate effort. We cite it and position via the scope-out table instead (a port remains future work).
+  - Q: Why is Progent absent from the ASR table? A: Its released experiment
+    adapters differ from this protocol. The table compares design only.
+  - Q: Does IntentGate uniquely derive policies from user requests? A: No.
+    Its evaluated distinction is a frozen contract and CPU score-plus-veto
+    enforcement, with once-per-session parsing and the stated benchmark scope.
 
 ## E28 — Parser ablation (Upgrade B)
 - Status: [ ] not started
@@ -113,46 +125,108 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
 - Supervisor Q&A: TBD
 
 ## E29 — Embedding swap + τ transfer (Upgrade B)
-- Status: [ ] not started
+- Status: [x] complete (offline call replay; no LLM or tool calls)
 - Goal: show τ is a procedure, not a magic number.
-- Setup: re-score cached traces with E5/MPNet; τ tuned on base tested on enhanced (and vice versa).
-- Results: transfer table + recalibration note.
-- Artifacts: TBD
-- Limitations: TBD
-- Supervisor Q&A: TBD
+- Setup: re-score 722 cached InjecAgent calls with pinned
+  `sentence-transformers/all-mpnet-base-v2` revision
+  `e8c3b32edf5434bc2275fc9bab85f82640a19130`. Seventeen request groups are split into
+  11 calibration and 6 held-out groups, with base/enhanced variants kept together.
+- Results: MiniLM selects τ=0.70 in both transfer directions, but held-out attacker-call pass
+  rates are 39.77% and 34.86%; its frozen τ=0.75 gives 2.27% and 1.83%. MPNet selects τ=0.76
+  base→enhanced and τ=0.77 enhanced→base, giving 2.27% and 0.92%; frozen τ=0.75 gives 2.27%
+  and 1.83%. Held-out user-call blocking is 0% in all reported rows. Threshold selection must
+  be repeated for each encoder and target distribution.
+- Artifacts: `scripts/e29_embedding_transfer.py`,
+  `results/phase7/e29_embedding_transfer/`, and `tests/test_phase7_offline.py`.
+- Limitations: only 17 independent request groups are available. These are call-level replay
+  rates and tool-name proxies, not end-to-end ASR or task completion.
+- Supervisor Q&A: a stronger encoder does not remove calibration; changing score geometry
+  changes the threshold selected under the same constraint.
 
 ## E30 — Conformal escalate band (Upgrade A)
-- Status: [ ] not started
+- Status: [x] complete (negative practical result)
 - Goal: turn heuristic [τ−δ, τ+δ] band into distribution-free guarantee.
-- Setup: calibrate on cached Phase 5 traces; add `conformal_band()` next to `power_analysis()` in `src/intent_gate/eval/stats.py` + tests.
-- Results: calibrated (α, empirical coverage) pair + method note.
-- Artifacts: TBD
-- Limitations: TBD
-- Supervisor Q&A: TBD
+- Setup: group all 2,013 full-gate calls by 408 trusted-request hashes, then split 204/204.
+  At α=0.1, calibrate the maximum per-group `abs(S-tau)` with fixed τ=0.75.
+- Results: δ=0.75 yields the full-support interval [0,1] and covers 100% of the 204 held-out
+  groups and 1,101 calls. The heuristic radius 0.1 covers 43.14% of held-out groups. All 100
+  deterministic sensitivity splits also cover 100%, because the interval is vacuous.
+- Artifacts: `scripts/e30_conformal_calibration.py`,
+  `results/phase7/e30_conformal_band/`, `src/intent_gate/eval/stats.py`, and tests.
+- Limitations: score coverage is not decision correctness or an ASR bound. The system retains
+  its asymmetric production interval `[tau-delta,tau)`; this diagnostic interval is not used.
+- Supervisor Q&A: 100% coverage does not prove safety because the calibrated interval covers
+  the entire known score support.
 
 ## E31 — Contract-vs-semantic contribution (supervisor Q5)
-- Status: [x] complete (offline, cached Phase 5 traces, no LLM calls)
-- Goal: locate where full contract + rules + escalate add value vs A1 (semantic-only).
-- Setup: offline comparison of `results/phase5/ours_*_trace.jsonl` vs `results/phase5/a1_semantic_only_*_trace.jsonl` across all 5 Phase 5 conditions (mcptox, dh_base, dh_enhanced, ds_base, ds_enhanced); 2,013 compared calls; script `scripts/e31_contract_vs_semantic.py`; report `results/phase7/e31_contract_vs_semantic/e31_report.json`.
+- At a glance: [x] corrected offline analysis. Original artifacts are
+  retained, and `e31_corrected_report.json` supersedes their interpretation.
+- Goal: separate independent-run differences from component effects on
+  identical proposed calls and frozen contracts.
+- Setup: all five frozen Phase 5 trace pairs. Independent runs are matched
+  by case ID, tool name, canonical JSON arguments, and repeated occurrence.
+  A separate replay compares the recorded full-gate decision with
+  `S_sem >= tau` on every full-gate proposal. No model or tool is executed.
+  InjecAgent tool-role proxies use the pinned case metadata. Missing local
+  MCPTox metadata remains unknown. Benchmark pins are InjecAgent
+  `f19c9f2c79a41046eb13c03c51a24c567a8ffa07` and the 2026-09-11 MCPTox snapshot.
 - Results:
-  - Aggregate decisions: ours blocks/escalates where A1 allows = 32; A1 blocks/escalates where ours allows = 322; both block/escalate = 681; both allow = 803.
-  - Interpretation: semantic-only (A1) is NOT equivalent to ours. A1 over-blocks legitimate calls (322 calls A1 blocks/escalates that ours allows) — a utility loss — while ours catches 32 attacks A1 misses. The contract shifts the operating point toward better valid-rate parity rather than purely higher ASR.
-  - Per-risk (MCPTox): semantic-only over-blocks across all risk categories (Privacy Leakage 65, Information Manipulation 63, Service Disruption 54, Data Tampering 26, Credential Leakage 15, ...); ours catches few extras per category (22 total on MCPTox).
-  - Cost/latency parity: contract is parsed once per session and embedded once; per-call p95 latency ours 16.2–19.8 ms vs A1 16.6–18.0 ms — within ~2 ms, parity holds.
-- Verdict: contract+rule adds value on utility (fewer false blocks) and catches a small set of attacks semantic-only misses; headline ASR parity (E12) holds, so the contract's differentiator is auditability + fail-closed guarantees + valid-rate parity, not raw ASR. Scoped claim: contract wins on valid-rate/auditability, ties on headline ASR, loses nothing material.
-- Artifacts: `results/phase7/e31_contract_vs_semantic/`
-- Limitations: offline on cached traces (no live re-scoring); S_rule is a score component, not a separate hard veto in these traces; hard veto (rule_triggered) analyzed separately in E21.
+
+| Decision pair | Exact calls across independent runs | Same-proposal replay |
+|---|---:|---:|
+| Both allow | 751 | 848 |
+| Both prevent execution | 633 | 805 |
+| Full prevents, semantic-only allows | 22 | 28 |
+| Semantic-only prevents, full allows | 306 | 332 |
+| Total comparisons | 1,712 | 2,013 |
+
+  The independent runs have 301 unmatched full-gate calls and 308 unmatched
+  A1 calls. Only 1,377 exact matches also share an identical contract.
+  The replay avoids that policy mismatch. It finds 240 critical vetoes,
+  including 28 calls semantic-only would allow. The prior 1,614
+  `veto_saves` count was incorrect because passing rules were counted twice.
+
+  Of the 28 replay veto differences, five use designated attacker tools in
+  InjecAgent and 23 have unknown MCPTox role. The 332 score-fusion relaxations
+  include 22 designated user-tool calls, 14 designated attacker-tool calls,
+  and 296 unknown MCPTox calls. Tool roles do not validate argument safety.
+  Those 14 attacker-tool relaxations are a security tradeoff, so the old
+  statement that the full gate loses nothing is withdrawn.
+
+  Observed p95 gate-call timings remain descriptive. They exclude parser
+  calls and initial contract embedding. Both full and A1 conditions use a
+  parsed contract, so this analysis isolates rules and fusion, not removal
+  of the contract. The raw-request ablation addresses the latter question.
+- Artifacts: `scripts/e31_contract_vs_semantic.py`,
+  `tests/test_e31_analysis.py`,
+  `results/phase7/e31_contract_vs_semantic/e31_corrected_report.json`.
+  The corrected report includes input SHA-256 hashes and per-risk counts.
+- Limitations: same-proposal replay estimates call-level decisions, not
+  end-to-end ASR or benign-task completion. The independent-run table can
+  include different contracts, while repeated exact calls are paired in
+  trace order. No unlabeled decision flip is called a false positive or
+  a prevented attack. Frozen Phase 5 headline results remain unchanged.
 - Supervisor Q&A:
-  - Q: Does the contract add anything over semantic-only? A: Yes — it shifts the operating point toward valid-rate parity (322 fewer over-blocks) and catches 32 attacks semantic-only misses, at parity latency and once-per-session parse cost.
+  - Q: Where does the full gate win or lose? A: Critical vetoes prevent
+    28 calls that semantic-only permits. Fusion also allows 332 calls that
+    semantic-only prevents, including both user-tool and attacker-tool
+    proxies. The measured tradeoff supports a narrower component claim.
 
 ## Artifact packaging
-- Status: [ ] not started
+- Status: [~] implemented and locally verified; clean-container validation pending
 - Goal: one-command repro (`docker build && docker run pytest -q`). Wire `scripts/run_phase5.py --check` into container entrypoint.
-- Artifacts: TBD
+- Results: local tests pass, and artifact-only verification checks all 30 frozen reports plus
+  SHA-256 hashes for 94 Phase 5 files. Docker Desktop did not expose its Linux engine, so the
+  required image build and run could not be verified on this host.
+- Artifacts: `Dockerfile`, `.dockerignore`, `requirements-repro.in`,
+  `requirements-repro.txt`, `scripts/container_entrypoint.py`,
+  `configs/phase5_artifact_hashes.json`, and `docs/experiments/phase7_packaging_notes.md`.
 
 ## Method formalism (writing task, no new runs)
-- Status: [ ] not started
+- Status: [x] complete
 - (a) τ-selection as FPR-constrained ASR minimization (Neyman–Pearson) pointing at Pareto figure.
 - (b) assumption-violation table (trusted request / untrusted tool content / single-turn scope).
 - (c) Anderson reference-monitor framing (2 sentences).
 - Lands in Ch 3 draft + blueprint Sec 9 pointer.
+- Artifacts: `docs/thesis/chapter3_method.md` and
+  `docs/experiments/phase7_formalism_notes.md`.
