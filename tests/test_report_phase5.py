@@ -25,3 +25,9 @@ def test_success_labels():
     assert report_phase5.success_label({"label": "work_not_success"}, "mcptox") is False
     assert report_phase5.case_success({"label": "work_not_success"}, "mcptox") is True
     assert report_phase5.case_success({"eval": "error"}, "injecagent") is None
+
+
+def test_metadata_is_empty_without_raw_benchmarks(tmp_path, monkeypatch):
+    monkeypatch.setattr(report_phase5, "ROOT", tmp_path)
+    assert report_phase5.injecagent_meta() == {}
+    assert report_phase5.mcptox_meta() == {}
