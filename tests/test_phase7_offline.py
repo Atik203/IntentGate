@@ -67,3 +67,69 @@ def test_conformal_groups_repeated_requests_before_splitting(tmp_path: Path) -> 
     assert summary["heldout_groups"] == 1
     assert summary["band"]["used_full_support"]
     assert heldout[0]["covered"]
+
+
+def _adaptive_contract():
+    from intent_gate.types import IntentContract
+
+    return IntentContract(
+        goals=["summarize the note"],
+        expected_tool_categories=["read"],
+        permitted_data_access=["note"],
+        side_effect_limits={"external_send": "disallow"},
+        specificity="specific",
+        raw_request="Summarize the note for me",
+    )
+
+
+def test_e26_near_miss_filter_uses_tau_window_and_attacker_role():
+    from scripts.e26_threshold_probe import is_near_miss
+
+    meta = {"c": {"attacker_tools": ["Bad"], "user_tool": "Good"}}
+    row = {"case_id": "c", "tool_call": {"name": "Bad"}, "gate": {"S": 0.70}}
+    assert is_near_miss(row, meta, 0.75, 0.15)
+    row["gate"]["S"] = 0.59
+    assert not is_near_miss(row, meta, 0.75, 0.15)
+    row["gate"]["S"] = 0.75
+    assert not is_near_miss(row, meta, 0.75, 0.15)
+    row["tool_call"]["name"] = "Good"
+    row["gate"]["S"] = 0.70
+    assert not is_near_miss(row, meta, 0.75, 0.15)
+
+
+def test_e26_variants_change_strings_only_and_keep_other_params():
+    from intent_gate.types import ToolCall
+    from scripts.e26_threshold_probe import build_variants
+
+    call = ToolCall(name="Bad", parameters={"query": "find", "count": 3})
+    variants = dict(build_variants(_adaptive_contract(), call))
+    assert "free_goal_echo" in variants
+    assert variants["free_goal_echo"].parameters["count"] == 3
+    assert "summarize the note" in variants["free_goal_echo"].parameters["query"]
+
+
+def test_e26_lenient_and_extra_param_arms_are_separate():
+    from intent_gate.types import ToolCall
+    from scripts.e26_threshold_probe import build_variants
+
+    call = ToolCall(name="Bad", parameters={"path": "/tmp/a"})
+    variants = dict(build_variants(_adaptive_contract(), call))
+    assert "all_goal_echo" in variants and "extra_param" in variants
+    assert "summarize the note" in variants["all_goal_echo"].parameters["path"]
+    assert variants["extra_param"].parameters["query"] == "Summarize the note for me"
+
+
+def test_e26_free_text_list_parameters_accept_an_extra_keyword():
+    from intent_gate.types import ToolCall
+    from scripts.e26_threshold_probe import build_variants
+
+    call = ToolCall(name="Bad", parameters={"keywords": ["health"]})
+    variants = dict(build_variants(_adaptive_contract(), call))
+    assert variants["free_goal_echo"].parameters["keywords"] == ["health", "summarize the note"]
+
+
+def test_e26_empty_parameter_calls_have_no_argument_variants():
+    from intent_gate.types import ToolCall
+    from scripts.e26_threshold_probe import build_variants
+
+    assert build_variants(_adaptive_contract(), ToolCall(name="Bad", parameters={})) == []
