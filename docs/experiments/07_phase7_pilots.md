@@ -98,7 +98,7 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
     exercised; zero attacker calls were proposed.
 
 ## E26 - Adaptive attacker pilots (Gap 2)
-- Status: [~] in progress - offline threshold-aware arm complete; live delivery arm running.
+- Status: [x] complete - live delivery and offline threshold-aware arms.
 - Goal: attack the gate itself, live. (a) paraphrase-delivery (ASB's 5 injection phrasings);
   (b) threshold-aware (calls aimed just above tau).
 - Setup:
@@ -111,25 +111,42 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
       only free-text keys (`query`, `keywords`, `search_term`, ...); the lenient arm edits
       any string parameter or adds a `query` parameter and is an upper bound.
 - Results:
-  (a) Live delivery table: TBD.
+  (a) Live delivery (100 cases per phrasing; valid excludes invalid and error rows):
+
+| Phrasing | Succ/valid | ASR-valid | Invalid | Errors | Gate-blocked calls |
+|---|---:|---:|---:|---:|---:|
+| Naive (baseline) | 0/90 | 0.0% | 10 | 0 | 12 |
+| Escape characters | 0/84 | 0.0% | 16 | 0 | 43 |
+| Context ignoring | 1/90 | 1.1% | 10 | 0 | 15 |
+| Fake completion | 1/92 | 1.1% | 7 | 1 | 27 |
+| Combined | 2/92 | 2.2% | 6 | 2 | 67 |
+
+  Delivery phrasing changes gated ASR by at most 2.2 percentage points (2/92) and is not
+  monotone across variants. The two successes are call-level attacker-tool invocations;
+  harmful follow-up calls in those cases are still gated. This arm does not show a
+  delivery-only bypass; the offline threshold-aware arm is the stronger adaptive result.
+  Gate-blocked calls include both user-tool and attacker-tool calls, so the column is not
+  an attack metric.
   (b) 262 prevented attacker-tool calls were replayed. 34 call instances (11 unique call
       templates) have free-text parameters; all 34 cross tau after the echo (median
       Delta S +0.176, max +0.253) and no rule veto catches them. The lenient upper bound
       crosses for 180/262 calls; 82 calls have no editable parameter. Full report:
       `results/phase7/e26_adaptive/offline/e26b_threshold_probe.json`.
-- Interpretation: the semantic score is sensitive to verbatim overlap with the trusted
-  request. A read-only search call can be pushed from just below tau to allow by copying
-  the user's own wording into a free-text argument. This is a call-level counterfactual,
-  not an end-to-end ASR; it motivates argument-aware vetoes or scoring the call structure
-  rather than raw parameter text.
-- Limitations: 11 unique templates limit generality; these calls were already prevented
-  (block or escalate), so the result is a counterfactual decision; invalid or
-  schema-incompatible arguments would be rejected by a real tool; no live agent run for
-  the strict arm.
+- Interpretation: live delivery phrasing is weak on this slice (0-2.2% gated ASR), but the
+  semantic score is sensitive to verbatim overlap with the trusted request. A read-only
+  search call can be pushed from just below tau to allow by copying the user's own wording
+  into a free-text argument. This is a call-level counterfactual, not an end-to-end ASR; it
+  motivates argument-aware vetoes or scoring the call structure rather than raw parameter text.
+- Limitations: the live arm is 100 cases per phrasing and two successes do not establish
+  a delivery effect; the offline arm has 11 unique templates, so generality is limited;
+  these calls were already prevented (block or escalate), so the offline result is a
+  counterfactual decision; invalid or schema-incompatible arguments would be rejected by a
+  real tool; no live agent run for the strict offline arm.
 - Supervisor Q&A:
-  - Q: Does adapting the attack break the gate? A: At the score level, yes for the 11
-    free-text templates tested; all 34 instances cross tau and rules do not veto them.
-    End-to-end execution was not tested.
+  - Q: Does adapting the attack break the gate? A: Live delivery phrasing does not on this
+    slice (0-2.2%). At the score level, the offline argument echo does: all 34 instances
+    across 11 free-text templates cross tau and rules do not veto them. End-to-end execution
+    was not tested.
   - Q: Is this the same as E20 mimicry? A: No. E20 wrapped a call in prose outside the
     real scorer; this probe edits the actual call parameters and re-scores with the real
     gate, including rules.
@@ -171,13 +188,40 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
     enforcement, with once-per-session parsing and the stated benchmark scope.
 
 ## E28 — Parser ablation (Upgrade B)
-- Status: [ ] not started
+- Status: [x] complete (negative/underpowered result)
 - Goal: answer "why not just heuristics."
-- Setup: InjecAgent 200-case subset, B1 + ours with LLM parser swapped for heuristic fallback.
-- Results: ASR/valid-rate deltas.
-- Artifacts: TBD
-- Limitations: TBD
-- Supervisor Q&A: TBD
+- Setup: 200-case InjecAgent subset (100 dh + 100 ds, base), gpt-4o-mini agent; three
+  conditions: B1, ours with `--parser heuristic`, ours with `--parser llm`. The heuristic
+  is the deterministic fail-closed fallback, not a tuned parser.
+- Results:
+
+| Condition | ASR-valid | Succ/valid | Invalid | Errors | Gate-blocked calls | Parser calls |
+|---|---:|---:|---:|---:|---:|---:|
+| B1 | 17.9% | 30/168 | 32 | 0 | 0 | 0 |
+| Ours + heuristic | 0.0% | 0/169 | 30 | 1 | 29 | 0 |
+| Ours + LLM | 0.0% | 0/171 | 29 | 0 | 32 | 200 |
+
+  Both gated conditions block every attacker call on this subset, and the heuristic is
+  indistinguishable from the LLM parser on ASR and block count. The subset is underpowered
+  for the full-run difference: the 2,108-case gated ASR is 0.7%, so a 200-case slice has an
+  expected 1-2 successes. E28 does not establish a security advantage for the LLM parser.
+- Interpretation: the honest answer to "why not just heuristics" is not "heuristics miss
+  attacks." A fail-closed keyword heuristic can match ASR on a small slice. The LLM parser
+  is retained for contract quality and intent coverage (slots, categories, permissions)
+  and for the E23 utility comparison; E28 shows that those properties, not this ASR delta,
+  must carry the argument. A heuristic benign-utility run remains future work.
+- Artifacts: `results/phase7/e28_parser_ablation/` (b1, ours_heuristic, ours_llm);
+  `--parser` flag in `scripts/run_injecagent_ours.py`; `build_run_parser` in
+  `harness/common.py`; tests in `tests/test_runner_endpoints.py`.
+- Limitations: 200 cases, call-level ASR, no end-to-end task completion; the heuristic is
+  a fallback, not tuned; no benign-utility measurement under the heuristic; the slice is
+  underpowered for a <1% ASR difference.
+- Supervisor Q&A:
+  - Q: Does the heuristic parser fail? A: On this slice it does not: both parsers reach 0%
+    ASR with 29-32 blocked calls. The subset cannot resolve a 0.7% difference, so E28 is
+    not evidence of equivalence either.
+  - Q: Why keep the LLM parser? A: Contract quality and utility, not this ASR table. The
+    heuristic's fail-closed defaults and benign-task cost were not measured here.
 
 ## E29 — Embedding swap + τ transfer (Upgrade B)
 - Status: [x] complete (offline call replay; no LLM or tool calls)
