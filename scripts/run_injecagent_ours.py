@@ -32,6 +32,18 @@ def main():
     ap.add_argument("--alpha", type=float, default=0.7)
     ap.add_argument("--model-name", default=None)
     ap.add_argument("--prompt-type", default="InjecAgent", help="Prompt variant for E24 prompt baselines")
+    ap.add_argument(
+        "--parser",
+        choices=["llm", "heuristic"],
+        default="llm",
+        help="E28 parser ablation: llm (default) or the deterministic heuristic fallback",
+    )
+    ap.add_argument(
+        "--attack-phrasing",
+        choices=["naive", "escape", "context", "fake", "combined"],
+        default="naive",
+        help="E26a ASB delivery phrasing applied to the injected instruction in tool output",
+    )
     from harness.common import add_endpoint_args
 
     add_endpoint_args(ap)
@@ -57,11 +69,15 @@ def main():
     from intent_gate.baselines.toolgate.world_state import seed_from_request
     from intent_gate.eval.cost import estimate_usage_cost
     from intent_gate.gate.trace import TraceLogger
-    from intent_gate.parser.parser import build_parser
     from intent_gate.scoring.embeddings import EmbeddingBackend
 
     tool_dict = build_tool_dict(load_tool_definitions(ROOT / "data/raw/InjecAgent/data/tools.json"))
-    from harness.common import resolve_api_key, resolve_base_url, resolve_reasoning_effort
+    from harness.common import (
+        build_run_parser,
+        resolve_api_key,
+        resolve_base_url,
+        resolve_reasoning_effort,
+    )
 
     llm = LLMClient(
         model_id=model_name,
@@ -95,13 +111,15 @@ def main():
             "delta": args.delta,
             "alpha": args.alpha,
             "ablation": args.ablation,
+            "parser_mode": args.parser,
+            "attack_phrasing": args.attack_phrasing,
             "embedding": backend.metadata,
         },
         append=False,
     )
     policy_factory = build_policy_factory(
         args.gate,
-        parser=build_parser(llm=parser_llm),
+        parser=build_run_parser(args.parser, parser_llm),
         backend=backend,
         trace=trace,
         tau=args.tau,
@@ -111,7 +129,15 @@ def main():
         ablation=args.ablation,
     )
 
-    summary = {"model_name": model_name, "setting": args.setting, "gate": args.gate, "ablation": args.ablation, "splits": {}}
+    summary = {
+        "model_name": model_name,
+        "setting": args.setting,
+        "gate": args.gate,
+        "ablation": args.ablation,
+        "parser_mode": args.parser,
+        "attack_phrasing": args.attack_phrasing,
+        "splits": {},
+    }
     for split in ["dh", "ds"]:
         case_file = ROOT / "data/raw/InjecAgent/data" / f"test_cases_{split}_{args.setting}.json"
         cases = load_injecagent_cases(case_file, limit=args.per_split, seed=args.seed)
@@ -124,6 +150,7 @@ def main():
         split_summary, _ = run_cases(
             cases, llm, tool_dict, policy_factory=policy_factory, jsonl_path=out_file, progress=progress,
             prompt_type=args.prompt_type,
+            attack_phrasing=args.attack_phrasing,
         )
         summary["splits"][split] = split_summary
 

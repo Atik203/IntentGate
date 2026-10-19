@@ -8,6 +8,7 @@ from pathlib import Path
 
 from harness.common import (
     add_endpoint_args,
+    build_run_parser,
     resolve_api_key,
     resolve_base_url,
     resolve_reasoning_effort,
@@ -221,3 +222,18 @@ def test_harness_mcptox_requires_report():
     result = _run("harness/run_mcptox.py")
     assert result.returncode != 0
     assert "--report" in result.stderr
+
+
+def test_build_run_parser_heuristic_is_offline():
+    parser = build_run_parser("heuristic")
+    assert parser.llm is None
+    contract = parser.parse("Summarize the note about the flight")
+    assert parser.last_backend == "heuristic"
+    assert contract.raw_request == "Summarize the note about the flight"
+
+
+def test_build_run_parser_rejects_unknown_mode():
+    import pytest
+
+    with pytest.raises(ValueError):
+        build_run_parser("unknown")
