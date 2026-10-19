@@ -16,6 +16,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{xurl}
+\usepackage{orcidlink}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -23,39 +24,16 @@
 \title{IntentGate: Action Gating Against Prompt Injection and Tool Poisoning in Tool-Using LLM Agents}
 
 
-% Author block: 5 authors total (4 members + supervisor). Lead author real; the three
-% remaining members and the supervisor are placeholders. The 3+2 two-row layout is
-% forced with a break inside the \and separator.
-% Camera-ready compact option: if all authors share one affiliation, collapse to the
-% single-block style (names on one line + shared affiliation + emails) to save space.
+% Author block: 5 authors total (4 members + supervisor), compact shared-affiliation style:
+% names on one line with affiliation superscripts, ORCID iD badge on the lead author, no emails.
+% If a co-author is from another institution, mark them with superscript 2 and uncomment the second
+% affiliation line below.
 % Before the double-blind CMT submission: comment out this block, uncomment the anonymous block below.
 \author{
-\IEEEauthorblockN{Md. Atikur Rahaman}
-\IEEEauthorblockA{\textit{Dept. of Computer Science and Engineering}\\
-\textit{United International University}\\
-Dhaka, Bangladesh\\
-atikurrahaman0305@gmail.com\\
-ORCID: 0009-0008-2945-4117}
-\and
-\IEEEauthorblockN{Second Author}
-\IEEEauthorblockA{\textit{dept. name of organization}\\
-City, Country\\
-email@example.com}
-\and
-\IEEEauthorblockN{Third Author}
-\IEEEauthorblockA{\textit{dept. name of organization}\\
-City, Country\\
-email@example.com}
-\and[\hfill\break]
-\IEEEauthorblockN{Fourth Author}
-\IEEEauthorblockA{\textit{dept. name of organization}\\
-City, Country\\
-email@example.com}
-\and
-\IEEEauthorblockN{Fifth Author (Supervisor)}
-\IEEEauthorblockA{\textit{dept. name of organization}\\
-City, Country\\
-email@example.com}
+\IEEEauthorblockN{Md. Atikur Rahaman\,\orcidlink{0009-0008-2945-4117}\textsuperscript{1},
+Second Author\textsuperscript{1}, Third Author\textsuperscript{1}, Fourth Author\textsuperscript{1}, and Fifth Author (Supervisor)\textsuperscript{1}}
+\IEEEauthorblockA{\textsuperscript{1}\textit{Department of Computer Science and Engineering, United International University, Dhaka, Bangladesh}}
+% \IEEEauthorblockA{\textsuperscript{2}\textit{Second Institution, City, Country}}
 }
 % Anonymous block for the double-blind submission:
 % \author{\IEEEauthorblockN{Anonymous Author(s)}
