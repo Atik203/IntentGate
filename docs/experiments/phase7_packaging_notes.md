@@ -3,9 +3,10 @@
 ## At a glance
 
 The image definition, CPU dependency lock and automatic frozen-result verification are
-implemented. Local verification passed for all 30 Phase 5 reports and the SHA256 hashes
-of all 94 published Phase 5 files. Clean-container validation remains unverified because
-Docker Desktop fails before its Linux engine starts on this host.
+implemented. The clean-container check passed in GitHub Actions run `39299936752`
+(PR #44): the image built on `ubuntu-latest`, `pytest -q` passed inside the container, and
+the offline reporter ran. Local Docker Desktop remains unavailable on the author's Windows
+host.
 
 ## Goal
 
@@ -55,15 +56,17 @@ uv pip compile requirements-repro.in --python-version 3.11 --python-platform x86
 - `pytest -q tests/test_phase5_freeze.py`: 8 passed.
 - `python scripts/run_phase5.py --check --artifacts-only`: integrity check passed.
 - `git diff --check`: passed for the packaging changes.
-- Docker CLI 29.7.2 is installed, but the Linux engine API is unavailable.
-- Starting Docker Desktop 4.90.0 reported an inaccessible runtime socket:
-  `sailor-ingest.sock` could not be renamed to its `.stale` path. The backend stopped
-  before exposing `dockerDesktopLinuxEngine`.
+- GitHub Actions `container` job (run `39299936752`): `docker build` passed,
+  `docker run --rm -e INTENT_GATE_OFFLINE_EMBEDDINGS=1 intentgate:phase7 pytest -q`
+  passed, and `report_phase5.py` ran inside the container.
+- Local Docker Desktop remains unavailable on the Windows host. The Linux engine fails
+  before startup, so the clean GitHub Actions runner provides the validation.
 
 ## Artifacts
 
 - `Dockerfile`
 - `.dockerignore`
+- `.github/workflows/tests.yml` (container job)
 - `requirements-repro.in` and `requirements-repro.txt`
 - `scripts/container_entrypoint.py`
 - `scripts/run_phase5.py --check --artifacts-only`
@@ -73,9 +76,10 @@ uv pip compile requirements-repro.in --python-version 3.11 --python-platform x86
 ## Limitations
 
 The roadmap's packaging completion criterion requires an actual successful image build
-and test run. It cannot be marked complete from local Python checks alone. Docker
-Desktop must start successfully, then the commands above must be executed. No factory
-reset or Docker data deletion was performed during diagnosis.
+and test run. The GitHub Actions container job provides that clean-machine evidence. Local
+Docker Desktop remains unavailable on the author's Windows host, so the validation path is
+the CI runner, not the local machine. No factory reset or Docker data deletion was performed
+during diagnosis.
 
 Offline unit tests use the deterministic test embedding backend. They do not establish
 embedding-model numerical equivalence across platforms or replicate paid model results.
@@ -91,5 +95,6 @@ No. The Phase 5 manifest and results remain unchanged. The new hash manifest rec
 published bytes so later accidental edits are detected.
 
 **Is clean-machine reproduction already verified?**
-No. Local artifact verification and targeted tests passed; Docker engine startup is the
-remaining validation barrier.
+Yes. The GitHub Actions container job built the image and ran `pytest -q` plus the offline
+reporter on a clean `ubuntu-latest` runner (run `39299936752`, PR #44). Local Docker Desktop
+is still unavailable on the author's Windows host.
