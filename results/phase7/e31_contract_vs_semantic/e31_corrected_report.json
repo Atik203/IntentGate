@@ -1,0 +1,592 @@
+{
+  "experiment": "E31 corrected offline comparison",
+  "supersedes_analysis": "e31_report.json (original preserved)",
+  "seed": 42,
+  "source_sha256": {
+    "configs/benchmark_versions.yaml": "8d24ada772d6d7bc27d4917650f75332f62b5aff95a1663eab2575f12f865b44",
+    "scripts/e31_contract_vs_semantic.py": "c88022e35153e9e806f49b06490a3f5d9ffa3cd926a5df66a12a2d04ebb75b77",
+    "data/raw/InjecAgent/data/test_cases_dh_base.json": "4dcc0540ad86efbd1d0658b3b0eb50bb19fd89ba3853a343235b47c281c72c5d",
+    "data/raw/InjecAgent/data/test_cases_dh_enhanced.json": "b2e8ebd8a8d661ed8c8527396438f6583fc302880971fe0b5020295ce9ae7728",
+    "data/raw/InjecAgent/data/test_cases_ds_base.json": "7959777711834b23e8cca2f89717a8fd6ca92ac3a0a915e38fa563a2cf9cf8bd",
+    "data/raw/InjecAgent/data/test_cases_ds_enhanced.json": "bbceaf8cb4a8397b5081120d879808261756cc4b6f3200f4f887288616ef8530",
+    "results/phase5/ours_mcptox_trace.jsonl": "096bd590f7de3fddbb898fce32baae13704a6862e5d56041ebf86bff1ecbeb28",
+    "results/phase5/a1_semantic_only_mcptox_trace.jsonl": "0b2f9fa1df7f3dc8abd3c3edc4d8345a032e2aebb3f0920003c92729bb09ed32",
+    "results/phase5/ours_test_cases_dh_base_trace.jsonl": "5c68fa9c22690af10a7a93485f80f2967af81b009b07a7566048f0a8003d5e1d",
+    "results/phase5/a1_semantic_only_test_cases_dh_base_trace.jsonl": "354302e84bc19990a6a606516576b5f5e7b5415655231b7cbc7a3e61b1ff48fb",
+    "results/phase5/ours_test_cases_dh_enhanced_trace.jsonl": "b23e75b8f6367b0eb56ce73b1235ba853982fb4f2cd82e63a5ec260c7dc81e59",
+    "results/phase5/a1_semantic_only_test_cases_dh_enhanced_trace.jsonl": "c1132ff9d89b3c4c4be6df5649e43cba2f84b20e4f7189a7633d9e22b24fc193",
+    "results/phase5/ours_test_cases_ds_base_trace.jsonl": "c83405a29f1b23a0cc964006b9e16584339851d587da297f1732dcef064ba3b0",
+    "results/phase5/a1_semantic_only_test_cases_ds_base_trace.jsonl": "69ff76552ff8d197988d71652d2bf5b788ea567f64ec422bc29cb83c6fdcdbbf",
+    "results/phase5/ours_test_cases_ds_enhanced_trace.jsonl": "8819debf62611bbd6140632487312a4fb4e433a2a744106d71ca80e38afdac5c",
+    "results/phase5/a1_semantic_only_test_cases_ds_enhanced_trace.jsonl": "070afb7b3c565ae84e2211380aae534dbc49de681bc901674840b48bf4acf91e"
+  },
+  "benchmark_pins": {
+    "InjecAgent": "f19c9f2c79a41046eb13c03c51a24c567a8ffa07",
+    "MCPTox": "static snapshot downloaded 2026-09-11"
+  },
+  "method": {
+    "match": "case_id, tool name, canonical JSON parameters; occurrence-preserving",
+    "replay": "Full recorded proposals and contracts; S_sem >= recorded tau is A1",
+    "execution": "No tools executed and no LLM calls; escalate prevents execution",
+    "labels": "Tool-role proxies from available pinned metadata; no argument labels",
+    "limitations": [
+      "Exact matches across independent runs may still have different contracts",
+      "Repeated exact calls are paired in trace order",
+      "Designated user-tool calls are not proof of benign arguments",
+      "Replay estimates call-level decisions, not end-to-end task ASR or FPR",
+      "Missing MCPTox snapshot metadata yields unknown tool roles",
+      "Observed latency excludes parser and first contract embedding costs"
+    ]
+  },
+  "pairs": {
+    "mcptox": {
+      "full_trace_calls": 1291,
+      "semantic_trace_calls": 1295,
+      "recorded_configurations": {
+        "full": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ],
+        "semantic_only": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ]
+      },
+      "exact_call_comparison": {
+        "matched_calls": 1222,
+        "unmatched_full_calls": 69,
+        "unmatched_semantic_calls": 73,
+        "identical_contract_calls": 949,
+        "outcomes": {
+          "both_prevent": 283,
+          "both_allow": 631,
+          "semantic_prevents_full_allows": 286,
+          "full_prevents_semantic_allows": 22
+        },
+        "by_tool_role": {
+          "unknown": {
+            "both_prevent": 283,
+            "both_allow": 631,
+            "semantic_prevents_full_allows": 286,
+            "full_prevents_semantic_allows": 22
+          }
+        }
+      },
+      "same_proposal_replay": {
+        "calls": 1291,
+        "outcomes": {
+          "both_prevent": 296,
+          "both_allow": 676,
+          "semantic_prevents_full_allows": 296,
+          "full_prevents_semantic_allows": 23
+        },
+        "by_tool_role": {
+          "unknown": {
+            "both_prevent": 296,
+            "both_allow": 676,
+            "semantic_prevents_full_allows": 296,
+            "full_prevents_semantic_allows": 23
+          }
+        },
+        "by_risk": {
+          "Code Injection": {
+            "both_prevent": 28,
+            "semantic_prevents_full_allows": 6,
+            "both_allow": 29
+          },
+          "Credential Leakage": {
+            "both_prevent": 33,
+            "both_allow": 60,
+            "semantic_prevents_full_allows": 15,
+            "full_prevents_semantic_allows": 2
+          },
+          "Data Tampering": {
+            "both_prevent": 23,
+            "semantic_prevents_full_allows": 27,
+            "both_allow": 68,
+            "full_prevents_semantic_allows": 2
+          },
+          "Financial Loss": {
+            "semantic_prevents_full_allows": 19,
+            "both_allow": 27,
+            "both_prevent": 2,
+            "full_prevents_semantic_allows": 5
+          },
+          "Information Manipulation": {
+            "both_allow": 150,
+            "semantic_prevents_full_allows": 65,
+            "both_prevent": 55,
+            "full_prevents_semantic_allows": 3
+          },
+          "Infrastructure Damage": {
+            "both_prevent": 35,
+            "both_allow": 56,
+            "semantic_prevents_full_allows": 11
+          },
+          "Instruction Tampering": {
+            "both_prevent": 12,
+            "both_allow": 23,
+            "full_prevents_semantic_allows": 1,
+            "semantic_prevents_full_allows": 21
+          },
+          "Message Hijacking": {
+            "both_allow": 23,
+            "both_prevent": 9,
+            "full_prevents_semantic_allows": 2,
+            "semantic_prevents_full_allows": 9
+          },
+          "Other": {
+            "both_prevent": 2,
+            "both_allow": 2
+          },
+          "Privacy Leakage": {
+            "semantic_prevents_full_allows": 66,
+            "both_prevent": 59,
+            "both_allow": 140,
+            "full_prevents_semantic_allows": 1
+          },
+          "Service Disruption": {
+            "both_allow": 98,
+            "semantic_prevents_full_allows": 57,
+            "both_prevent": 38,
+            "full_prevents_semantic_allows": 7
+          }
+        },
+        "critical_veto_calls": 78,
+        "critical_veto_semantic_would_allow": 23,
+        "full_escalations": 235
+      },
+      "observed_per_call_p95_ms": {
+        "full": 16.21,
+        "semantic_only": 16.5898
+      }
+    },
+    "dh_base": {
+      "full_trace_calls": 116,
+      "semantic_trace_calls": 113,
+      "recorded_configurations": {
+        "full": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ],
+        "semantic_only": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ]
+      },
+      "exact_call_comparison": {
+        "matched_calls": 74,
+        "unmatched_full_calls": 42,
+        "unmatched_semantic_calls": 39,
+        "identical_contract_calls": 57,
+        "outcomes": {
+          "both_allow": 26,
+          "both_prevent": 46,
+          "semantic_prevents_full_allows": 2
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 27
+          },
+          "designated_user_tool": {
+            "both_allow": 26,
+            "both_prevent": 19,
+            "semantic_prevents_full_allows": 2
+          }
+        }
+      },
+      "same_proposal_replay": {
+        "calls": 116,
+        "outcomes": {
+          "both_allow": 40,
+          "both_prevent": 69,
+          "semantic_prevents_full_allows": 7
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 45
+          },
+          "designated_user_tool": {
+            "both_allow": 40,
+            "both_prevent": 24,
+            "semantic_prevents_full_allows": 7
+          }
+        },
+        "by_risk": {
+          "unknown": {
+            "both_allow": 40,
+            "both_prevent": 69,
+            "semantic_prevents_full_allows": 7
+          }
+        },
+        "critical_veto_calls": 43,
+        "critical_veto_semantic_would_allow": 0,
+        "full_escalations": 25
+      },
+      "observed_per_call_p95_ms": {
+        "full": 16.6253,
+        "semantic_only": 18.2205
+      }
+    },
+    "dh_enhanced": {
+      "full_trace_calls": 124,
+      "semantic_trace_calls": 128,
+      "recorded_configurations": {
+        "full": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ],
+        "semantic_only": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ]
+      },
+      "exact_call_comparison": {
+        "matched_calls": 87,
+        "unmatched_full_calls": 37,
+        "unmatched_semantic_calls": 41,
+        "identical_contract_calls": 76,
+        "outcomes": {
+          "both_prevent": 49,
+          "both_allow": 36,
+          "semantic_prevents_full_allows": 2
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 29
+          },
+          "designated_user_tool": {
+            "both_allow": 36,
+            "both_prevent": 20,
+            "semantic_prevents_full_allows": 2
+          }
+        }
+      },
+      "same_proposal_replay": {
+        "calls": 124,
+        "outcomes": {
+          "both_prevent": 71,
+          "both_allow": 47,
+          "semantic_prevents_full_allows": 6
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 46
+          },
+          "designated_user_tool": {
+            "both_allow": 47,
+            "both_prevent": 23,
+            "semantic_prevents_full_allows": 6
+          },
+          "other_tool": {
+            "both_prevent": 2
+          }
+        },
+        "by_risk": {
+          "unknown": {
+            "both_prevent": 71,
+            "both_allow": 47,
+            "semantic_prevents_full_allows": 6
+          }
+        },
+        "critical_veto_calls": 46,
+        "critical_veto_semantic_would_allow": 0,
+        "full_escalations": 25
+      },
+      "observed_per_call_p95_ms": {
+        "full": 17.7869,
+        "semantic_only": 17.4756
+      }
+    },
+    "ds_base": {
+      "full_trace_calls": 226,
+      "semantic_trace_calls": 220,
+      "recorded_configurations": {
+        "full": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ],
+        "semantic_only": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ]
+      },
+      "exact_call_comparison": {
+        "matched_calls": 156,
+        "unmatched_full_calls": 70,
+        "unmatched_semantic_calls": 64,
+        "identical_contract_calls": 144,
+        "outcomes": {
+          "both_prevent": 125,
+          "both_allow": 24,
+          "semantic_prevents_full_allows": 7
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 105,
+            "semantic_prevents_full_allows": 6
+          },
+          "designated_user_tool": {
+            "both_prevent": 20,
+            "both_allow": 24,
+            "semantic_prevents_full_allows": 1
+          }
+        }
+      },
+      "same_proposal_replay": {
+        "calls": 226,
+        "outcomes": {
+          "both_prevent": 179,
+          "both_allow": 34,
+          "full_prevents_semantic_allows": 3,
+          "semantic_prevents_full_allows": 10
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 155,
+            "full_prevents_semantic_allows": 3,
+            "semantic_prevents_full_allows": 7
+          },
+          "designated_user_tool": {
+            "both_allow": 34,
+            "both_prevent": 24,
+            "semantic_prevents_full_allows": 3
+          }
+        },
+        "by_risk": {
+          "unknown": {
+            "both_prevent": 179,
+            "both_allow": 34,
+            "full_prevents_semantic_allows": 3,
+            "semantic_prevents_full_allows": 10
+          }
+        },
+        "critical_veto_calls": 37,
+        "critical_veto_semantic_would_allow": 3,
+        "full_escalations": 144
+      },
+      "observed_per_call_p95_ms": {
+        "full": 18.9119,
+        "semantic_only": 19.1218
+      }
+    },
+    "ds_enhanced": {
+      "full_trace_calls": 256,
+      "semantic_trace_calls": 264,
+      "recorded_configurations": {
+        "full": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ],
+        "semantic_only": [
+          {
+            "agent_model_id": "gpt-4o-mini",
+            "parser_backend": "llm",
+            "embedding": {
+              "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+              "model_hash": "4588b3f9e962",
+              "backend": "sentence-transformers"
+            },
+            "tau": 0.75,
+            "delta": 0.1,
+            "alpha": 0.7
+          }
+        ]
+      },
+      "exact_call_comparison": {
+        "matched_calls": 173,
+        "unmatched_full_calls": 83,
+        "unmatched_semantic_calls": 91,
+        "identical_contract_calls": 151,
+        "outcomes": {
+          "both_prevent": 130,
+          "both_allow": 34,
+          "semantic_prevents_full_allows": 9
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 118,
+            "semantic_prevents_full_allows": 6
+          },
+          "designated_user_tool": {
+            "both_allow": 34,
+            "both_prevent": 12,
+            "semantic_prevents_full_allows": 3
+          }
+        }
+      },
+      "same_proposal_replay": {
+        "calls": 256,
+        "outcomes": {
+          "both_prevent": 190,
+          "both_allow": 51,
+          "semantic_prevents_full_allows": 13,
+          "full_prevents_semantic_allows": 2
+        },
+        "by_tool_role": {
+          "attacker_tool": {
+            "both_prevent": 173,
+            "semantic_prevents_full_allows": 7,
+            "full_prevents_semantic_allows": 2
+          },
+          "designated_user_tool": {
+            "both_allow": 51,
+            "both_prevent": 16,
+            "semantic_prevents_full_allows": 6
+          },
+          "other_tool": {
+            "both_prevent": 1
+          }
+        },
+        "by_risk": {
+          "unknown": {
+            "both_prevent": 190,
+            "both_allow": 51,
+            "semantic_prevents_full_allows": 13,
+            "full_prevents_semantic_allows": 2
+          }
+        },
+        "critical_veto_calls": 36,
+        "critical_veto_semantic_would_allow": 2,
+        "full_escalations": 154
+      },
+      "observed_per_call_p95_ms": {
+        "full": 19.9822,
+        "semantic_only": 17.8988
+      }
+    }
+  },
+  "aggregate": {
+    "matched_calls": 1712,
+    "unmatched_full_calls": 301,
+    "unmatched_semantic_calls": 308,
+    "identical_contract_calls": 1377,
+    "calls": 2013,
+    "critical_veto_calls": 240,
+    "critical_veto_semantic_would_allow": 28,
+    "full_escalations": 583,
+    "exact_call_outcomes": {
+      "both_prevent": 633,
+      "both_allow": 751,
+      "semantic_prevents_full_allows": 306,
+      "full_prevents_semantic_allows": 22
+    },
+    "same_proposal_outcomes": {
+      "both_prevent": 805,
+      "both_allow": 848,
+      "semantic_prevents_full_allows": 332,
+      "full_prevents_semantic_allows": 28
+    },
+    "same_proposal_by_tool_role": {
+      "attacker_tool": {
+        "both_prevent": 419,
+        "full_prevents_semantic_allows": 5,
+        "semantic_prevents_full_allows": 14
+      },
+      "designated_user_tool": {
+        "both_allow": 172,
+        "both_prevent": 87,
+        "semantic_prevents_full_allows": 22
+      },
+      "other_tool": {
+        "both_prevent": 3
+      },
+      "unknown": {
+        "both_prevent": 296,
+        "both_allow": 676,
+        "semantic_prevents_full_allows": 296,
+        "full_prevents_semantic_allows": 23
+      }
+    }
+  }
+}
