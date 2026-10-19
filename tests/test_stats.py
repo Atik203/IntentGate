@@ -106,7 +106,8 @@ def test_conformal_band_calibrates_target_coverage():
     result = conformal_band([0.70, 0.72, 0.74, 0.76, 0.80], tau=0.75, alpha=0.2)
     assert result["method"] == "split_conformal_absolute_deviation"
     assert result["delta"] == pytest.approx(0.05)
-    assert result["empirical_coverage"] >= result["target_coverage"]
+    assert result["calibration_coverage"] >= result["target_coverage"]
+    assert result["rank"] == 5
 
 
 def test_conformal_band_rejects_invalid_inputs():
@@ -114,6 +115,43 @@ def test_conformal_band_rejects_invalid_inputs():
         conformal_band([], tau=0.75)
     with pytest.raises(ValueError):
         conformal_band([0.5], tau=0.75, alpha=1.0)
+
+
+@pytest.mark.parametrize("scores", [[float("nan")], [float("inf")], [-0.1], [1.1]])
+def test_conformal_band_rejects_nonfinite_or_out_of_support(scores: list[float]) -> None:
+    with pytest.raises(ValueError):
+        conformal_band(scores, tau=0.75)
+
+
+@pytest.mark.parametrize("tau", [float("nan"), -0.1, 1.1])
+def test_conformal_band_rejects_invalid_center(tau: float) -> None:
+    with pytest.raises(ValueError):
+        conformal_band([0.5], tau=tau)
+
+
+def test_conformal_band_small_calibration_requires_full_support() -> None:
+    result = conformal_band([0.75], tau=0.75, alpha=0.1)
+    assert result["rank"] == 2
+    assert result["used_full_support"]
+    assert result["delta"] == 0.75
+    assert (result["lower"], result["upper"]) == (0.0, 1.0)
+
+
+def test_conformal_band_exact_heldout_rank_coverage() -> None:
+    values = [index / 19 for index in range(20)]
+    covered = 0
+    for index, heldout in enumerate(values):
+        calibration = values[:index] + values[index + 1:]
+        interval = conformal_band(calibration, tau=0.0, alpha=0.1)
+        covered += interval["lower"] <= heldout <= interval["upper"]
+    assert covered / len(values) == pytest.approx(0.9)
+
+
+def test_conformal_band_ties_are_conservative() -> None:
+    result = conformal_band([0.7] * 19, tau=0.75, alpha=0.1)
+    assert result["rank"] == 18
+    assert result["calibration_coverage"] == 1.0
+    assert not result["used_full_support"]
 
 
 def test_per_specificity_fpr_stratification():
