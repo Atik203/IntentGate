@@ -319,14 +319,15 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       28 calls semantic-only permits; score fusion allows 332 calls semantic-only prevents.
       Available tool-role labels include both user and attacker proxies, so these flips are not
       presented as false positives or prevented attacks. Headline Phase 5 results are unchanged.
-- [~] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
+- [x] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
       pinned `pip install` + `results/` manifest check (`scripts/run_phase5.py --check`
       already exists — wire it into the container entrypoint). Done when: clean-machine
       `docker build && docker run pytest -q` passes and the repro commands in
       `docs/experiments/README.md` run unmodified inside the container.
-      → IN PROGRESS: image definition, CPU lock, entrypoint, and 94-file Phase 5 hash manifest
-      are implemented; local tests and integrity checks pass. Docker engine startup failed on
-      this host, so the required clean-container build and run remain unverified.
+      → COMPLETE: GitHub Actions `container` job (PR #44, run `39299936752`) built the image
+      on a clean `ubuntu-latest` runner, passed `pytest -q`, ran the artifacts-only check via
+      the entrypoint, and ran `report_phase5.py`. `report_phase5.py` now tolerates missing
+      raw benchmark metadata so the offline reporter runs without benchmark clones.
 - [x] Write up E23–E31 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
       → COMPLETE: all experiment sections written, including E25 boundary condition, E26
       live/offline adaptive arms, and E28 negative/underpowered parser ablation.
