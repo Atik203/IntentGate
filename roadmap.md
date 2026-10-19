@@ -263,27 +263,34 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       either delta numbers or the scope-out table. Absence here reads as unawareness — do not skip.
       → COMPLETE: scope-out table written; `shi2025progent` (arXiv:2504.11703) added to
       `docs/references.bib` + paper-local `IEEE-conference/references.bib`; cited in paper related work.
-- [ ] **Method formalism (Upgrade A, writing task, no new runs).** Goal: read as a contribution,
+- [x] **Method formalism (Upgrade A, writing task, no new runs).** Goal: read as a contribution,
       not just measurements. How: (a) one paragraph framing τ-selection as FPR-constrained ASR
       minimization (Neyman–Pearson) pointing at the existing Pareto figure; (b) an
       assumption-violation table (trusted request / untrusted tool content / single-turn scope →
       what breaks when each is violated, with E16/E18/E26 as evidence). Done when: both land in
       Ch 3 draft + blueprint Sec 9 pointer; Anderson reference-monitor framing added (2 sentences).
-- [ ] **E30 conformal escalate band (Upgrade A, offline, no LLM calls).** Goal: turn the
+      → COMPLETE: `docs/thesis/chapter3_method.md` states the constrained threshold objective,
+      reference-monitor placement, and assumption-violation table without claiming a formal
+      security guarantee.
+- [x] **E30 conformal escalate band (Upgrade A, offline, no LLM calls).** Goal: turn the
       heuristic [τ−δ, τ+δ] band into a distribution-free guarantee. How: ★ needs conformal-prediction
       comfort — calibrate a coverage guarantee on cached Phase 5 traces
       (`results/phase5/ours_*_trace.jsonl`), report empirical coverage at the chosen α, add
       `conformal_band()` next to `power_analysis()` in `src/intent_gate/eval/stats.py` + tests.
       Done when: calibrated (α, empirical coverage) pair + method note in
       `07_phase7_pilots.md#e30`. Highest leverage-per-line item in this phase.
+      → COMPLETE (negative practical result): α=0.1 calibrates δ=0.75 and interval [0,1],
+      covering 100% of 204 held-out request groups but providing no useful escalation width.
 - [ ] **E28 parser ablation (Upgrade B).** Goal: answer "why not just heuristics." How: one
       InjecAgent 200-case subset, B1 + ours with the LLM parser swapped for the heuristic
       fallback → ASR/valid-rate deltas. Done when: delta table in `07_phase7_pilots.md#e28`.
       Est. ~$1–2.
-- [ ] **E29 embedding swap + τ transfer (Upgrade B, offline, free).** Goal: show τ is a
+- [x] **E29 embedding swap + τ transfer (Upgrade B, offline, free).** Goal: show τ is a
       procedure, not a magic number. How: re-score cached traces with one stronger embedding
       (E5/MPNet) + report τ tuned on base tested on enhanced (and vice versa). Done when:
       transfer table + recalibration note in `07_phase7_pilots.md#e29`.
+      → COMPLETE: real pinned MPNet embeddings and disjoint request groups show that thresholds
+      are encoder- and direction-specific; results are call-level replay, not end-to-end ASR.
 - [x] **E31 contract-vs-semantic contribution (supervisor Q5).** Goal: E12 showed A1
       (semantic-only) ≈ ours on headline ASR — locate *where* the full contract + rules +
       escalate add value, or scope the claim honestly. How: offline on cached traces
@@ -295,15 +302,18 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       wins/ties/loses" verdict in `07_phase7_pilots.md#e31`; if A1 ties everywhere, the
       contract claim is scoped to auditability + fail-closed guarantees (already stated in
       E12 — this makes it measured, not asserted).
-      → COMPLETE: offline on 2,013 cached calls; semantic-only over-blocks legitimate calls
-      (322 A1 blocks/escalates that ours allows) while ours catches 32 attacks A1 misses;
-      latency parity holds; verdict: contract wins on valid-rate/auditability, ties on
-      headline ASR.
+      → COMPLETE (corrected): same-proposal replay covers 2,013 calls. Critical vetoes prevent
+      28 calls semantic-only permits; score fusion allows 332 calls semantic-only prevents.
+      Available tool-role labels include both user and attacker proxies, so these flips are not
+      presented as false positives or prevented attacks. Headline Phase 5 results are unchanged.
 - [ ] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
       pinned `pip install` + `results/` manifest check (`scripts/run_phase5.py --check`
       already exists — wire it into the container entrypoint). Done when: clean-machine
       `docker build && docker run pytest -q` passes and the repro commands in
       `docs/experiments/README.md` run unmodified inside the container.
+      → IN PROGRESS: image definition, CPU lock, entrypoint, and 94-file Phase 5 hash manifest
+      are implemented; local tests and integrity checks pass. Docker engine startup failed on
+      this host, so the required clean-container build and run remain unverified.
 - [ ] Write up E23–E31 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
 
 **Explicitly deferred to future work (Ch 6 material, not pilots):** live-server MCPTox slice
