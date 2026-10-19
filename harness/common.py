@@ -58,6 +58,17 @@ def add_endpoint_args(ap):
     return ap
 
 
+def build_run_parser(mode: str = "llm", llm=None):
+    """Select the parser backend for a run: LLM (default) or deterministic heuristic (E28)."""
+    from intent_gate.parser.parser import build_parser
+
+    if mode == "llm":
+        return build_parser(llm=llm)
+    if mode == "heuristic":
+        return build_parser(offline=True)
+    raise ValueError(f"unknown parser mode: {mode}")
+
+
 def _first_env(*names: str) -> str | None:
     for name in names:
         value = os.getenv(name)

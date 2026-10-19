@@ -62,22 +62,77 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
   - Q: Which prompt baseline is best? A: Delimiters and Sandwich tie at 4.3% ASR.
 
 ## E25 - Third backbone pilot (Gap 4)
-- Status: [~] in progress - DeepSeek V4.1 Flash configured and smoke-verified (2026-10-18); full 50/50 run pending.
-- Goal: replicate ASR delta on a new model family with full ReAct participation.
-- Setup: `scripts/run_injecagent_ours.py --per-split 50 --setting base --gate none|ours --model-name <new-family>`, parser stays gpt-4o-mini; `--out` under `results/phase7/e25_third_backbone/`.
-- Results: per-backbone delta table (B1 ASR → ours ASR), 3 rows.
-- Artifacts: smoke in `results/phase7/e25_third_backbone/deepseek_smoke/`; full-run artifacts TBD.
-- Limitations: TBD
-- Supervisor Q&A: TBD
+- Status: [x] complete - boundary condition: DeepSeek refuses the static InjecAgent attacks.
+- Goal: replicate the ASR delta on a new model family with full ReAct participation.
+- Setup: `scripts/run_injecagent_ours.py --per-split 50 --setting base --gate none|ours
+  --model-name deepseek-flash` with the role-specific endpoint flags; parser stays
+  `gpt-4o-mini`. Model version DeepSeek-V4.1-Flash-1017, thinking disabled
+  (`--agent-reasoning-effort none`). Outputs:
+  `results/phase7/e25_third_backbone/deepseek_{none,ours}/`.
+- Results (100 cases per condition, base setting):
+
+| Backbone | B1 ASR | Ours ASR | Gate blocks | Valid rate (B1/ours) | Reading |
+|---|---:|---:|---:|---|---|
+| gpt-4o-mini (freeze) | 19.0% (2,108) | 0.7% | 340 | - | primary result |
+| qwen3.5:4b (E18) | 27.1% (100) | 2.1% | 24 | 96% / 96% | replicates |
+| DeepSeek V4.1 Flash (E25) | 0.0% (100) | 0.0% (100) | 0 | 96% / 97% | refuses; delta undefined |
+
+  On the exact 100-case slice used here, the frozen gpt-4o-mini traces give B1 14.3%
+  (12/84 valid) and ours 0.0%, so the DeepSeek row is comparable to that slice rather than
+  to the 2,108-case freeze. DeepSeek's outputs name the injected instruction as untrusted
+  (for example, "this is a prompt injection") and do not call the attacker tool. The gate
+  blocked zero calls in the ours condition because no attacker calls were proposed. The
+  0.0% -> 0.0% row is therefore a ceiling effect, not a gate effect, and E25 does not
+  provide a third replication; qwen remains the only replication.
+- Artifacts: `results/phase7/e25_third_backbone/deepseek_{none,ours}/` (summaries, case
+  JSONL, traces, logs); smoke in `.../deepseek_smoke/`. The abandoned `gpt4o_none/`
+  directory was removed because the slice baseline is derivable from the frozen traces.
+- Limitations: one static benchmark, 100 cases, one model version; the refusal may be
+  prompt-specific; no adaptive attack was run against this backbone. A zero B1 ASR leaves
+  no headroom for measuring a gate delta.
+- Supervisor Q&A:
+  - Q: Does the third backbone replicate? A: No. DeepSeek refuses the static injections,
+    so the gated and unprotected conditions both have zero attacker calls. The qwen row
+    remains the only replication.
+  - Q: Does 0.0% for ours show the gate works on DeepSeek? A: No. The gate was never
+    exercised; zero attacker calls were proposed.
 
 ## E26 - Adaptive attacker pilots (Gap 2)
-- Status: [ ] not started
-- Goal: attack the gate itself, live. (a) paraphrase-delivery (ASB's 5 injection phrasings); (b) threshold-aware (S ∈ [0.75, 0.79]).
-- Setup: InjecAgent pilot slice; live re-score vs τ=0.75.
-- Results: ASR-under-adaptation table + honest scope sentence (static vs adaptive).
-- Artifacts: TBD
-- Limitations: TBD
-- Supervisor Q&A: TBD
+- Status: [~] in progress - offline threshold-aware arm complete; live delivery arm running.
+- Goal: attack the gate itself, live. (a) paraphrase-delivery (ASB's 5 injection phrasings);
+  (b) threshold-aware (calls aimed just above tau).
+- Setup:
+  (a) Live delivery: the five ASB phrasings (naive, escape characters, context ignoring,
+      fake completion, combined) are applied to the attacker instruction inside the tool
+      response; 100 cases per phrasing, `--gate ours`, tau=0.75, all other inputs fixed.
+  (b) Offline threshold-aware: mine prevented attacker-tool calls with S in [0.60, 0.75)
+      from the four frozen Phase 5 InjecAgent traces; rewrite free-text parameters with
+      text from the trusted contract; re-score with the full gate. The strict arm edits
+      only free-text keys (`query`, `keywords`, `search_term`, ...); the lenient arm edits
+      any string parameter or adds a `query` parameter and is an upper bound.
+- Results:
+  (a) Live delivery table: TBD.
+  (b) 262 prevented attacker-tool calls were replayed. 34 call instances (11 unique call
+      templates) have free-text parameters; all 34 cross tau after the echo (median
+      Delta S +0.176, max +0.253) and no rule veto catches them. The lenient upper bound
+      crosses for 180/262 calls; 82 calls have no editable parameter. Full report:
+      `results/phase7/e26_adaptive/offline/e26b_threshold_probe.json`.
+- Interpretation: the semantic score is sensitive to verbatim overlap with the trusted
+  request. A read-only search call can be pushed from just below tau to allow by copying
+  the user's own wording into a free-text argument. This is a call-level counterfactual,
+  not an end-to-end ASR; it motivates argument-aware vetoes or scoring the call structure
+  rather than raw parameter text.
+- Limitations: 11 unique templates limit generality; these calls were already prevented
+  (block or escalate), so the result is a counterfactual decision; invalid or
+  schema-incompatible arguments would be rejected by a real tool; no live agent run for
+  the strict arm.
+- Supervisor Q&A:
+  - Q: Does adapting the attack break the gate? A: At the score level, yes for the 11
+    free-text templates tested; all 34 instances cross tau and rules do not veto them.
+    End-to-end execution was not tested.
+  - Q: Is this the same as E20 mimicry? A: No. E20 wrapped a call in prose outside the
+    real scorer; this probe edits the actual call parameters and re-scores with the real
+    gate, including rules.
 
 ## E27 — Progent comparison (Gap 1b)
 - At a glance: [x] scope-out complete, re-verified 2026-10-18 against

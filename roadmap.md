@@ -231,7 +231,7 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       / baseline 6.8% / InstrPrev 8.9% ASR. Valid rate: Delimiters 92.0% / Sandwich 92.0%
       / baseline 88.0%. Delimiters + Sandwich reduce ASR ~37% but still far behind full gate
       (0.7% InjecAgent).
-- [~] **E25 third backbone pilot (Gap 4: generality is n=1.5).** Goal: replicate the ASR
+- [x] **E25 third backbone pilot (Gap 4: generality is n=1.5).** Goal: replicate the ASR
       delta on a new model family with full ReAct participation. How: same 100-case protocol
       as E18 (`scripts/run_injecagent_ours.py --per-split 50 --setting base --gate none|ours
       --model-name <new-family-via-API>`, parser stays `gpt-4o-mini`, explicit `--out` under
@@ -240,10 +240,13 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       `07_phase7_pilots.md#e25`; if it fails to replicate, document the boundary condition
       instead (also publishable). Est. ~$1. If Luna-style prose-only output recurs, exclude
       with the same convention-#7 justification as E18.
-      → IN PROGRESS: key/base URL now configured (`.env` -> `DEEPSEEK_*`). Model: `deepseek-flash` (version DeepSeek-V4.1-Flash-1017); append `--agent-base-url https://api.deepseek.com/v1 --agent-api-key <from .env> --model-name deepseek-flash --agent-reasoning-effort none` to the E25 command above (thinking mode is default-on; none disables it and re-enables temperature). Smoke verified on `deepseek-flash`
-      (6 cases, 0 invalid, clean summary; `results/phase7/e25_third_backbone/deepseek_smoke/`).
-      Full 50/50 run aborted mid-execution — needs completion.
-- [ ] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
+      → COMPLETE (boundary condition): DeepSeek V4.1 Flash (`deepseek-flash`,
+      DeepSeek-V4.1-Flash-1017, thinking off) refused all 100 static InjecAgent injections
+      in both conditions: B1 ASR 0.0% (100), ours ASR 0.0% (100), 0 gate blocks, valid
+      96%/97%. The gate was never exercised, so the delta is undefined and this is not a
+      third replication; qwen remains the only replication. Artifacts:
+      `results/phase7/e25_third_backbone/deepseek_{none,ours}/`.
+- [~] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
       itself, live. Two arms, both on the InjecAgent pilot slice: (a) paraphrase-delivery —
       ASB's 5 injection phrasings (`literature_review/papers/04-asb-zhang-2025.md`) applied to
       attack delivery, re-scored live vs τ=0.75, ASR delta vs E20; (b) threshold-aware —
@@ -251,7 +254,13 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       report how many crafted calls land above τ. Done when: ASR-under-adaptation table +
       honest scope sentence (static vs adaptive) lands in `07_phase7_pilots.md#e26`.
       Est. ~$1. Keep the static-attack scope claim prominent either way.
-      → NOT STARTED.
+      → IN PROGRESS: (b) offline arm complete. 262 prevented attacker-tool calls were
+      replayed; 34 instances (11 unique free-text templates) cross τ after echoing the
+      trusted request into a query/keyword argument (median ΔS +0.176), with no rule veto.
+      The lenient all-parameter upper bound crosses 180/262. Artifacts:
+      `scripts/e26_threshold_probe.py` and `results/phase7/e26_adaptive/offline/`.
+      (a) live delivery runs are in progress; the five phrasing outputs and the table are
+      under `results/phase7/e26_adaptive/live/`.
 
 ### P1 — acceptance-makers (staff the starred ones first: specialist effort, not runner time)
 
