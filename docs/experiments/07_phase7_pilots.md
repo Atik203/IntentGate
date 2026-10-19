@@ -98,9 +98,9 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
     exercised; zero attacker calls were proposed.
 
 ## E26 - Adaptive attacker pilots (Gap 2)
-- Status: [x] complete - live delivery and offline threshold-aware arms.
+- Status: [x] complete - live delivery, offline threshold-aware, and echo-guard arms.
 - Goal: attack the gate itself, live. (a) paraphrase-delivery (ASB's 5 injection phrasings);
-  (b) threshold-aware (calls aimed just above tau).
+  (b) threshold-aware (calls aimed just above tau); (c) test a post-hoc verbatim-echo guard.
 - Setup:
   (a) Live delivery: the five ASB phrasings (naive, escape characters, context ignoring,
       fake completion, combined) are applied to the attacker instruction inside the tool
@@ -110,6 +110,9 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
       text from the trusted contract; re-score with the full gate. The strict arm edits
       only free-text keys (`query`, `keywords`, `search_term`, ...); the lenient arm edits
       any string parameter or adds a `query` parameter and is an upper bound.
+  (c) Echo guard: a post-hoc, deterministic guard flags a contiguous 6-token span from
+      the request, goals, or permitted data access inside free-text arguments. It is
+      evaluated offline and does not change the frozen matrix.
 - Results:
   (a) Live delivery (100 cases per phrasing; valid excludes invalid and error rows):
 
@@ -132,16 +135,26 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
       Delta S +0.176, max +0.253) and no rule veto catches them. The lenient upper bound
       crosses for 180/262 calls; 82 calls have no editable parameter. Full report:
       `results/phase7/e26_adaptive/offline/e26b_threshold_probe.json`.
+  (c) The six-token echo guard blocks 34/34 strict E26b calls (11/11 templates). It adds
+      no block among 194 allowed user-tool calls (281 user calls total). The threshold
+      sweep gives 33/34 at 8 tokens, 29/34 at 10, and 28/34 at 12. Report:
+      `results/phase7/e26_adaptive/offline/e26c_echo_guard.json`.
+- Artifacts: `scripts/e26_threshold_probe.py`, `scripts/e26c_echo_guard.py`,
+  `src/intent_gate/scoring/echo_guard.py`, `tests/test_e26_echo_guard.py`, and the two
+  JSON reports under `results/phase7/e26_adaptive/offline/`.
 - Interpretation: live delivery phrasing is weak on this slice (0-2.2% gated ASR), but the
   semantic score is sensitive to verbatim overlap with the trusted request. A read-only
   search call can be pushed from just below tau to allow by copying the user's own wording
   into a free-text argument. This is a call-level counterfactual, not an end-to-end ASR; it
   motivates argument-aware vetoes or scoring the call structure rather than raw parameter text.
+  The six-token guard is a concrete argument-aware veto for the measured verbatim echo. It
+  catches verbatim copies, not paraphrases.
 - Limitations: the live arm is 100 cases per phrasing and two successes do not establish
   a delivery effect; the offline arm has 11 unique templates, so generality is limited;
   these calls were already prevented (block or escalate), so the offline result is a
   counterfactual decision; invalid or schema-incompatible arguments would be rejected by a
-  real tool; no live agent run for the strict offline arm.
+  real tool; no live agent run for the strict offline arm; the guard catches verbatim
+  copies only, and its false-positive estimate covers 194 allowed user-tool calls.
 - Supervisor Q&A:
   - Q: Does adapting the attack break the gate? A: Live delivery phrasing does not on this
     slice (0-2.2%). At the score level, the offline argument echo does: all 34 instances
@@ -150,6 +163,9 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
   - Q: Is this the same as E20 mimicry? A: No. E20 wrapped a call in prose outside the
     real scorer; this probe edits the actual call parameters and re-scores with the real
     gate, including rules.
+  - Q: Does the echo guard close the bypass? A: For the measured verbatim copies, yes:
+    34/34 calls and 11/11 templates are blocked, with no new blocks among 194 allowed
+    user-tool calls. Paraphrased echoes remain open, and the guard is offline only.
 
 ## E27 — Progent comparison (Gap 1b)
 - At a glance: [x] scope-out complete, re-verified 2026-10-18 against

@@ -259,8 +259,11 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       (b) offline: 262 prevented attacker-tool calls replayed; 34 instances (11 unique
       free-text templates) cross τ after echoing the trusted request (median ΔS +0.176),
       with no rule veto; the lenient all-parameter upper bound crosses 180/262. This is a
-      call-level counterfactual, not end-to-end ASR. Artifacts:
-      `scripts/e26_threshold_probe.py`, `results/phase7/e26_adaptive/`.
+      call-level counterfactual, not end-to-end ASR. (c) six-token echo guard: 34/34
+      strict calls (11/11 templates) blocked, with no new blocks among 194 allowed
+      user-tool calls. Artifacts: `scripts/e26_threshold_probe.py`,
+      `scripts/e26c_echo_guard.py`, `src/intent_gate/scoring/echo_guard.py`,
+      `results/phase7/e26_adaptive/`.
 
 ### P1 — acceptance-makers (staff the starred ones first: specialist effort, not runner time)
 
@@ -362,6 +365,15 @@ evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings
 - [ ] Reviewer #2 checklist (blueprint Sec 18) cleared item by item
 - [ ] Reproducibility package: pip wrapper + contracts + logs + one-slide "ToolGate vs Ours" table
 - [ ] (Optional, after Findings) Expand to journal: Q2 security journal (e.g., JISA / Applied Intelligence)
+
+### Paper final reviewer-risk fixes (2026-10-20)
+
+- [x] Novelty paragraph vs ClawGuard / Task Shield / Progent / ToolGate
+- [x] Offline adaptive-echo guard + evaluation
+- [x] DeepSeek boundary clarification
+- [x] Paper integration (novelty + echo + DeepSeek, strict 6 pages)
+- [x] Rebuild anonymous + author PDFs (strict 6 pages)
+- [~] Final QA, tests, CI, promote
 
 ---
 
