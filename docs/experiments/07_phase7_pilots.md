@@ -61,16 +61,16 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
     far weaker than the middleware gate. They are complementary, not substitutes.
   - Q: Which prompt baseline is best? A: Delimiters and Sandwich tie at 4.3% ASR.
 
-## E25 — Third backbone pilot (Gap 4)
-- Status: [ ] not started
+## E25 - Third backbone pilot (Gap 4)
+- Status: [~] in progress - DeepSeek V4.1 Flash configured and smoke-verified (2026-10-18); full 50/50 run pending.
 - Goal: replicate ASR delta on a new model family with full ReAct participation.
 - Setup: `scripts/run_injecagent_ours.py --per-split 50 --setting base --gate none|ours --model-name <new-family>`, parser stays gpt-4o-mini; `--out` under `results/phase7/e25_third_backbone/`.
 - Results: per-backbone delta table (B1 ASR → ours ASR), 3 rows.
-- Artifacts: TBD
+- Artifacts: smoke in `results/phase7/e25_third_backbone/deepseek_smoke/`; full-run artifacts TBD.
 - Limitations: TBD
 - Supervisor Q&A: TBD
 
-## E26 — Adaptive attacker pilots (Gap 2)
+## E26 - Adaptive attacker pilots (Gap 2)
 - Status: [ ] not started
 - Goal: attack the gate itself, live. (a) paraphrase-delivery (ASB's 5 injection phrasings); (b) threshold-aware (S ∈ [0.75, 0.79]).
 - Setup: InjecAgent pilot slice; live re-score vs τ=0.75.
