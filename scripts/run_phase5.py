@@ -33,6 +33,7 @@ RESULT_DIR = ROOT / "results" / "phase5"
 LOG_DIR = RESULT_DIR / "logs"
 LOCK_PATH = ROOT / "configs" / "phase5_lock.json"
 MANIFEST_PATH = RESULT_DIR / "manifest.json"
+ARTIFACT_HASHES_PATH = ROOT / "configs" / "phase5_artifact_hashes.json"
 
 INJECAGENT_FILES = [
     "test_cases_dh_base.json",
@@ -173,8 +174,25 @@ def _case_counts(limit: int | None) -> dict[str, int]:
     return counts
 
 
+def _pinned_case_counts(limit: int | None) -> dict[str, int]:
+    """Read published dataset sizes without requiring third-party benchmark clones."""
+    import yaml
+
+    versions = yaml.safe_load((ROOT / "configs/benchmark_versions.yaml").read_text(encoding="utf-8"))
+    counts = {
+        filename: int(versions["InjecAgent"]["cases"][Path(filename).stem.removeprefix("test_cases_")])
+        for filename in INJECAGENT_FILES
+    }
+    counts["mcptox"] = int(versions["MCPTox"]["cases"])
+    return {name: min(limit, count) if limit else count for name, count in counts.items()}
+
+
 def build_jobs(args) -> list[Job]:
-    counts = _case_counts(args.limit)
+    counts = (
+        _pinned_case_counts(args.limit)
+        if getattr(args, "artifacts_only", False)
+        else _case_counts(args.limit)
+    )
     resume_flag = [] if args.no_resume else ["--resume"]
     jobs: list[Job] = []
     for condition, gate, ablation in CONDITIONS:
@@ -344,11 +362,34 @@ def run_check(jobs: list[Job], manifest: dict) -> list[str]:
     return failures
 
 
+def verify_artifact_hashes() -> list[str]:
+    """Verify the published Phase 5 bytes independently of raw datasets and model APIs."""
+    if not ARTIFACT_HASHES_PATH.exists():
+        return ["missing published artifact hash manifest"]
+    recorded = json.loads(ARTIFACT_HASHES_PATH.read_text(encoding="utf-8"))
+    files = recorded.get("files", {})
+    if not files:
+        return ["published artifact hash manifest has no files"]
+    failures: list[str] = []
+    for filename, expected in files.items():
+        path = (ROOT / filename).resolve()
+        if not path.is_relative_to(RESULT_DIR.resolve()):
+            failures.append(f"artifact path outside results/phase5: {filename}")
+        elif not path.is_file() or _sha256(path) != expected:
+            failures.append(f"artifact missing or changed: {filename}")
+    return failures
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--freeze", action="store_true", help="write lock + manifest before runs")
     ap.add_argument("--run", action="store_true", help="execute/resume the matrix")
     ap.add_argument("--check", action="store_true", help="verify artifacts vs manifest")
+    ap.add_argument(
+        "--artifacts-only",
+        action="store_true",
+        help="with --check, use pinned dataset sizes without loading benchmark clones",
+    )
     ap.add_argument("--dry-run", action="store_true", help="list jobs + call estimate only")
     ap.add_argument("--force", action="store_true", help="overwrite existing reports / lock")
     ap.add_argument(
@@ -369,6 +410,9 @@ def main():
     ap.add_argument("--model-name", default="gpt-4o-mini")
     ap.add_argument("--parser-model", default="gpt-4o-mini")
     args = ap.parse_args()
+
+    if args.artifacts_only and (not args.check or args.freeze or args.run or args.dry_run):
+        ap.error("--artifacts-only requires --check and cannot be used with execution modes")
 
     jobs = build_jobs(args)
     est_calls = sum(job.est_calls for job in jobs)
@@ -406,7 +450,11 @@ def main():
         if not MANIFEST_PATH.exists():
             print("no manifest; run --freeze first")
             raise SystemExit(1)
-        failures = run_check(jobs, json.loads(MANIFEST_PATH.read_text(encoding="utf-8")))
+        manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+        failures = run_check(jobs, manifest)
+        if args.artifacts_only:
+            failures += verify_manifest(manifest, jobs, args)
+            failures += verify_artifact_hashes()
         if failures:
             print(f"integrity check FAILED ({len(failures)}):")
             for failure in failures:

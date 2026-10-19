@@ -200,14 +200,20 @@ def bonferroni_alpha(alpha: float, n_comparisons: int) -> float:
     return alpha / max(1, n_comparisons)
 
 
-def conformal_band(scores: list[float], tau: float, alpha: float = 0.1) -> dict:
-    """Calibrate a distribution-free symmetric band around ``tau``.
+def conformal_band(
+    scores: list[float], tau: float, alpha: float = 0.1
+) -> dict[str, int | float | str | bool]:
+    """Calibrate a symmetric score-coverage interval around an independently fixed tau.
 
-    The calibration set is treated as exchangeable nonconformity scores
-    ``abs(score - tau)``.  The finite-sample split-conformal quantile uses the
-    conservative order statistic ``ceil((n + 1) * (1 - alpha))``.  The returned
-    empirical coverage is measured on the supplied calibration set and is
-    reported separately from the guaranteed target coverage.
+    Under exchangeability of calibration scores and a future score, the interval
+    has marginal coverage at least ``1-alpha``. The covered object is a score,
+    not attack success or a correct gate decision. Dependent calls must first be
+    aggregated into exchangeable case/request units by the caller.
+
+    If rank ``ceil((n+1)*(1-alpha))`` equals n+1, use the known support [0,1].
+    Clipping the rank to n would not preserve the finite-sample coverage bound.
+    Calibration coverage is descriptive; heldout coverage must be measured on
+    separate observations. This function changes no production gate decisions.
     """
     if not 0 < alpha < 1:
         raise ValueError("alpha must be between 0 and 1")
@@ -215,20 +221,30 @@ def conformal_band(scores: list[float], tau: float, alpha: float = 0.1) -> dict:
         raise ValueError("scores must not be empty")
     if not 0 <= tau <= 1:
         raise ValueError("tau must be between 0 and 1")
-    values = np.sort(np.abs(np.asarray(scores, dtype=float) - tau))
-    rank = min(len(values) - 1, max(0, int(np.ceil((len(values) + 1) * (1 - alpha))) - 1))
-    delta = float(values[rank])
-    coverage = float(np.mean(np.abs(np.asarray(scores, dtype=float) - tau) <= delta))
+    observed = np.asarray(scores, dtype=float)
+    if observed.ndim != 1 or not np.all(np.isfinite(observed)):
+        raise ValueError("scores must be a finite one-dimensional sequence")
+    if np.any((observed < 0) | (observed > 1)):
+        raise ValueError("scores must be between 0 and 1")
+    values = np.sort(np.abs(observed - tau))
+    rank = int(np.ceil((len(values) + 1) * (1 - alpha)))
+    use_full_support = rank > len(values)
+    delta = max(tau, 1 - tau) if use_full_support else float(values[rank - 1])
+    lower, upper = max(0.0, tau - delta), min(1.0, tau + delta)
     return {
         "n": len(values),
         "tau": tau,
         "alpha": alpha,
         "delta": delta,
-        "lower": max(0.0, tau - delta),
-        "upper": min(1.0, tau + delta),
+        "rank": rank,
+        "used_full_support": use_full_support,
+        "full_support_interval": lower == 0.0 and upper == 1.0,
+        "lower": lower,
+        "upper": upper,
         "target_coverage": 1.0 - alpha,
-        "empirical_coverage": coverage,
+        "calibration_coverage": float(np.mean(values <= delta)),
         "method": "split_conformal_absolute_deviation",
+        "covered_object": "future score from an exchangeable population",
     }
 
 
