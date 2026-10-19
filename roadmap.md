@@ -246,7 +246,7 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       96%/97%. The gate was never exercised, so the delta is undefined and this is not a
       third replication; qwen remains the only replication. Artifacts:
       `results/phase7/e25_third_backbone/deepseek_{none,ours}/`.
-- [~] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
+- [x] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
       itself, live. Two arms, both on the InjecAgent pilot slice: (a) paraphrase-delivery —
       ASB's 5 injection phrasings (`literature_review/papers/04-asb-zhang-2025.md`) applied to
       attack delivery, re-scored live vs τ=0.75, ASR delta vs E20; (b) threshold-aware —
@@ -254,13 +254,13 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       report how many crafted calls land above τ. Done when: ASR-under-adaptation table +
       honest scope sentence (static vs adaptive) lands in `07_phase7_pilots.md#e26`.
       Est. ~$1. Keep the static-attack scope claim prominent either way.
-      → IN PROGRESS: (b) offline arm complete. 262 prevented attacker-tool calls were
-      replayed; 34 instances (11 unique free-text templates) cross τ after echoing the
-      trusted request into a query/keyword argument (median ΔS +0.176), with no rule veto.
-      The lenient all-parameter upper bound crosses 180/262. Artifacts:
-      `scripts/e26_threshold_probe.py` and `results/phase7/e26_adaptive/offline/`.
-      (a) live delivery runs are in progress; the five phrasing outputs and the table are
-      under `results/phase7/e26_adaptive/live/`.
+      → COMPLETE: (a) live delivery 0/90 naive, 0/84 escape, 1/90 context, 1/92 fake,
+      2/92 combined (ASR 0.0-2.2%); no monotone delivery effect and no delivery-only bypass.
+      (b) offline: 262 prevented attacker-tool calls replayed; 34 instances (11 unique
+      free-text templates) cross τ after echoing the trusted request (median ΔS +0.176),
+      with no rule veto; the lenient all-parameter upper bound crosses 180/262. This is a
+      call-level counterfactual, not end-to-end ASR. Artifacts:
+      `scripts/e26_threshold_probe.py`, `results/phase7/e26_adaptive/`.
 
 ### P1 — acceptance-makers (staff the starred ones first: specialist effort, not runner time)
 
@@ -290,10 +290,14 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       `07_phase7_pilots.md#e30`. Highest leverage-per-line item in this phase.
       → COMPLETE (negative practical result): α=0.1 calibrates δ=0.75 and interval [0,1],
       covering 100% of 204 held-out request groups but providing no useful escalation width.
-- [ ] **E28 parser ablation (Upgrade B).** Goal: answer "why not just heuristics." How: one
+- [x] **E28 parser ablation (Upgrade B).** Goal: answer "why not just heuristics." How: one
       InjecAgent 200-case subset, B1 + ours with the LLM parser swapped for the heuristic
       fallback → ASR/valid-rate deltas. Done when: delta table in `07_phase7_pilots.md#e28`.
       Est. ~$1–2.
+      → COMPLETE (negative/underpowered): B1 17.9% (30/168); ours+heuristic 0.0% (0/169,
+      29 gate-blocked calls); ours+LLM 0.0% (0/171, 32 blocked). Both gated conditions block
+      every attacker call; a 200-case slice cannot resolve the full-run 0.7% ASR. The LLM
+      parser is retained for contract quality and utility, not an ASR advantage here.
 - [x] **E29 embedding swap + τ transfer (Upgrade B, offline, free).** Goal: show τ is a
       procedure, not a magic number. How: re-score cached traces with one stronger embedding
       (E5/MPNet) + report τ tuned on base tested on enhanced (and vice versa). Done when:
@@ -315,7 +319,7 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       28 calls semantic-only permits; score fusion allows 332 calls semantic-only prevents.
       Available tool-role labels include both user and attacker proxies, so these flips are not
       presented as false positives or prevented attacks. Headline Phase 5 results are unchanged.
-- [ ] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
+- [~] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
       pinned `pip install` + `results/` manifest check (`scripts/run_phase5.py --check`
       already exists — wire it into the container entrypoint). Done when: clean-machine
       `docker build && docker run pytest -q` passes and the repro commands in
@@ -323,7 +327,9 @@ E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supe
       → IN PROGRESS: image definition, CPU lock, entrypoint, and 94-file Phase 5 hash manifest
       are implemented; local tests and integrity checks pass. Docker engine startup failed on
       this host, so the required clean-container build and run remain unverified.
-- [ ] Write up E23–E31 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
+- [x] Write up E23–E31 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
+      → COMPLETE: all experiment sections written, including E25 boundary condition, E26
+      live/offline adaptive arms, and E28 negative/underpowered parser ablation.
 
 **Explicitly deferred to future work (Ch 6 material, not pilots):** live-server MCPTox slice
 (static-snapshot limitation stands, blueprint Sec 8) · 20-case multi-turn drift pilot
