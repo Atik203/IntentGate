@@ -61,7 +61,8 @@
 - **Benchmarks only:** AgentDojo, InjecAgent, MCPTox, ASB all document high ASR (50–84%) and propose no defense. They are evaluation substrates, not solutions.
 - **Single-vector filters:** Prompt-level defenses (spotlighting, delimiters, tool filters in AgentDojo) reduce but never eliminate ASR and are bypassed by adaptive attacks (Zhan et al., NAACL Findings 2025: >85% ASR against several defenses when attacker knows the defense).
 - **Hand-authored safety specs:** TrustAgent (Findings of EMNLP 2024) uses a hand-authored Agent Constitution + GPT-4-emulated tools; not live, not scalable to new domains, no MCPTox/InjecAgent evaluation.
-- **Formal contract gating (ToolGate, arXiv 2601.04688):** The closest system. Provides Hoare-style pre/postconditions per tool, formally checks world-state before/after execution. But (a) requires manual contract per tool (deployment cost the authors do not remove), (b) evaluated only on ToolBench/MCP-Universe task completion, never on InjecAgent or MCPTox, (c) code is minimal (2 commits, no README at last check), and (d) not peer-reviewed at time of writing. This is our High-threat baseline — and our primary differentiation.
+- **Formal contract gating (ToolGate, arXiv 2601.04688):** Provides Hoare-style pre/postconditions per tool and checks world-state before/after execution. It remains the formal High-threat baseline, but its evaluation differs from InjecAgent and MCPTox.
+- **Symbolic privilege gating (Progent, arXiv 2504.11703v3):** Automatically generates an initial privilege policy from the user task, checks calls with symbolic rules, and uses SMT checks plus approval for policy expansion. It is the closest request-derived neighbor; the documented comparison is positional because its released adapters and benchmarks differ from this protocol.
 - **Heavyweight structural defenses:** StruQ (USENIX Security 2025) separates instruction/data channels via fine-tuning; CaMeL (arXiv 2025) separates planner/executor with capabilities for provable security on AgentDojo. Both require model-level changes, heavy deployment cost vs. our middleware wrapper claim. MELON (arXiv 2025) needs masked re-execution (2× inference cost).
 
 **Why a middleware gate instead of fine-tuning or prompt hardening.** The gate is the only placement that is (a) attack-vector agnostic — injection, poisoning, and drift all must eventually emit a tool call, (b) model-agnostic — no fine-tuning, works as wrapper around any ReAct/MCP agent, (c) auditable — allow/block/escalate + score is logged per call. Prompt hardening is in-band and therefore attacker-controllable; fine-tuning is out-of-scope for a 4-month thesis and couples the defense to one backbone.
@@ -269,7 +270,7 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 - **Responsibilities:** (1) embed proposed call, (2) compute semantic similarity vs. contract, (3) evaluate rule engine, (4) fuse to score S, (5) threshold to decision, (6) log trace, (7) enforce (block = no execution, return error observation; escalate = user prompt in interactive mode, auto-block in benchmark mode with flag).
 - **Input:** `intent_contract + contract_embedding` (frozen) and `proposed tool_call` (name, params, source).
 - **Output:** `{decision: allow|block|escalate, score S, risk R, latency_ms, rule_triggered: bool}`.
-- **Scoring (formal):** `S_sem = cosine(embed(contract_text), embed(tool_call_text))`, `S_rule = 1 if passes all hard constraints else 0` (or graded). `S = α·S_sem + (1-α)·S_rule` with α=0.7 default (swept in ablation), but hard veto: if `S_rule == 0` on critical constraint (e.g., financial when disallowed) → `S = 0` regardless of semantic. Decision: `S ≥ τ → allow`, `τ-δ ≤ S < τ → escalate`, `S < τ → block`. τ default 0.6, δ 0.1 — both swept and reported.
+- **Scoring (formal):** `S_sem = (cosine(embed(contract_text), embed(tool_call_text)) + 1) / 2`, `S_rule = 1 if passes all hard constraints else 0` (or graded). `S = α·S_sem + (1-α)·S_rule` with α=0.7 default (swept in ablation), but hard veto: if `S_rule == 0` on critical constraint (e.g., financial when disallowed) → `S = 0` regardless of semantic. Decision: `S ≥ τ → allow`, `τ-δ ≤ S < τ → escalate`, `S < τ → block`. τ default 0.6, δ 0.1 — both swept and reported.
 - **Communication:** Synchronous middleware — agent `tool_call` → gate → (allow → executor) or (block/escalate → agent observation). No async.
 - **Dependencies:** Requires parser output; embedding model loaded.
 - **Failure cases:** (a) embedding model returns NaN; (b) rule engine missing contract field; (c) escalate in non-interactive benchmark run.
@@ -433,6 +434,11 @@ Baseline B2 (ToolGate reimpl) replaces the scorer with:
 > p95, setup cost (contracts authored), utility retention. B1 = unprotected ReAct, B2 = ToolGate
 > reimplementation, Ours = intent gate — identical prompts for all three. τ/δ sweeps are reported
 > as a Pareto curve, never a single tuned point.
+
+The method formalism in `docs/thesis/chapter3_method.md` states threshold selection as empirical
+ASR minimization subject to a clean-call blocking budget and records the trust and session
+assumptions. The Neyman-Pearson and reference-monitor connections frame the design; they do not
+establish optimality, a global security guarantee, or a multi-turn guarantee.
 
 **Evaluation pipeline (end-to-end):**
 

@@ -79,7 +79,7 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
 - **Docs hub:** [`docs/README.md`](docs/README.md) · **Team guide (start here):** [`docs/team_guide.md`](docs/team_guide.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E17, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
 
-All 5 papers verified via full arXiv html (not snippets). BibTeX: [`docs/references.bib`](docs/references.bib).
+All 6 reviewed papers were checked against their primary full text. BibTeX: [`docs/references.bib`](docs/references.bib).
 
 ---
 
@@ -87,10 +87,10 @@ All 5 papers verified via full arXiv html (not snippets). BibTeX: [`docs/referen
 
 1. **Title:** Intent-Consistency Verification at the Action Gate: A Request-Derived Alternative to Formal Contract Gating
 2. **Domain:** LLM Security · Agentic AI · AI Safety
-3. **Motivation:** Shift from chat to action via MCP; OWASP excessive agency Top 10; formal gating exists but is manual and non-adversarial
+3. **Motivation:** Shift from chat to action via MCP; OWASP excessive agency Top 10; existing formal and symbolic gates lack a matched InjecAgent/MCPTox comparison
 4. **Problem:** Injection, tool poisoning, and drift all converge to one observable — an agent executes an action the user never intended
 5. **Gap:** Single-vector filters vs. manual Hoare contracts (ToolGate, never on InjecAgent/MCPTox); no auto-derived, cross-vector gate
-6. **Solution:** Parse user request → structured intent contract (goals, tool categories, data scopes, side-effect limits) → middleware gate scores every proposed `tool_call(name,params)` via `S = α·cosine(embed(contract), embed(call)) + (1-α)·rule_compliance` with veto; decision `allow / block / escalate` via threshold `τ` (sweep)
+6. **Solution:** Parse user request → structured intent contract (goals, tool categories, data scopes, side-effect limits) → middleware gate scores every proposed `tool_call(name,params)` via `S = α·((cosine(embed(contract), embed(call))+1)/2) + (1-α)·rule_compliance` with veto; decision `allow / block / escalate` via threshold `τ` (sweep)
 7. **Novelty:** Zero per-tool authoring, vector-agnostic (injection + poisoning), first adversarial test of contract-style gating
 8. **Deliverables:** Pip-installable wrapper, ToolGate reimplementation (Appendix G), evaluation report (ASR/FPR/latency/setup-cost), workshop/Findings paper draft
 9. **Evaluation:** B1 unprotected ReAct vs B2 ToolGate vs Ours on InjecAgent (1,054) + MCPTox (1,312, 45 servers) — metrics ASR, FPR, escalation rate, latency p95, setup cost (0 vs manual count); stretch multi-turn drift pilot (20 AgentDojo cases)
