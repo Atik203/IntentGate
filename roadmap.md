@@ -373,7 +373,7 @@ evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings
 - [x] DeepSeek boundary clarification
 - [x] Paper integration (novelty + echo + DeepSeek, strict 6 pages)
 - [x] Rebuild anonymous + author PDFs (strict 6 pages)
-- [~] Final QA, tests, CI, promote
+- [x] Final QA, tests, CI, promote
 
 ---
 
