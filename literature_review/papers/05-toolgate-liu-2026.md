@@ -8,6 +8,10 @@
 
 > *Verified via full paper text (arXiv html 2601.04688v1, 52k chars + Appendix G formal derivations).*
 
+> **Historical v1 review (2026-08-24):** Its original novelty and future-work language is superseded
+> by the Phase 8 literature audit. Do not reuse claims that ToolGate is the only action gate, that
+> related work has no request-derived policy, or that this project is the first adversarial test.
+
 Paper Title:
 ToolGate: Contract-Grounded and Verified Tool Execution for LLMs
 
@@ -22,7 +26,7 @@ Summary:
 ToolGate is a forward-execution framework that replaces natural-language reasoning about *when to call tools* with formal Hoare-style contracts. It maintains an explicit typed symbolic state *S = {(k,v,type)}* representing trusted world information, and formalizes each tool as `{P} T {Q}` where precondition *P* gates invocation (is *S ⊨ P*?) and postcondition *Q* gates commitment (does tool result *r* satisfy *Q* and type-correctly update *S* via deterministic update operator?). A retrieval-reranking front end (Qwen3-embedding-0.6B + Qwen3-Reranker-0.6B, Top-k) shrinks thousands of tools to candidates, then contracts filter candidates to a logically valid policy (renormalized) and verification gates state updates — unverified results are discarded, not propagated. Trajectory-level safety is proved (if all contracts sound and *S₀ ⊨ Inv*, every reachable trajectory is safe, Eq 21). Evaluated on ToolBench (16,464 APIs, 49 categories, G1/G2/G3) and MCP-Universe (231 tasks on 11 real MCP servers, 6 domains with Format/Static/Dynamic evaluators), ToolGate is best across 4 LLM backbones (Qwen3-235B, DeepSeek V3.2, GPT-5.2, Gemini 3 Pro) — e.g., GPT-5.2 G1 85.5/83.5 (Pass/Win) vs ToolChain* 82.8/80, MCP-Universe avg 57.0 vs 51.5 — with more concise trajectories. Ablations show Hoare is the driver: w/o Hoare 37.6% MCP-Avg vs DFSDT 38.3% (worse), removing pre-check −10.8% vs post-check −4.5%; fine-grained rejection is 29.4% (17.6% pre: 8.4% hallucination, 5.1% schema, 4.1% dependency; 11.8% post: 6.3% empty, 3.7% semantic, 1.8% state). The paper does not evaluate on any adversarial benchmark (InjecAgent, MCPTox, AgentDojo, ASB) and requires hand-authored logical predicates per tool.
 
 Relevant to Our Idea:
-ToolGate is our **closest system and High-threat baseline (B2)** — the only published gate that, like ours, sits *between the agent's decision and tool execution* and enforces a policy before state is updated. It is the direct precedent we reimplement per Appendix G as our comparison gate. The differentiation is sharp and quantitative: same placement, opposite policy source — ToolGate's policy is *hand-authored* Hoare contracts per tool with symbolic world-state (setup cost the paper does not measure), ours is *automatically derived* from the user's own request as a structured intent contract (setup cost 0). And opposite evaluation: ToolGate is evaluated only on task completion (ToolBench/MCP-Universe Pass/Win), never on adversarial injection or poisoning; we will be the first to report contract-style gating ASR on InjecAgent (1,054) and MCPTox (1,312) — the exact benchmarks ToolGate never tested. Their rejection taxonomy (29.4% total, pre vs. post) and efficiency claim (more concise trajectories) are the figures we will directly compare against (our per-call latency vs. their retrieval+verification overhead).
+ToolGate is a **closest system and the B2 baseline** — a contract-grounded gate that sits before tool execution. It is the direct precedent reimplemented per Appendix G. Its use of hand-authored Hoare contracts and its reported evaluation differ from the tested IntentGate v1 setup, but those differences alone do not establish a novel contribution. The earlier statement that this project would be the first to test contract-style gating on InjecAgent and MCPTox is superseded: the journal study must update the comparison against task-derived and runtime authorization systems, then describe only the measured benchmark coverage and distinctions.
 
 Gap / Limitation Noted in Paper:
 Per §6/Limitations: scope is text/structured only (no multimodal, no long-chain multi-step collaborative tasks); static evaluation that does not capture live API dynamics (latency, rate limits, fluctuating data); metrics are quantitative only (need qualitative reasoning assessment); prompt-based bias may not generalize across LLMs. From our perspective, the unaddressed gaps are the critical ones: (1) no adversarial evaluation at all — vulnerability to injection/poisoning is never measured, (2) no setup-cost metric — hand-authoring cost per tool is not quantified, and (3) no FPR/latency reporting at the gate level — only aggregate Pass/Win. Appendix G's formal derivations are provided but the repository at verification time is minimal (2 commits, no README) — fidelity of any reimplementation must be validated on ToolBench subset before adversarial runs, which we explicitly plan in Weeks 3–4.
@@ -115,18 +119,24 @@ Per §6/Limitations: (1) text/structured only — no multimodal/long-chain colla
 
 **Overlap with C1 (gate mechanism):** High — same placement, same concept of gating execution with a policy. But mechanism is opposite: formal vs. intent-derived, manual vs. automatic, stateful vs. stateless, capability vs. security. No direct duplication; we reimplement ToolGate as B2 to make the comparison head-to-head.
 
-**Overlap with C2 (evaluation):** None — ToolGate is task-completion only. Our evaluation is the *first* adversarial test of contract-style gating, which is itself a contribution.
+**Historical v1 overlap note:** The v1 study added adversarial benchmark results for its ToolGate
+reimplementation. That finding is bounded to this implementation and protocol; it does not establish
+that IntentGate is the first adversarial test of action gating or a current journal contribution.
 
-### 6. Our Positioning Strategy
+### 6. Historical v1 Positioning Notes (superseded for journal work)
+
+> The statements in this section were drafted before the Phase 8 related-work audit. Do not reuse
+> claims of being first or of a unique gap. The journal positioning must be based on the updated
+> matrix in `literature_review/index.md` and the feature-level comparison required by `roadmap.md`.
 
 | Role | Detail |
 |---|---|
 | **In our paper** | Closest (System) — High threat to novelty; baseline B2 (ToolGate reimplementation per Appendix G) |
-| **How we cite** | As "the first forward-execution, Hoare-contract tool gate (typed symbolic state, pre/post verification, 29.4% rejection, trajectory safety theorem; best on ToolBench/MCP-Universe but evaluated only on task completion, never on adversarial injection/poisoning; requires hand-authored predicates per tool)" — we compare auto intent vs. manual contracts on the benchmarks it never tested |
-| **Relationship** | Direct competitor on mechanism (gate) but not on evaluation — we do the cross-paper experiment the ToolGate paper explicitly leaves open |
+| **How we cite** | Describe ToolGate's verified contract mechanism, reported evaluation, and assumptions; avoid unverified exclusivity or novelty language |
+| **Relationship** | One of several close systems. The v1 B2 implementation is a measured baseline; its comparisons do not substitute for a Phase 8 matched study |
 
 **Pre-emptive rebuttal paragraph** (if reviewer asks "how is this different from ToolGate?"):
-> ToolGate is the closest published gate and our direct baseline. Both sit between the agent's decision and tool execution and both enforce a policy before state is corrupted. The difference is policy source and evaluation, not placement. ToolGate's policy is a set of hand-authored Hoare contracts `{P}T{Q}` over a typed symbolic world-state that must be maintained and updated — formally verifiable but requiring manual predicates per tool and evaluated only on task completion (ToolBench Pass/Win, MCP-Universe Success). Our policy is a structured intent contract automatically derived from the user's own request (no per-tool authoring) and checked per call via embedding similarity plus hard side-effect rules — informal but zero-setup, stateless, and evaluated adversarially on the injection and poisoning benchmarks ToolGate never tested (InjecAgent 1,054, MCPTox 1,312). We reimplement ToolGate per its Appendix G and report both gates head-to-head on those benchmarks, including the setup-cost (contracts per tool: manual vs. 0) and per-call latency that ToolGate's paper does not measure. The two approaches are not mutually exclusive: intent gating could serve as the zero-setup front gate, with formal contracts added later for persistent state invariants.
+> Historical v1 comparison: ToolGate uses Hoare-style contracts over symbolic state; IntentGate v1 uses a request-derived contract scored per call. The frozen v1 study reports its ToolGate reimplementation results and limitations on InjecAgent and MCPTox. These implementation and benchmark differences describe that experiment, but do not establish the journal contribution. Phase 8 must compare ToolGate and other close systems under a shared threat model where faithful implementations and compatible artifacts permit.
 
 ### 7. Code & Reproducibility
 

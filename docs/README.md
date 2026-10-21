@@ -9,7 +9,7 @@
 | Document | What it is | When to read it |
 |---|---|---|
 | [`team_guide.md`](team_guide.md) | **Start here** — beginner-friendly guide: project in plain words, glossary, what has been done with results, where we are going, what you can do | First day; when confused about the big picture |
-| [`blueprint.md`](blueprint.md) | Design source of truth (Sec 0–18): problem, pipeline, scorer, B2 baseline, datasets, evaluation plan, risks, roadmap, supervisor/team explanations, Reviewer #2 critique | Before touching design decisions |
+| [`blueprint.md`](blueprint.md) | Design source of truth (Sec 0–18: completed v1; Sec 19: provisional journal study) | Before touching design decisions |
 | [`setup.md`](setup.md) | Install & verify guide (venv, deps, `.env`, tests, benchmark clones, harness commands) | First day / fresh machine |
 | [`prompt.md`](prompt.md) | Voice guide for paper/thesis prose: simple student register, anti-AI pattern rules, editing vs generation modes | Before writing or polishing any paper text |
 | [`writing-guideline.md`](writing-guideline.md) | Section-by-section structure and content rules for the paper, adapted from the supervisor's guide | Before drafting or rewriting paper sections |
@@ -27,7 +27,7 @@ Related roots outside `docs/`:
 - [`CHANGELOG.md`](../CHANGELOG.md) — change log (`[Unreleased]` for the current PR window).
 - [`AGENTS.md`](../AGENTS.md) — conventions for AI coding agents working in this repo.
 
-## Status snapshot (2026-10-13)
+## Status snapshot (2026-10-22)
 
 | Gate | Definition | Status |
 |---|---|---|
@@ -49,6 +49,11 @@ Frozen headline (Gate 3): ours takes InjecAgent ASR-valid **354 → 13 cases (19
 attack-influenced **279 → 144**, B2 statistically indistinguishable from unprotected, p95 ≤ 20 ms,
 billed $9.64. E11–E17 are final; E1–E10 were the development slices that motivated the design.
 Phase 6 (E18–E22) is preliminary; it never rewrites E11–E17.
+
+Phases 1–7 are complete. The ICEEICT conference manuscript completed its final pass on 2026-10-20.
+Phase 8 is planned journal-strengthening research; its questions and candidate contributions remain
+provisional pending the related-work and protocol gates. See [`../roadmap.md`](../roadmap.md) and
+[`blueprint.md` Section 19](blueprint.md#section-19--journal-extension-research-questions-and-contribution-boundary).
 
 ## Conventions
 
