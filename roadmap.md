@@ -1,6 +1,6 @@
 # Roadmap — Intent-Consistency Gate Thesis
 
-> Tracker for the thesis + paper. Single source of truth for progress: `docs/blueprint.md` (design), `roadmap.md` (status).
+> Tracker for the completed v1 study and planned journal extension. Single source of truth for progress: `docs/blueprint.md` (design), `roadmap.md` (status).
 > Legend: `[x]` done · `[ ]` todo · `[~]` in progress · `Gate N` = blueprint Sec 12/13 milestone.
 > Update this file in the same commit that completes a task.
 
@@ -31,47 +31,10 @@ Phase 5 matrix is not to be overwritten by future journal studies.
 
 **Interpretation:** these phases establish a conference-paper prototype and a reproducible baseline.
 They do not, by themselves, establish journal-level novelty, robust end-to-end safety, or broad
-external validity. The next study must address the open risks below before a journal submission.
+external validity. The ICEEICT manuscript completed its final pass on 2026-10-20; the active work is
+the journal-strengthening study.
 
-## Phase 8 — Thesis + Paper Writing (merged; old Phase 7 + old Phase 8)
-
-**Goal: finish the thesis and prepare the ICEEICT conference paper from the frozen evidence and
-reported pilots. A substantially extended journal study is tracked separately in Phase 9.**
-
-### Thesis
-
-- [ ] Ch 1: Intro & motivation (problem, OWASP excessive agency, why action gate)
-- [ ] Ch 2: Related work — answer Reviewer #2 Q#1 in first paragraph ("not just embeddings + if-statements")
-- [ ] Ch 3: Method — intent parser, contract schema, scorer + veto, gate middleware, escalate band
-- [ ] Ch 4: ToolGate B2 baseline (Appendix G translation, coverage %, fidelity notes)
-- [ ] Ch 5: Evaluation — metrics, baselines, ablations, per-category, stats, error taxonomy
-- [ ] Ch 6: Limitations & future work (adaptive attacks, code-exec scope, live-vs-snapshot)
-- [ ] Reproducibility appendix: hashes, configs, contract examples, JSONL sample
-- [ ] Supervisor review rounds; final defence
-
-### Paper (ICEEICT conference submission)
-
-- [x] Outline (2-column short paper) → COMPLETE: `IEEE-conference/IEEE-conference.tex` drafted (abstract, intro, related work, method, ToolGate baseline, evaluation, results, limitations, conclusion, LLM-usage acknowledgment); double-blind anonymized; 5 pages, compiles via pdflatex+bibtex.
-- [x] Related work: ToolGate "same gate, opposite policy source" framing (blueprint Sec 18) → COMPLETE: Progent (shi2025progent) added to references + cited.
-- [x] Results section: ASR/FPR/latency/setup-cost tables + Pareto + error taxonomy → COMPLETE: Table I headline results (InjecAgent 19.0%→0.7%, MCPTox 20.7%→10.7%, McNemar p=1.3e-33 / p=1.25e-07), setup cost 0 vs 145 contracts, p95 16–20 ms, error taxonomy (13 residuals), E31 contract-vs-semantic flips.
-- [x] Writing guides wired: `docs/prompt.md` + `docs/writing-guideline.md` adapted for the conference template (journal-only sections noted) and linked from `AGENTS.md`.
-- [x] ICEEICT final pass to submission quality (≤6 pages incl. references, 30 verified refs, vector figures, cell-grid tables, no first-person pronouns): **DONE 2026-10-18** (steps A–D + expert-review pass): 6 pages, 254 KB, Type 1 fonts only, double-blind; title covers injection + poisoning. Remaining: co-author/supervisor info (placeholders in) + CMT upload.
-- [ ] Reviewer #2 checklist (blueprint Sec 18) cleared item by item
-- [ ] Reproducibility package: pip wrapper + contracts + logs + one-slide "ToolGate vs Ours" table
-- [ ] Journal extension: complete the evidence and manuscript gates in Phase 9; verify each target journal's current quartile, scope, and prior-publication policy before selecting it.
-
-### Paper final reviewer-risk fixes (2026-10-20)
-
-- [x] Novelty paragraph vs ClawGuard / Task Shield / Progent / ToolGate
-- [x] Offline adaptive-echo guard + evaluation
-- [x] DeepSeek boundary clarification
-- [x] Paper integration (novelty + echo + DeepSeek, strict 6 pages)
-- [x] Rebuild anonymous + author PDFs (strict 6 pages)
-- [x] Final QA, tests, CI, promote
-
----
-
-## Phase 9 — Journal-strengthening study (PLANNED; start after conference evidence is frozen)
+## Phase 8 — Journal-strengthening study (PLANNED; conference manuscript completed)
 
 **Goal:** produce a substantially extended, independently reproducible study suitable for submission
 to a reputable Q1 journal in the best-fitting category. “80%+” is an internal evidence-readiness
@@ -81,31 +44,62 @@ current Scopus/SJR and JCR category quartiles, scope, article type, fees, and po
 conference paper.
 
 **Study rule:** keep the published/frozen Phase 5 and Phase 7 artifacts immutable. Assign new run IDs
-(E32 onward), save raw outputs and config/hash manifests under `results/phase9/`, and write each
+(E32 onward), save raw outputs and config/hash manifests under `results/phase8/`, and write each
 completed experiment using the `docs/experiments/` template. Run only against benchmark fixtures and
 sandboxed/simulated tools; do not send live email, modify real files, or perform external side effects.
 
-### 9.0 — Decide the journal claim and novelty boundary (Weeks 1–2; before new implementation)
+**Provisional research questions (freeze after the related-work audit):**
+
+- **RQ1 — Safety:** How do frozen request-derived policies compare with IntentGate v1, no gate,
+  prompt-only defense, and faithful action-gate baselines on task-level unauthorized side effects
+  across injection, tool poisoning, and multi-step attacks?
+- **RQ2 — Utility:** How do request ambiguity, benign task complexity, and abstention/escalation
+  affect end-to-end safe task completion and false intervention rates?
+- **RQ3 — Policy lifecycle:** Under matched tasks, how do immutable, user-confirmed, and dynamically
+  updated policies trade off safety and utility under adaptive attacks?
+- **RQ4 — Generalization and cost:** How stable are the effects across model families, datasets, and
+  tool schemas after accounting for refusal rates, latency, and inference cost?
+
+**Candidate contributions (not claims until verified):** (C1) a controlled task-level comparison of
+policy representation and update lifecycle under a common threat model; (C2) an argument-aware
+authorization prototype evaluated against frozen v1, if the related-work audit identifies a specific
+defensible difference; and (C3) a reproducible evaluation package with adjudicated labels, paired
+traces, and full cost/latency reporting. Request-derived policies and argument constraints already
+appear in related systems, so the project must not claim to invent either one.
+
+**Strengthening additions A1–A7 (2026-10-22 expert review):** seven additions harden the study
+toward the ~80% evidence-readiness target at a mid-tier Q1 venue. Items are tagged `[A#]` below and
+priced in the model-strategy table at the end of this phase.
+
+- **A1** — Pre-registered fallback framing if the RQ3 lifecycle comparison is null.
+- **A2** — Named, released benchmark artifact (adjudicated labels + paired traces, GitHub + Zenodo DOI).
+- **A3** — Formal security property plus contract-completeness measurement.
+- **A4** — Optimization-based adaptive attacker (LLM hill-climb) with a local-first inner loop.
+- **A5** — Explicit CaMeL handling (faithful subset arm or principled non-comparability note).
+- **A6** — Venue selection bound as a hard gate before any confirmatory run.
+- **A7** — Presentation package (threat-model figure, one results figure per RQ, artifact DOI on page 1).
+
+### 8.0 — Decide the journal claim and novelty boundary (Weeks 1–2; before new implementation)
 
 - [ ] Build a dated related-work matrix around the closest request-derived action authorization,
   prompt-injection defense, tool-schema/contract, and agent-monitoring systems (including ClawGuard,
-  AgentSpec, Task Shield, Progent, ToolGate/CaMeL, and AgentDojo). Record each system’s trusted input,
+  CaMeL, AgentSpec, Task Shield, Progent, ToolGate, and AgentDojo) [A5]. Record each system's trusted input,
   policy representation, decision point, argument/resource awareness, threat model, datasets, and
   evaluation. Verify all sources and versions; do not treat an arXiv label or a different wording as
   novelty by itself.
-- [ ] Ask whether the proposed contribution remains distinct after the comparison. Prefer a narrow,
-  testable claim: a model-agnostic, request-derived action authorization monitor with typed operation,
-  resource, argument/destination, data-scope, and side-effect constraints, plus a measured abstain /
-  escalation policy. If this distinction cannot be demonstrated, revise the contribution before
-  expanding the implementation.
-- [ ] Select 1–2 realistic journal candidates only after verifying their current quartiles by the
-  intended subject category and publication policies. Record the evidence and article limits in the
-  journal experiment plan. The ICEEICT paper alone is not the journal contribution: document the
-  substantial new method, datasets, analyses, and results planned for the extension.
+- [ ] Decide whether a method contribution survives comparison with systems that already derive
+  task-specific policies or check structured arguments. Prefer the lifecycle/comparative study in the
+  RQs above unless the review demonstrates a concrete technical distinction. Do not treat a new schema
+  or field list as novelty by itself.
+- [ ] Select and bind 1–2 realistic journal candidates as a hard gate [A6]: no confirmatory run
+  starts before this item is `[x]`. Verify current quartiles by the intended subject category,
+  scope, article type, fees, and publication policies; record the evidence and article limits in
+  the journal experiment plan. The ICEEICT paper alone is not the journal contribution: document
+  the substantial new method, datasets, analyses, and results planned for the extension.
 - **Exit gate:** supervisor/team approves a one-page contribution statement, closest-work table, and
   falsifiable research questions before coding or running the confirmatory test set.
 
-### 9.1 — Lock the protocol, labels, and threat model (Weeks 2–4)
+### 8.1 — Lock the protocol, labels, and threat model (Weeks 2–4)
 
 - [ ] Specify attacker capabilities and exclusions: malicious user text, retrieved/tool-returned
   content, poisoned tool descriptions, benign echoed text, multi-step requests, and proposed
@@ -122,10 +116,13 @@ sandboxed/simulated tools; do not send live email, modify real files, or perform
 - [ ] Pre-register hypotheses, primary/secondary outcomes, split rules, exclusion rules, seeds,
   planned comparisons, and a power/sample-size analysis based on independent task groups and pilot
   paired discordance. Split by task/request or attack template to prevent near-duplicate leakage.
+- [ ] Pre-register the fallback framing [A1]: if the RQ3 lifecycle comparison is null on the
+  confirmatory split, the headline pivots to the measurement study + formal boundary + released
+  benchmark artifact. Freeze this decision before unblinding; never choose the framing post hoc.
 - **Exit gate:** protocol, annotation guide, schema, and analysis plan are versioned before any
   confirmatory test run; threshold selection is confined to development data.
 
-### 9.2 — Implement and verify the stronger authorization method (Weeks 4–8)
+### 8.2 — Implement and verify the stronger authorization method (Weeks 4–8)
 
 - [ ] Audit the paper against the running code first. Resolve and document the score normalization
   and equation; align names and behavior for contract fields, hard vetoes, allow/block/escalate,
@@ -141,10 +138,14 @@ sandboxed/simulated tools; do not send live email, modify real files, or perform
   and escalation. Test deterministic decisions, malformed inputs, ordering, trace completeness, and
   the no-bypass invariant. Do not add provenance or other mechanisms unless the novelty review and
   threat model show they are needed for the central claim.
+- [ ] State and verify the formal property [A3]: under the documented observation boundary, any
+  unauthorized consequential action requires either contract incompleteness or contract-internal
+  ambiguity. Measure contract completeness and ambiguity on the labeled development data so the
+  property has an empirical counterpart, not only a statement.
 - **Exit gate:** security invariants and existing regression suite pass; blinded development results
   show the method has a plausible safety/utility operating point before confirmatory evaluation.
 
-### 9.3 — Build a fair and useful evaluation matrix (Weeks 7–11)
+### 8.3 — Build a fair and useful evaluation matrix (Weeks 7–11)
 
 - [ ] Retain pinned InjecAgent and MCPTox comparisons, and add a dynamic/multi-turn benchmark such
   as AgentDojo plus at most one additional compatible tool/MCP attack suite after checking license,
@@ -164,7 +165,7 @@ sandboxed/simulated tools; do not send live email, modify real files, or perform
   effectiveness. Pin exact model IDs and API dates/versions in every run.
 - **Exit gate:** matrix and comparison fairness reviewed before the final test split is unlocked.
 
-### 9.4 — Measure end-to-end safety, utility, and cost (Weeks 10–16)
+### 8.4 — Measure end-to-end safety, utility, and cost (Weeks 10–16)
 
 - [ ] Make task-level unauthorized side effect / attack success the primary outcome. Report both
   strict attack success and attack-influenced/tool-call rates where definitions differ, with
@@ -174,8 +175,12 @@ sandboxed/simulated tools; do not send live email, modify real files, or perform
   model. Call-level “allowed” rate is not a substitute for task utility.
 - [ ] Evaluate adaptive attackers against the documented observation boundary: intent mimicry,
   argument substitution, destination changes, multi-turn drift, echoing trusted wording, and
-  threshold-aware probing. Include both offline replay and end-to-end runs; measure the attacker’s
+  threshold-aware probing. Include both offline replay and end-to-end runs; measure the attacker's
   success and the benign cost of each defense.
+- [ ] Add an optimization-based adaptive attacker [A4]: an LLM-in-the-loop hill-climb rewrites
+  free-text arguments to push $S$ above $\tau$ and past the v2 typed checks. The inner loop runs
+  against the local CPU scorer only ($0); top-k surviving candidates get end-to-end verification.
+  Report offline and end-to-end results, the attacker's success, and each defense's benign cost.
 - [ ] Measure p50/p95/p99 gate latency, end-to-end task latency, parser/agent token and monetary cost,
   throughput, memory/hardware, and setup effort. Separate model inference cost from gate overhead.
 - [ ] Use paired confidence intervals clustered by independent task/request groups, appropriate paired
@@ -185,12 +190,15 @@ sandboxed/simulated tools; do not send live email, modify real files, or perform
   arms, without unacceptable benign task-completion loss. If it is not, narrow the claim and report
   the limitation rather than tuning on the test set.
 
-### 9.5 — Reproducibility and artifact review (Weeks 15–19)
+### 8.5 — Reproducibility and artifact review (Weeks 15–19)
 
 - [ ] Publish a clean artifact: pinned benchmark versions, schema/policy, configs, scripts, anonymized
   traces, metric definitions, hashes, environment/hardware details, and a one-command offline
   reproduction path. Ensure benchmark licenses and data handling permit redistribution; otherwise
   document bootstrap instructions and provide derived artifacts only.
+- [ ] Package the adjudicated labels + paired traces as a named, citable benchmark artifact [A2]:
+  GitHub release + Zenodo DOI, license-checked, with metric definitions and the one-command
+  reproduction path. Present it as a first-class contribution, not an appendix.
 - [ ] Add a clean-environment artifact check and independently reproduce a subset of the primary
   tables from saved traces. Record discrepancies and fix the artifact before manuscript submission.
 - [ ] Log provider, endpoint type, exact model ID/revision, parameters, API date, retries/refusals,
@@ -199,12 +207,14 @@ sandboxed/simulated tools; do not send live email, modify real files, or perform
 - **Exit gate:** a second team member can reproduce the principal tables without access to the
   original author’s machine or secrets.
 
-### 9.6 — Write and submit the journal extension (Weeks 18–24)
+### 8.6 — Write and submit the journal extension (Weeks 18–24)
 
 - [ ] Write from the approved journal outline using `docs/prompt.md` and
   `docs/writing-guideline.md`. Include a clear threat model, formal policy/method, closest-work
   comparison, full protocol, task-level results, uncertainty, error analysis, limitations, ethics,
   and artifact availability. Keep the conference and journal claims/results traceable.
+- [ ] Apply the presentation package [A7]: threat-model figure, one results figure per RQ, and the
+  artifact DOI on page 1; combine with the non-implementer review below.
 - [ ] Run a reviewer-style audit for claim/evidence alignment, paper/code consistency, baseline
   fairness, leakage, label validity, statistical reporting, reproducibility, and journal scope. Ask
   at least one reviewer who did not implement the gate to challenge the novelty and evaluation.
@@ -213,6 +223,40 @@ sandboxed/simulated tools; do not send live email, modify real files, or perform
   Re-check quartile and submission requirements on the submission date.
 - **Exit gate:** submit only when every primary claim has a reproducible artifact and the independent
   review has no unresolved validity or novelty blocker.
+
+### Model strategy and cost guardrails (local-first; 2026-10-22)
+
+Minimize API spend: local models wherever scientifically acceptable; the paid API only where frozen
+comparability or attack strength requires it. Estimated budget: **minimum ~$25, expected ~$40–60,
+worst case ~$100+** if the levers below are ignored. Cost basis: Gate 3 billed $9.64 for 30 jobs /
+20,736 cases (~$0.47 per 1k cases).
+
+| Arm | gpt-4o-mini (anchor, paid) | Qwen3.5:4b local (workhorse, $0) | DeepSeek (boundary, cheap) |
+|---|---|---|---|
+| B1 (no gate) | frozen Phase 5 reuse — no rerun | full rerun $0 | refusal/boundary doc only (~$2–5) |
+| v1 (IntentGate) | frozen reuse — no rerun | full rerun $0 | skip (refuses; E25) |
+| v2 (typed argument policy) | run (~$8–15) | run $0 | — |
+| Prompt-only defense | run (~$5–10) | run $0 | — |
+| ToolGate B2 | frozen reuse | rerun $0 | — |
+| Close competitor (Progent/ClawGuard-lite) | subset run (~$5–10) | subset $0 | — |
+| CaMeL [A5] | subset arm or non-comparability note ($0–10) | subset $0 | — |
+| Adaptive attacker inner loop [A4] | attacker = gpt-4o-mini (~$10–20) | attacker = local $0 (weaker; report as lower bound) | attacker variant (~$2–5) if the paid attacker refuses |
+| Adaptive end-to-end verification [A4] | top-k survivors only (~$5–15) | $0 | — |
+| End-to-end utility | subset (~$5–10) | full $0 | — |
+| Parser re-runs (contract completeness [A3]) | cached (~$1–3) | $0 | — |
+
+Rules:
+
+- Frozen B1/v1/B2 traces are reused, never rerun; new run IDs (E32+) only for new arms.
+- Offline-first: every probe/hill-climb iteration runs against the local CPU scorer; the paid API is
+  touched only by top-k end-to-end verification and anchor-family arms.
+- AgentDojo: 200–300-task subset on paid families; the full set only on local Qwen.
+- Qwen local is the replication/robustness workhorse ($0); headline numbers stay on the anchor
+  family, and 4B results are labeled as such in every table.
+- Per-arm budget caps are set before launch; billed tokens are logged in the run manifest. Kill
+  rule: if an arm exceeds its cap by >50%, stop and re-scope (subset) instead of continuing.
+- Existing cache discipline (AGENTS.md) applies: stable prefixes, pinned model IDs, batched
+  embeddings, parser once per session, temperature 0, repair-retry only on parse failure.
 
 ### Provider setup for controlled model comparisons
 
@@ -244,7 +288,7 @@ an implementation gap is found; this plan does not require new secrets or a real
 - [x] Setup cost: 0 contracts for ours vs. documented manual count for B2 on same tool set — 0 vs 145
 - [x] Latency overhead p95 < 100ms per tool call on CPU — 16–20 ms (E17)
 - [x] ToolGate B2 runs and is documented (coverage % reported) — InjecAgent 100%, MCPTox 8.1%/37.2% (E11/E15)
-- [ ] Deliverables: thesis + pip package + GitHub + evaluation report + paper draft
+- [x] Research deliverables: pip package + GitHub + frozen evaluation report + ICEEICT conference manuscript final pass (2026-10-20). Thesis completion is tracked separately; journal extension is Phase 8.
 
 ---
 
