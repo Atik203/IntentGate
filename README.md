@@ -4,9 +4,14 @@
 
 > LLM Security · Agentic AI · AI Safety — Thesis Project (2026) · [github.com/Atik203/IntentGate](https://github.com/Atik203/IntentGate)
 
-MCP-style agents now execute real actions (email, payments, code, files). Benchmarks show systemic hijack vulnerability — AgentDojo 629 cases, InjecAgent 1,054 cases (GPT-4 24%→47% ASR), MCPTox 1,312 cases on 45 live servers (up to 72.8% ASR, <3% refusal), ASB 84.3% mixed ASR — yet defenses are siloed or require hand-authored contracts (ToolGate, arXiv 2601.04688v1, never tested adversarially).
+> **Status (2026-10-22):** v1 implementation and Phases 1–7 evaluation are complete; the ICEEICT
+> manuscript completed its final pass on 2026-10-20. Phase 8 is a planned journal-strengthening
+> study. Its research questions and candidate contributions are provisional until the related-work
+> and protocol gates pass. See [`roadmap.md`](roadmap.md) and [blueprint Section 19](docs/blueprint.md#section-19--journal-extension-research-questions-and-contribution-boundary).
 
-This project builds a **model-agnostic middleware gate** that derives an _intent contract_ automatically from the user's original request and blocks/escalates any tool call inconsistent with that intent — evaluated head-to-head against an unprotected agent and a ToolGate reimplementation on the benchmarks ToolGate never tested.
+MCP-style agents execute real actions (email, payments, code, files). Request-derived policies and runtime action authorization now appear in several systems. Their policy representations, update lifecycles, threat models, and evaluations differ; the journal study will compare them under a shared protocol before making a novelty claim.
+
+IntentGate v1 is a **model-agnostic middleware gate** that derives an _intent contract_ from the user's original request and scores proposed tool calls before execution. Its completed evaluation compares an unprotected agent and a ToolGate reimplementation on pinned InjecAgent and MCPTox suites. The resulting evidence is bounded to those tasks, models, and implementations.
 
 ## Setup
 
@@ -73,9 +78,9 @@ Full rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security reports: [`SECURITY.m
 
 ## Literature Review
 
-- **Index:** [`literature_review/index.md`](literature_review/index.md) — Master Matrix (5 verified 2026-08-24), Legend, Quick Triage, Gap Map, Verification Log
+- **Index:** [`literature_review/index.md`](literature_review/index.md) — v1 review matrix plus newly identified closest systems; the Phase 8 feature-level audit remains open
 - **Papers:** 5 detailed reviews in `literature_review/papers/` — each follows the same template (badges, Summary, Relevant to Our Idea, Gap, Q1–Q9, Citation, Method, Results, Limitations, Comparison, Positioning, Reproducibility, Cross-References, Relevance to Thesis)
-- **Blueprint:** [`docs/blueprint.md`](docs/blueprint.md) — Phase 1–5, Sections 0–18 (indexed with anchors): design decisions, pipeline, data flow, models/tools, datasets, evaluation, edge cases, risks, roadmap, implementation order, supervisor/team explanations, expected outcomes, future work, Reviewer #2 critique
+- **Blueprint:** [`docs/blueprint.md`](docs/blueprint.md) — completed v1 design (Sections 0–18) plus provisional journal study (Section 19)
 - **Roadmap:** [`roadmap.md`](roadmap.md) — phased tracker (Phases 0–8, Gates 0–3, success criteria, current status)
 - **Docs hub:** [`docs/README.md`](docs/README.md) · **Team guide (start here):** [`docs/team_guide.md`](docs/team_guide.md) · **Experiments:** [`docs/experiments/README.md`](docs/experiments/README.md) — status matrix, experiment index E1–E17, datasets, pinned models, artifact map, reproduce commands, supervisor Q&A
 
@@ -87,18 +92,18 @@ All 6 reviewed papers were checked against their primary full text. BibTeX: [`do
 
 1. **Title:** Intent-Consistency Verification at the Action Gate: A Request-Derived Alternative to Formal Contract Gating
 2. **Domain:** LLM Security · Agentic AI · AI Safety
-3. **Motivation:** Shift from chat to action via MCP; OWASP excessive agency Top 10; existing formal and symbolic gates lack a matched InjecAgent/MCPTox comparison
+3. **Motivation:** Tool-using agents can produce harmful side effects; current task-derived and runtime authorization systems need matched comparison under common threats and tasks
 4. **Problem:** Injection, tool poisoning, and drift all converge to one observable — an agent executes an action the user never intended
-5. **Gap:** Single-vector filters vs. manual Hoare contracts (ToolGate, never on InjecAgent/MCPTox); no auto-derived, cross-vector gate
+5. **V1 study question:** whether a request-derived action gate reduces measured attack success on InjecAgent and MCPTox with acceptable utility and latency compared with the tested baselines; this does not establish uniqueness against newer systems
 6. **Solution:** Parse user request → structured intent contract (goals, tool categories, data scopes, side-effect limits) → middleware gate scores every proposed `tool_call(name,params)` via `S = α·((cosine(embed(contract), embed(call))+1)/2) + (1-α)·rule_compliance` with veto; decision `allow / block / escalate` via threshold `τ` (sweep)
-7. **Novelty:** Zero per-tool authoring, vector-agnostic (injection + poisoning), first adversarial test of contract-style gating
-8. **Deliverables:** Pip-installable wrapper, ToolGate reimplementation (Appendix G), evaluation report (ASR/FPR/latency/setup-cost), workshop/Findings paper draft
-9. **Evaluation:** B1 unprotected ReAct vs B2 ToolGate vs Ours on InjecAgent (1,054) + MCPTox (1,312, 45 servers) — metrics ASR, FPR, escalation rate, latency p95, setup cost (0 vs manual count); stretch multi-turn drift pilot (20 AgentDojo cases)
+7. **Research status:** v1 prototype and frozen evaluation are complete; request-derived policies and action-level gates overlap with newer systems, so no “first” claim is made. The journal study's candidate contribution is a controlled comparison of policy representation and update lifecycle, subject to the Phase 8 related-work gate.
+8. **Deliverables:** Pip-installable wrapper, ToolGate reimplementation (Appendix G), frozen evaluation report, and completed ICEEICT conference manuscript; journal extension is planned in `roadmap.md` Phase 8.
+9. **Frozen evaluation:** B1 vs. B2 ToolGate reimplementation vs. v1 on InjecAgent (2,108) and MCPTox (1,348); results and limitations are frozen in the experiment reports. Planned studies use separate Phase 8 runs.
 10. **Stack:** Open LLM (Qwen/Llama via API), ReAct/MCP client, Python middleware, `all-MiniLM-L6-v2` (CPU), no fine-tuning
 
 ---
 
-## Evaluation Plan (abridged from `docs/blueprint.md:Section 9`)
+## Frozen v1 Evaluation (abridged from `docs/blueprint.md:Section 9`)
 
 - **B1:** Unprotected ReAct (no gate) — raw vulnerability floor
 - **B2:** ToolGate reimplementation (Hoare `{P}T{Q}` per Appendix G, symbolic world-state) — validated on ToolBench/MCP-Universe subset before adversarial runs
@@ -108,31 +113,36 @@ All 6 reviewed papers were checked against their primary full text. BibTeX: [`do
 
 ---
 
-## Quick Start (planned)
+## Reproduce the v1 study (completed)
 
 ```bash
-# 1. Clone benchmarks (Week 1)
+# 1. Clone pinned benchmark snapshots
 git clone https://github.com/uiuc-kang-lab/InjecAgent
 git clone https://anonymous.4open.science/r/AAAI26-7C02  # MCPTox snapshot
 git clone https://github.com/OceannTwT/ToolGate          # B2 reference
 git clone https://github.com/ethz-spylab/agentdojo       # stretch
 
-# 2. Install gate (after Weeks 5–8)
+# 2. Install gate
 pip install -e .  # pip wrapper around agent tool executor
 
-# 3. Run evaluation (Weeks 9–12)
+# 3. Run a harness evaluation (use the exact commands/configs in the experiment reports)
 python harness/run_injecagent.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --gate ours --threshold 0.6 --report results/injecagent.json
 python harness/run_mcptox.py --gate ours --snapshot v1 --report results/mcptox.json
 python harness/compare_b2.py --cases data/raw/InjecAgent/data/test_cases_dh_base.json --report results/comparison.json
 ```
 
-> See `docs/blueprint.md:Section 12` for 16-week roadmap (Weeks 1–2 pilot → Weeks 3–4 B2 → Weeks 5–8 gate → Weeks 9–12 full evaluation → Weeks 13–16 writing) and `docs/blueprint.md:Section 13` for exact build order.
+> For reproduction commands and artifact integrity checks, follow [`docs/setup.md`](docs/setup.md) and
+> [`docs/experiments/README.md`](docs/experiments/README.md). Do not overwrite frozen results; new
+> journal experiments use the Phase 8 protocol and `results/phase8/`.
 
 ---
 
-## Publication Target
+## Publication Status and Journal Direction
 
-Realistic: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, USENIX-adjacent) — Q2 journal equivalent (e.g., _Journal of Information Security and Applications_, _Applied Intelligence_) is feasible with rigorous ASR/FPR/latency/setup-cost reporting and error taxonomy (see `docs/blueprint.md:Section 18` Reviewer #2 checklist).
+The ICEEICT conference manuscript covers the completed v1 study. A journal target has not been
+selected: Phase 8 first requires a current related-work audit, a defensible extension, and verification
+of journal scope, category-specific quartiles, fees, and conference-extension policy. See
+[`roadmap.md`](roadmap.md) Phase 8 and [`docs/blueprint.md`](docs/blueprint.md#section-19--journal-extension-research-questions-and-contribution-boundary).
 
 ---
 

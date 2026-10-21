@@ -6,9 +6,10 @@ Formal Contract Gating for Tool-Using LLM Agents**
 > Thesis project · LLM Security / Agentic AI / AI Safety · 2026
 > Repository: [github.com/Atik203/IntentGate](https://github.com/Atik203/IntentGate)
 >
-> **Status at time of writing:** Phases 0–6 complete · Gates 0, 1, 2, 3 passed ·
-> full evaluation **frozen 2026-10-12** · 199 automated tests green. Phase 7 (Q1 hardening) and
-> Phase 8 (thesis + paper) are scoped and marked *planned / not yet executed*.
+> **Status snapshot (2026-10-22):** Phases 0–7 complete · Gates 0, 1, 2, 3 passed ·
+> full evaluation **frozen 2026-10-12** · ICEEICT manuscript final pass completed 2026-10-20.
+> Phase 8 is a planned journal-strengthening study; its research questions and contributions remain
+> provisional until the related-work and protocol gates pass.
 >
 > This report is self-contained: system design, research question, goals and objectives, every
 > phase completed so far, the frozen results, limitations, and the remaining plan. Every number
@@ -24,7 +25,7 @@ Formal Contract Gating for Tool-Using LLM Agents**
 4. [Problem statement & motivation](#4-problem-statement--motivation)
 5. [System design](#5-system-design)
 6. [Evaluation methodology](#6-evaluation-methodology)
-7. [Phases completed (0–6)](#7-phases-completed-06)
+7. [Phases completed (0–7)](#7-phases-completed-07)
 8. [Consolidated results](#8-consolidated-results)
 9. [Success criteria vs results](#9-success-criteria-vs-results)
 10. [Limitations & threats to validity](#10-limitations--threats-to-validity)
@@ -36,11 +37,11 @@ Formal Contract Gating for Tool-Using LLM Agents**
 
 ## 1. Executive summary
 
-Modern LLM agents no longer only chat — they execute real actions through tools (email, payments,
-code, files) via MCP-style protocols. Every benchmark in our literature review shows the same
-pattern: once an agent holds tool permissions, a hijacked tool call succeeds at scale. The closest
-published system that intercepts at the action itself, **ToolGate** (arXiv, Jan 2026), requires a
-hand-authored formal contract **per tool** and had never been tested on an adversarial benchmark.
+Modern LLM agents execute real actions through tools. Recent systems now include task-derived
+policies and runtime action authorization, so the original gap framing is no longer sufficient to
+establish novelty. The completed v1 study provides a reproducible middleware prototype and frozen
+benchmark results; Phase 8 must establish its incremental research contribution through an updated
+comparison and new evidence.
 
 **IntentGate** is a model-agnostic middleware **action gate**. It derives an *intent contract*
 from the user's original request **once, before any attacker content is visible**, then scores
@@ -61,10 +62,10 @@ that call is the single chokepoint we police.
 | Utility (valid-rate parity) | 87.5–89.7% | 86.9–89.7% (Δ ≤ 0.6 pp) | — |
 | Evaluation cost (billed) | — | **$9.64** (34,560 LLM calls) | — |
 
-**The one-sentence verdict:** the intent gate cut InjecAgent attacks from 1-in-5 to nearly zero and
-halved MCPTox attacks with no measurable utility loss, at zero contract cost and 16–20 ms latency,
-while a manual contract gate (ToolGate, with 145 hand-written contracts) was statistically
-indistinguishable from doing nothing.
+**The v1 result:** the intent gate reduced measured InjecAgent attack success and MCPTox
+attack-influenced calls under the frozen harness. These results do not establish broad robustness or
+novelty against newer task-derived policy systems. ToolGate's evaluated coverage and baseline result
+are reported with the limitations in Section 8.
 
 ### Gate milestones
 
@@ -80,14 +81,16 @@ indistinguishable from doing nothing.
 
 ## 2. Research question & hypothesis
 
-**Research gap (one sentence).** Several recent systems derive task-scoped policies from the
-user’s request (e.g., Task Shield, ACL 2025), while concurrent arXiv work also explores
-request-derived policy enforcement (ClawGuard, arXiv:2604.11790, 2026). However, existing work
-differs in how the policy is represented and enforced (e.g., LLM-as-judge checkers) and in
-evaluation coverage; we focus on a lightweight embedding-based gate with deterministic hard-rule
-veto, a frozen, reproducible head-to-head against a faithful ToolGate reimplementation, and
-evaluation on both injection (InjecAgent) and tool-poisoning (MCPTox) under the same harness and
-metrics.
+**Resolved v1 question.** Can a request-derived intent gate reduce benchmark-measured attack success
+with acceptable utility and latency compared with no gate and the implemented ToolGate baseline?
+The frozen v1 results answer this for the evaluated tasks and model setup; they do not establish
+uniqueness of request-derived policy enforcement or broad generalization.
+
+**Current journal questions.** Phase 8 provisionally asks how policy representation and update
+lifecycle affect task-level safety and utility under matched threat models, and how those effects
+generalize across models, datasets, and tool schemas. Task Shield, Progent, ClawGuard, AgentSpec,
+ToolGate, and other close systems must be compared feature by feature before the contribution is
+fixed. See `docs/blueprint.md` Section 19 and `roadmap.md` Phase 8.
 
 **Central research question.** *Can a gate derived automatically from the user's own request match
 the protection of formal per-tool contract gating — automatically, at zero per-tool setup cost, and
@@ -106,11 +109,9 @@ on the comparison to ToolGate the outcome was stronger than hypothesised — the
 baseline did not meaningfully outperform doing nothing, a structural finding rather than a
 measurement miss (Section 8).
 
-**Why this framing is publication-worthy.** It closes a cross-paper gap: benchmarks measure
-vulnerability but propose no defense; defenses are evaluated only on their own threat model; the
-closest action-level gate is manual and non-adversarial. The contribution is therefore both a
-practical artifact (a zero-setup gate) and an evaluation (the first adversarial test of
-contract-style gating, with setup cost measured).
+**Contribution status.** The completed v1 artifact and evaluation are established project outputs.
+Any journal novelty claim is unapproved. A controlled comparison of policy representation and
+update lifecycle is a candidate contribution, not yet a demonstrated gap or result.
 
 ---
 
@@ -124,11 +125,11 @@ The project's objectives were fixed in the design blueprint (Section 3). Their c
 | 2 | Implement the gate as model-agnostic middleware (wrapper around any ReAct/MCP agent) with **no fine-tuning** | ✅ Done | `src/intent_gate/gate/middleware.py`; `AgentLoop` executes only via `GateMiddleware.execute`; E18 replicates on a second backbone |
 | 3 | Reimplement ToolGate's Hoare-contract check (Appendix G) as a minimal, faithful baseline for direct comparison | ✅ Done | `src/intent_gate/baselines/toolgate/`; coverage frozen in `configs/b2_coverage.json` — E7 |
 | 4 | Empirically validate on InjecAgent + MCPTox with ASR, FPR, latency, setup-cost reporting; threshold ablation + error taxonomy | ✅ Done (FPR proxied — see limitations) | E11–E17 frozen matrix; E12 ablations A1–A3; E13 Pareto; E16 taxonomy |
-| 5 | (Stretch) Pilot a small multi-turn drift condition to test whether the gate catches slow-build manipulation | ⏳ Deferred | Explicitly deferred to future work (Ch 6); not in the submitted core |
+| 5 | (Stretch) Pilot a small multi-turn drift condition to test whether the gate catches slow-build manipulation | ⏳ Deferred | Explicitly deferred to future work; not in the frozen v1 core |
 
-**Deliverables (from blueprint Section 16).** Falsifiable success criteria and graduation
-outcome: thesis + evaluated gate + pip package + evaluation report + paper draft. The evaluation
-report is complete; the thesis chapters and paper draft are Phase 8 (Section 11).
+**Deliverables.** The v1 evaluated gate, pip package, frozen evaluation report, and ICEEICT
+conference manuscript final pass are complete. Thesis status is tracked separately from this research
+summary. A journal manuscript is a planned Phase 8 deliverable, conditional on its evidence gates.
 
 ---
 
@@ -145,11 +146,11 @@ real permissions, a single successful hijack outweighs many correct turns. A lig
 model-agnostic gate at the narrowest chokepoint addresses the risk regardless of which vector got
 through.
 
-**Relation to prior work.** Request-derived policy enforcement has been explored in recent
-peer-reviewed work (e.g., Task Shield, ACL 2025) and concurrent arXiv work (e.g., ClawGuard,
-arXiv:2604.11790, 2026). Our focus is on a CPU-only, no-LLM-per-action approach (embedding
-similarity + deterministic hard-rule veto) with a frozen, reproducible head-to-head against a
-faithful ToolGate reimplementation; a full empirical comparison is planned for Phase 7.
+**Relation to prior work.** Request-derived policy enforcement and runtime constraints appear in
+Task Shield, Progent, ClawGuard, AgentSpec, and other systems. The completed v1 study compares its
+implementation with no gate and a ToolGate reimplementation under its frozen protocol. A broader,
+matched comparison is planned for Phase 8; CPU use or avoiding an LLM call per action is a measured
+system property, not by itself a novelty claim.
 
 **Verified benchmark evidence (from our literature review, Aug 2026).**
 
@@ -339,7 +340,7 @@ violation, state seeded best-effort from the trusted request. Uncontracted tools
 
 ---
 
-## 7. Phases completed (0–6)
+## 7. Phases completed (0–7)
 
 Each phase is reported as **goal → what was done → result**. Detailed numbers are consolidated in
 Section 8 so the phase narrative stays readable.
@@ -348,11 +349,11 @@ Section 8 so the phase narrative stays readable.
 
 - **Goal:** fix the problem, the threat model, and the design before writing code.
 - **Done:** 10-paper synthesis (Q1–Q9 structured notes) condensed into the master blueprint
-  (Sections 0–18, the design source of truth); 5 anchor paper reviews; `docs/references.bib` (10
-  verified entries); repo README.
-- **Result:** the gap was pinned down — *no automated, vector-agnostic action gate evaluated
-  adversarially on both injection and poisoning* — and the two benchmarks (InjecAgent, MCPTox)
-  plus the ToolGate baseline were selected.
+  (Sections 0–18, the v1 design source of truth); anchor paper reviews; `docs/references.bib`;
+  repository README.
+- **Original v1 framing:** the team selected an automated intent gate and chose InjecAgent,
+  MCPTox, and ToolGate for evaluation. This historical rationale is not a current novelty claim;
+  the updated landscape and Phase 8 comparison requirements are in blueprint Section 19.
 
 ### Phase 1 — Project skeleton ✅ (commit `3ff9e33`)
 
@@ -540,24 +541,25 @@ Falsifiable criteria from the design blueprint (Section 16), judged against the 
 | Setup cost: 0 contracts (ours) vs documented B2 count on the same tool set | 0 vs 145 | ✅ |
 | Latency overhead p95 < 100 ms per tool call on CPU | 16–20 ms | ✅ |
 | ToolGate B2 runs and is documented (coverage reported) | InjecAgent 100%; MCPTox 8.1%/37.2% weighted | ✅ |
-| Deliverables: thesis + pip package + GitHub + evaluation report + paper draft | evaluation report done; thesis + paper = Phase 8 | ⏳ |
+| Research deliverables: pip package + GitHub + frozen evaluation report + ICEEICT manuscript | Complete; final pass 2026-10-20. Thesis completion is tracked separately. | ✅ |
 
 ---
 
 ## 10. Limitations & threats to validity
 
-Each limitation is paired with its planned answer (Chapter 6 material):
+These are limitations of the completed v1 study; some have Phase 7 evidence, while others remain
+scope limits or are addressed only by the planned Phase 8 protocol:
 
-1. **Static attacks only** — adversarial/adaptive attacks are not yet tested live → planned E26
-   (paraphrase-delivery + threshold-aware), with E20 as the offline precursor.
-2. **Two effective backbones** (gpt-4o-mini + Qwen; Luna excluded) → planned E25 third backbone,
-   same 100-case protocol.
-3. **Utility is proxied** (valid-rate parity, not a dedicated benign suite) → planned E23
-   legitimate-only utility suite to replace the proxy with a measured completion number.
+1. **Adaptive attacks** — E26 includes live delivery phrasings and an offline threshold-aware call
+   probe; it is not end-to-end adaptive ASR and does not establish robustness.
+2. **Backbone coverage** — the third-backbone DeepSeek arm refused all tested injections, so the
+   gate was not exercised; Qwen is the only effective replication.
+3. **Utility** — E23 measures a small benign suite, but broader task completion and independently
+   labeled utility remain for the Phase 8 protocol.
 4. **Static MCPTox snapshot, not live servers** → stands; documented; deferred to future work.
 5. **Single-turn scope** (multi-turn drift out of scope) → stands; drift pilot deferred.
-6. **A3 ≈ ours** (raw-request embedding nearly matches the parsed contract) → planned E28 parser
-   ablation to quantify exactly what the LLM parser buys.
+6. **A3 ≈ ours** (raw-request embedding nearly matches the parsed contract) — E28 parser ablation
+   is complete; its limited 200-case slice does not establish a full-run ASR advantage for the LLM parser.
 7. **Heuristic MCPTox evaluator** (precision 0.82 / recall 0.26, conservative — it under-counts
    attacks) → shared across all conditions, so deltas are fair even where absolute counts
    understate attacks.
@@ -566,41 +568,24 @@ Each limitation is paired with its planned answer (Chapter 6 material):
 
 ---
 
-## 11. Roadmap — planned work (Phases 7–8)
+## 11. Roadmap — completed work and planned journal study
 
-> ⚠️ **These phases are scoped and not yet executed.** They never modify the frozen Phase 5
-> numbers (E11–E17); all new work gets E23+ identifiers and is framed as preliminary.
+> Phases 1–7 and the ICEEICT manuscript final pass are complete. Phase 8 work must preserve the
+> frozen Phase 5/7 artifacts and use new E32+ identifiers under `results/phase8/`.
 
-### Phase 7 — Q1 hardening (9 submission-gate items, ~$8 estimated)
+### Phase 7 — Q1 hardening (COMPLETE)
 
 | ID | Item | Goal | Status |
 |---|---|---|---|
-| E23 | Legitimate-only utility suite | Measure task completion with gate ON vs OFF on benign tasks (replaces the utility proxy) | ⏳ |
-| E24 | Prompt-level baselines | Delimiters / instructional-prevention / sandwich-repetition from the ASB taxonomy | ⏳ |
-| E25 | Third backbone pilot | Replicate the ASR delta on a new model family | ⏳ |
-| E26 | Adaptive attacker | Paraphrase-delivery + threshold-aware attacks against the gate itself | ⏳ |
-| E27 | Baseline comparison (Task Shield/Progent) | Compare against at least one peer-reviewed/request-derived baseline (Task Shield, ACL 2025) if feasible, or document scope-out and the preprint status of others | ⏳ |
-| E28 | Parser ablation | B1 + ours with the LLM parser swapped for the heuristic fallback | ⏳ |
-| E29 | Embedding swap + τ transfer | Re-score cached traces with a stronger embedding; test τ transfer base↔enhanced | ⏳ |
-| E30 | Conformal escalate band | Turn the heuristic [τ−δ, τ+δ] band into a distribution-free coverage guarantee | ⏳ |
-| — | Method formalism + artifact packaging | Neyman–Pearson τ framing, reference-monitor framing, assumption table; Docker one-command repro | ⏳ |
+| E23–E31 | Utility, prompt baselines, backbone boundary, adaptive-call/echo, Progent, parser, embedding transfer, conformal band, formalism, and artifact work | Completed; see `results/phase7/` and experiment reports |
 
-### Phase 8 — Thesis + paper writing
+### Phase 8 — Journal-strengthening study (PLANNED)
 
-| Deliverable | Focus | Status |
-|---|---|---|
-| Ch 1 | Intro & motivation (OWASP excessive agency, why an action gate) | ⏳ |
-| Ch 2 | Related work — answer "how is this different from ToolGate?" in the first paragraph | ⏳ |
-| Ch 3 | Method — parser, contract schema, scorer + veto, gate, escalate band | ⏳ |
-| Ch 4 | ToolGate B2 baseline (Appendix G translation, coverage %, fidelity notes) | ⏳ |
-| Ch 5 | Evaluation — metrics, baselines, ablations, per-category, stats, error taxonomy | ⏳ |
-| Ch 6 | Limitations & future work (adaptive attacks, code-exec scope, live-vs-snapshot) | ⏳ |
-| Appendix | Reproducibility: hashes, configs, contract examples, JSONL samples | ⏳ |
-| Paper | Workshop / Findings-tier draft (~4–8 pages) from the frozen evidence | ⏳ |
-
-**Publication target.** Realistic: a security/agentic-AI workshop or Findings track. After Phase 7
-(adaptive loop + third backbone + conformal band), a Q1 security journal (TDSC/TIFS or Computers &
-Security; JISA / Applied Intelligence as backup) is the target.
+The ICEEICT conference manuscript is the completed v1 artifact. Journal work begins with a verified
+related-work matrix, contribution statement, RQ and hypothesis freeze, preregistered protocol,
+independent annotations, and fair comparative evaluation. Select a journal only after checking current
+category-specific quartiles, scope, article type, fees, and conference-extension policy. The detailed
+plan and exit criteria are in `roadmap.md` Phase 8.
 
 ---
 
@@ -637,7 +622,7 @@ docs/                blueprint.md · team_guide.md · experiments/ (E1–E22) ·
 | Frozen full numbers (E11–E17) | `docs/experiments/05_phase5_full_evaluation.md` |
 | Phase 6 pilots (E18–E22) | `docs/experiments/06_phase6_pilots.md` |
 | Development-slice results (E1–E10) | `docs/experiments/01–04_*.md` |
-| Full design (source of truth) | `docs/blueprint.md` (Sections 0–18) |
+| Full design (source of truth) | `docs/blueprint.md` (v1 Sections 0–18; journal direction Section 19) |
 | Live status / plan | `roadmap.md` |
 | Raw evidence | `results/phase5/`, `results/phase6/`, `configs/b2_coverage.json` |
 | Install & reproduce | `docs/setup.md` → `pytest -q` (199 green) → `docs/experiments/README.md` |
@@ -698,16 +683,17 @@ A: The evaluator is heuristic (precision 0.82 / recall 0.26) and conservative �
 attacks — but it is shared across all conditions, so deltas are fair while absolutes understate the
 problem.
 
-**Q: What would falsify the approach?**
-A: A legit-only suite showing FPR > 10%, a second backbone showing no delta, or B2 at high coverage
-matching ours. The second backbone has already replicated (E18); the others are queued in Phase 7.
+**Q: What would falsify a stronger journal claim?**
+A: A matched policy-lifecycle comparison showing no reliable safety/utility distinction, or evidence
+that existing systems already cover the claimed contribution. Phase 8 specifies confirmatory tests.
 
-**Q: What remains before submission?**
-A: Phase 7's nine items — utility suite, prompt baselines, third backbone, and a live adaptive loop
-first; formalism and the artifact in parallel. Then Phase 8 thesis + paper.
+**Q: What remains before a journal submission?**
+A: Complete the Phase 8 related-work audit, freeze a falsifiable contribution and protocol, then run
+blinded, independently labeled, fair end-to-end comparisons. Select a journal after verifying its
+current scope, category quartile, fees, and conference-extension policy.
 
 ---
 
-*Prepared from the frozen evidence (E11–E17), Phase 6 pilots (E18–E22), `docs/blueprint.md`,
+*Status snapshot updated 2026-10-22; prepared from the frozen evidence (E11–E17), Phase 6 pilots (E18–E22), `docs/blueprint.md`,
 `roadmap.md`, and `docs/experiments/`. Every number is cited to the report or `results/` artifact
 named beside it. Design source of truth: `docs/blueprint.md`; live status: `roadmap.md`.*
