@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Journal-strengthening roadmap:** condensed completed Phases 1–7 and added a staged Phase 9 plan for novelty, protocol, typed authorization, fair comparisons, end-to-end evaluation, reproducibility, journal extension, and OpenAI/DeepSeek/Qwen3.5 endpoint setup.
 - **Phase 7 E29 embedding transfer:** re-scored 722 frozen InjecAgent calls with pinned MPNet weights and disjoint trusted-request groups. Transfer results show encoder- and direction-specific threshold selection; reports include source hashes and model revision.
 - **Phase 7 E30 conformal calibration:** added `conformal_band()` and a grouped held-out study. At α=0.1 the calibrated interval is [0,1], a valid but practically vacuous negative result rather than a deployable escalation band.
 - **Phase 7 formalism:** added the Chapter 3 method draft with constrained threshold selection, Anderson reference-monitor placement, and an assumption-violation table; the blueprint now points to the scoped claims.

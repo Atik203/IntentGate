@@ -13,336 +13,30 @@
 - [x] Master blueprint Sec 0–18 (`docs/blueprint.md` — single source of truth)
 - [x] Repo `README.md` (project overview, structure, evaluation plan, quick start)
 
-## Phase 1 — Project Structure Initialization — DONE (commit 3ff9e33)
+## Phases 1–7 — Completed implementation and evaluation (DONE)
 
-- [x] `pyproject.toml` + `.python-version` + venv + pip (`pip install -e .`)
-- [x] pytest suite: 26/26 passing (parser, veto, no-bypass, ordering, metrics, ToolGate)
-- [x] `src/intent_gate/` skeleton: parser / scoring / gate / agent / baselines.toolgate / eval
-- [x] `harness/` stubs: `run_injecagent.py`, `run_mcptox.py`, `compare_b2.py`, `common.py`
-- [x] `configs/`: `intent_schema.json`, `parser_fewshots.json`, `thresholds.yaml`, `models.yaml`
-- [x] `scripts/`: `pilot_score_dist.py`, `check_parser.py`, `clone_benchmarks.ps1`
-- [x] `.env.example`, `data/README.md`, `results/.gitkeep`, `.gitignore` (venv, egg-info, data/raw, results)
-- [x] Professional repo docs: `LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`
-- [x] GitHub PR/issue templates + CI workflow (`pytest -q` on `dev`/`main`)
-- [x] Branch model: feature branch → `dev` → `main` (dev integration branch created)
+This compact status summary replaces the expanded phase checklists. The detailed protocols,
+artifacts, and limitations remain in the linked experiment reports and `results/`; the frozen
+Phase 5 matrix is not to be overwritten by future journal studies.
 
-## Phase 2 — Foundation & Pilot (Weeks 1–2) → Gate 0
+| Phase | Completed outcome and evidence |
+|---|---|
+| 1. Project structure | Python package, harness, configs, CI, tests, repo docs, and benchmark bootstrap established. |
+| 2. Foundation and pilot / Gate 0 | Pinned benchmark snapshots and schema v1.1; scorer pilot AUC 0.979, with 0% ASR / 4% FPR at τ=0.75. See `docs/experiments/01_gate0_foundation.md` and `02_parser_schema.md`. |
+| 3. ToolGate B2 / Gate 1 | Manual-contract baseline implemented and evaluated with measured evaluated-tool coverage and documented fidelity limits. See `docs/experiments/`. |
+| 4. Gate build / Gate 2 | Parser, scorer, hard vetoes, middleware, trace, ReAct harness, ordering guard, and no-bypass coverage delivered; test suite and latency gate recorded. |
+| 5. Frozen main evaluation / Gate 3 | 20,736 cases frozen. InjecAgent ASR 19.0% → 0.7%; MCPTox attack-influenced rate 20.7% → 10.7%; B2 and utility/latency results documented in `results/` and Phase 5 reports. |
+| 6. Strengthening | Qwen3.5 replication, expanded B2 coverage analysis, intent-mimicry probe, escalation precision, and statistical utilities completed. See `docs/experiments/06_phase6_pilots.md`. |
+| 7. Hardening | E23–E31 utility, prompt, backbone-boundary, adaptive-call/echo, parser, embedding-transfer, conformal, formalism, and artifact studies completed. Negative and limited findings are retained with their limitations; see `results/phase7/` and `docs/experiments/`. |
 
-**Goal: confirm Assumption 2 (scorer separates hijack from legit) before building the full gate. Cheapest place to fail.**
-
-- [x] Clone benchmarks into `data/raw/` (InjecAgent, MCPTox snapshot, ToolGate, AgentDojo) via `scripts/clone_benchmarks.ps1` — rewritten as a pinned verify-and-repair bootstrap (`-VerifyOnly` / `-Force` / `-Only`) so teammates reproduce the exact measured commits
-- [x] Record exact commit hashes / snapshot versions (required for reproducibility, blueprint Sec 8) → `configs/benchmark_versions.yaml`
-- [x] B1 unprotected ReAct runs on 20 InjecAgent cases — ballpark reproduced (20% ours = 20% authors' harness, paper ~24% GPT-4); our pipeline is gate-ready
-- [x] B1 unprotected ReAct runs on 20 MCPTox cases (static snapshot fallback documented; 30% attack-influenced, heuristic evaluator)
-- [x] 50-case scorer pilot (hijack vs legitimate S distributions) → `scripts/build_pilot_set.py` + `scripts/pilot_score_dist.py`
-- [x] Go/No-Go decision on Assumption 2: **GO** — AUC 0.979, ASR 0% / FPR 4% at τ=0.75 (`docs/experiments/01_gate0_foundation.md`); three rule-engine FPs found and fixed
-- [x] Intent schema **v1.1** (controlled unfreeze 2026-09-16: adds `system_change`, 9 few-shots, 30-request re-validation `docs/experiments/02_parser_schema.md`); v1 frozen 2026-09-11 with the original spot-check
-- [x] `docs/references.bib` started (verified figures only) → 10 entries, `literature_review/index.md` frozen
-
-## Phase 3 — ToolGate B2 Baseline (Weeks 3–4) → Gate 1
-
-**Goal: faithful minimal ToolGate reimpl (Appendix G) ready to run side-by-side — the comparison that defines the paper.**
-
-- [x] Author Hoare contracts for evaluated tool subset (InjecAgent 79/79 user+attacker tools; MCPTox 65 contracts over the 801-tool registered snapshot = 8.1% distinct / 37.2% availability-weighted — the long tail + poisoned registrations stay `no_contract`)
-- [x] Symbolic world-state extended (`balance`, `files`, `directories`, `permissions`, per-tool fields) + snapshot/rollback on post violations + best-effort seeding from the trusted request
-- [x] Validate B2 — ToolBench not cloned: blueprint Sec 10 fallback used (manual contract review vs official tool schemas + recorded-call replay; `docs/experiments/03_b2_toolgate.md`)
-- [x] Freeze B2 coverage % — `configs/b2_coverage.json` (InjecAgent 100%; MCPTox 8.1% / 37.2% weighted); `no_contract`/`no_contract_tools` counted and reported
-- [x] Document any divergence from ToolGate paper behavior honestly (`docs/experiments/03_b2_toolgate.md`; code changes + test suite green)
-
-## Phase 4 — Gate Build (Weeks 5–8) → Gate 2
-
-**Goal: working middleware — embed + rule + threshold + escalate + trace — wired to the agent loop.**
-
-- [x] Real LLM intent parser (temp 0, JSON mode, 1 repair retry) replacing heuristic stand-in — landed in Phase 2 (`parser/parser.py`, `docs/experiments/02_parser_schema.md`)
-- [x] Real embedding model (`all-MiniLM-L6-v2`) wired + model hash logged in every trace — `EmbeddingBackend.metadata` (model_id + probe hash + backend) on every JSONL record; contract embedded once per session, only the call per step
-- [x] GateMiddleware integrated with `AgentLoop` (ReAct → gate → executor) — `agent/react.py` loop executes via `gate.execute`, tests in `tests/test_agent_loop_gate.py`
-- [x] Escalate band: benchmark mode = block + `would_escalate`; demo mode = user prompt (`tests/test_no_bypass.py`)
-- [x] No-bypass enforcement test green (direct executor access fails in harness) — loop + middleware integration tests pin the single execution path
-- [x] 100-case integration run (InjecAgent + MCPTox); p95 latency measured — 100 InjecAgent + 100 MCPTox across none/ours/toolgate; ASR-valid 9.0% → 1.0% (ours, 0 FP blocks), p95 ≤ 23 ms (`docs/experiments/04_gate2_gated_eval.md`)
-- [x] Component unit tests + threshold sweep infra over the gated traces (`eval/sweep.py` case-level re-decision, `scripts/sweep_gated.py`, Pareto in `docs/experiments/04_gate2_gated_eval.md`; 130 tests green at the time, 199 today) — blueprint Week 5–8 labels this "Section 14", which is the supervisor chapter (flagged in the sweep doc)
-
-## Phase 5 — Main Evaluation (Weeks 9–12) → Gate 3 (results freeze) — DONE 2026-10-12
-
-**Goal: complete, reproducible results. Nothing gets rewritten after this.**
-
-**Freeze before starting:** intent schema v1.1 · B2 contracts + `configs/b2_coverage.json` · runner `--gate none|ours|toolgate` · defaults τ=0.75, δ=0.1, α=0.7. The orchestrator writes a lock + manifest (git SHA, config hashes, model IDs, embedding hash) before the first full run; any code/config change after that = new freeze + full re-run.
-
-**Decisions (locked 2026-09-16):** InjecAgent runs **base + enhanced (2,108 cases: dh 510 + ds 544 each)**; MCPTox = 1,348 snapshot cases. Ablations A1–A3 run on the **full matrix** (A4 is trace-derived). Utility = **proxies from the runs** (InjecAgent valid-rate + user-tool calls allowed; MCPTox ignored share). No LLM judge for MCPTox in Phase 5 (heuristic evaluator documented; report both `success` and attack-influenced).
-
-**Run matrix** (identical prompts/tool blocks/model, seed 42, one run per cell):
-
-| Condition | InjecAgent 2,108 (dh/ds × base/enhanced) | MCPTox 1,348 |
-|---|---|---|
-| B1 — none (unprotected) | full | full |
-| B2 — toolgate (manual contracts) | full | full |
-| Ours — intent gate, τ=0.75 | full | full |
-| A1 — semantic-only | full | full |
-| A2 — rule-only | full | full |
-| A3 — raw-request embedding | full | full |
-
-- 30 file-level runs, resumable; each writes report JSON + per-case JSONL + trace/gate events (S, S_sem, S_rule, decision, latency, contract, embedding hash, `model_id`, tokens/cost). Artifacts: `results/phase5/`.
-- Budget was ~4–8 h with 3-way file-level parallelism; actual: **~5.6 h**. **Cost chart** (34,560 LLM calls total; actuals from the frozen run 2026-10-12 — list-price estimate vs billed):
-
-| Group | Cases | Calls | List-price actual | Billed share* |
-|---|---|---|---|---|
-| Main matrix — B1 (agent) | 3,456 | 3,456 | $1.33 | |
-| Main matrix — B2 (agent) | 3,456 | 3,456 | $1.33 | |
-| Main matrix — Ours (agent + parser) | 3,456 | 6,912 | $2.20 | |
-| Ablations A1–A3 (agent + parser each) | 10,368 | 20,736 | $6.60 | |
-| **Total** | 20,736 | **34,560** | **$11.46** | **$9.64** |
-
-\*Billed total from the OpenAI dashboard; per-group billed splits aren't reported — the ~16%
-gap vs list is automatic prompt caching (byte-identical system/tool prefixes).
-
-Per benchmark: InjecAgent 2,108 cases × 6 conditions = 12,648 agent calls (+8,432 parser); MCPTox 1,348 × 6 = 8,088 agent (+5,392 parser). `scripts/run_phase5.py --dry-run` prints the live estimate.
-
-**Stage 0 — pre-run engineering (must land before the freeze):**
-- [x] Gate every proposed call (user + attacker), not only attack-relevant ones — per-call decision/latency in `gate_events` (FPR proxy + full latency samples)
-- [x] Wire ablations A1–A3 (`--ablation semantic-only|rule-only|raw-request`), ablation tag in trace metadata
-- [x] Exact McNemar (+ continuity-corrected variant) and seeded bootstrap CI (10k) in `eval/stats.py`, with tests
-- [x] τ×δ sweep grid (τ ∈ {0.40–0.80 step 0.05} × δ ∈ {0.05, 0.10, 0.15}) + escalate share per cell
-- [x] Token/cost logging captured per run
-- [x] `scripts/run_phase5.py` orchestrator: resume, `--jobs` parallelism, retry/backoff, `--max-calls` guard, lock/manifest, `--check` integrity mode
-- [x] `scripts/report_phase5.py` reporter: tables, breakdowns (risk/tool/split/setting), stratification, CIs/McNemar, τ×δ Pareto, latency/utility, cost-vs-ASR
-- [x] Smoke runs (5 cases per condition) green before the freeze — events/latency/cost/ablation paths verified
-
-**Stage 1 — freeze + full runs:**
-- [x] Write `configs/phase5_lock.json` + `results/phase5/manifest.json` (frozen 2026-10-12, git `307487f`, clean tree)
-- [x] 15 main runs: B1/B2/Ours × {dh_base, ds_base, dh_enhanced, ds_enhanced, mcptox}
-- [x] 15 ablation runs: A1/A2/A3 × {dh_base, ds_base, dh_enhanced, ds_enhanced, mcptox}
-- [x] Integrity check (`--check`): 30/30 passed with default flags
-
-**Stage 2 — analysis:**
-- [x] τ×δ Pareto (all + per benchmark) from cached traces; escalate share (~20% at τ=0.75, benchmark mode counts as block)
-- [x] Bootstrap 95% CI + paired McNemar per benchmark (B1 vs ours: p=1.3e-33 ds_enh, p=1.25e-07 mcptox; B2 n.s.)
-- [x] Breakdowns: MCPTox per risk (11) · InjecAgent per attacker tool (30) + per user tool (17) · per split (dh/ds) and setting (base/enhanced)
-- [x] Stratification: valid-rate parity (FPR proxy) + E4 pilot 4%; per-specificity stratification deferred to Phase 6
-- [x] Error taxonomy: 13 InjecAgent residuals (all S 0.75–0.79, rule=1.0, read-only exfil) + MCPTox registration class, with contract + score evidence
-- [x] Latency p50/p95 per call (ours p95 16–20 ms); utility proxies (valid-rate parity); cost-vs-ASR ($11.46 list / $9.64 billed)
-- [x] Headline figures: results table, Pareto curve, setup-cost bar (0 vs 145 contracts), latency table, cost-vs-ASR table
-
-**Stage 3 — Gate 3 freeze:**
-- [x] `docs/experiments/05_phase5_full_evaluation.md` (E11–E17: matrix, Pareto, ablations, breakdowns, stats, taxonomy, latency/utility; limitations + supervisor Q&A)
-- [x] Roadmap + CHANGELOG updated, commit tagged, PR to `dev`; no results edits after this point
-
-## Phase 6 — Strengthening & Hardening (Weeks 13–14) — DONE 2026-10-13
-
-**Goal: turn the thesis's two most attackable claims into evidence. Rule: never touch frozen
-Phase 5 numbers — all new work gets E18+ numbers framed as preliminary.**
-**Status: COMPLETE — all P0/P1 pilots done (E18–E22, `docs/experiments/06_phase6_pilots.md`).
-Teammates continue at Phase 7.**
-
-### P0-1 — Second-backbone pilot / E18 (model-agnostic claim)
-
-All Phase 5 evidence is gpt-4o-mini (n=1). Re-run a ~200-case subset (B1 + ours) on two new
-backbones and compare ASR *deltas*, never absolutes.
-
-- [x] Wire `--agent-base-url` / `--parser-base-url` through `harness/run_injecagent.py` +
-  `harness/run_mcptox.py` (+ `--agent-api-key` / `--parser-api-key`, same flags on the
-  `run_*_ours.py` pilots; `LLMClient` already accepts `base_url`; env fallback
-  `AGENT_BASE_URL`→legacy `QWEN_BASE_URL` for agent, `PARSER_BASE_URL` for parser) + tests
-  (`tests/test_runner_endpoints.py`, 7 tests). Extras landed with the pilot:
-  `--agent-reasoning-effort` (Qwen3.5 thinking models return empty `content` on the
-  OpenAI-compatible endpoint without `reasoning_effort=none`), `--out`/`--report` made
-  **required** (a run can no longer default onto a tracked baseline path), `TraceLogger`
-  default moved out of the repo, `LLMClient` auto-omits unsupported `temperature`
-  (`gpt-6-luna`). 190 tests green → **199 tests green** (7 stats + 2 test-fix + 2 PPF pins)
-- [x] Pull `qwen3.5:4b` (**not** `:latest` — 6.6–7.6 GB won't fit 6 GB VRAM); set Ollama
-  `num_ctx` ≥ 16384 (default 4k silently truncates our prompts despite the 256K window);
-  verify served ctx via `ollama show`; keep MiniLM embeddings on CPU. *(pulled + num_ctx set
-  on dev box; num_ctx caveat remains documented for GPU box deployments)*
-  Dev-box note (Ollama v0.40.5): the server ignores `OLLAMA_NUM_CTX` /
-  `OLLAMA_CONTEXT_LENGTH` env and per-request `options.num_ctx` (VRAM-based default 4096
-  sticks) → baked-in variant instead: Modelfile with `FROM qwen3.5:4b` +
-  `PARAMETER num_ctx 16384` → `ollama create qwen3.5-16k`. Pilots pass
-  `--model-name qwen3.5-16k`. Verified: served `context_length` 16384 via `/api/ps`,
-  3.56 GB VRAM, warm inference ~4 s, `reasoning_effort: none` returns clean content.
-- [x] Smoke on Qwen re-run: dh 0/3, ds 2/3 (B1) → ours τ=0.75 blocks both (ds 0/3).
-  Parser assertion: `usage.parser.calls > 0` ✓
-- [x] **Qwen pilot (~100-case B1 + ours completed):** ASR 27.1% → 2.1%, parser calls=100,
-  gate blocked 24, 0 false positives. `results/phase6/qwen_pilot_*`
-- [x] **Luna arm (gpt-6-luna) completed:** 10-case per split B1 + ours. B1: 70% invalid
-  (prose output); ours: 45% invalid, parser calls=20. Luna mitigates via structured contract.
-  `results/phase6/luna_pilot_*`
-- [x] Write up delta comparison → E18 (`docs/experiments/06_phase6_pilots.md`)
-
-### P0-2 — B2 coverage curve / E19 (strawman defense)
-
-- [x] Contract next MCPTox tools by availability rank; re-run `scripts/freeze_b2_coverage.py`
-  (65 → 583 contracts, 8.1% → 84.9% weighted coverage)
-- [x] Re-run B2 MCPTox at ~40% and ~70% weighted coverage; plot coverage-vs-ASR curve
-  (200-case re-run: 2.2% block rate — curve is flat)
-- [x] Write up (with the honest outcome whatever it is) → E19
-
-### P1 — cheap, high signal (cached traces + manual work)
-
-- [x] E20 intent-mimicry probe: take the 13 residual near-miss templates → generate
-  intent-mimicking variants → re-score vs τ=0.75 offline → report S inflation Δ
-  (avg ΔS = +0.0112, 0/13 cross τ with mimicry)
-- [x] E21 escalate precision: classify all 583 escalated calls rule-based against ground truth
-  from case metadata (full census, deterministic — not a sampled hand-label)
-  (80.5% precision, 14.8% false-escalate rate on 583 escalated calls)
-- [x] Stats discipline: post-hoc power analysis on n=2,108/1,348 + multiple-comparison
-  correction across the 10-risk breakdowns; amend E14 notes if anything changes
-  (power=1.0 at α=0.005; 10-risk Bonferroni α=0.005 survives)
-- [x] Per-specificity FPR stratification on full traces (deferred from E15)
-  (specific: 12.8% FPR / vague: 9.6% / overall: 12.4% — includes escalate candidates)
-
-**Team (done):** P0 items (E18/E19) · E20 (mimicry) · E21 (escalate precision) · E22 (stats).
-
-## Phase 7 — Q1 Hardening (all 10 submission-gate items)
-
-**Goal: close every gap the Q1 review named, in effort order. Same iron rule as Phase 6:
-frozen Phase 5 numbers (E11–E17) are never touched or re-run — all new work gets E23+
-numbers framed as preliminary, committed under `results/phase7/` and written up in
-`docs/experiments/07_phase7_pilots.md` (same At-a-glance → … → Supervisor-Q&A template as 06).
-Branch from `dev` (`feat/phase7-<topic>`), PR back to `dev`. Total est. API cost ~$8.**
-
-**Numbering note (authoritative):** earlier drafts called the paraphrase pilot E23 and the
-parser ablation E24. Final mapping below wins — E23 = utility suite, E24 = prompt baselines,
-E25 = third backbone, E26 = adaptive attacker, E27 = Progent, E28 = parser ablation,
-E29 = embedding/transfer, E30 = conformal band, E31 = contract-vs-semantic (supervisor Q5).
-
-### P0 — submission gate (do first, all parallelizable)
-
-- [x] **E23 legitimate-only utility suite (Gap 3: utility is proxied, never measured).**
-      Goal: measure task-completion with gate ON vs OFF on benign tasks with zero attacks.
-      How: reuse InjecAgent user cases with attacker instruction removed (per supervisor, no
-      new loader needed) → run `scripts/e23_benign_utility.py` with three conditions:
-      `--gate none` (unprotected), `--gate ours --ablation none` (full gate),
-      `--gate ours --ablation semantic-only` (A1). Explicit `--out` under
-      `results/phase7/e23_utility/`. Done when: user-tool-allowed rate + clean-call block rate
-      is reported in `07_phase7_pilots.md#e23`; valid-rate-parity claim is replaced by a
-      measured number. E22's 12.4% stratum metric already relabeled from "FPR" to
-      block-rate-by-stratum.
-      → COMPLETE: 50 benign cases (25 dh + 25 ds). User-tool-allowed: none 16.0% / ours 12.0%
-      / semantic-only 8.0%; clean-call block: none 0.0% / ours 25.0% / semantic-only 42.9%.
-      Semantic-only over-blocks legitimate calls — settles E31: contract preserves utility.
-- [x] **E24 prompt-level baselines (Gap 1a: only one real baseline).** Goal: beat the field,
-      not a strawman. How: add system-text variants (delimiters, instructional-prevention,
-      sandwich/repeat-instruction from the ASB taxonomy) as new `--gate` modes or prompt
-      flags in `harness/gate_policy.py` (no new infra — same harness, same 100-case pilot
-      slice as E18) → run B1 vs ours vs each defense. Done when: one 5-metric panel
-      (ASR, utility, latency, setup cost, backbone) covers all conditions in
-      `07_phase7_pilots.md#e24`. Est. ~$2.
-      → COMPLETE: `--prompt-type` flag added to `scripts/run_injecagent_ours.py`; three
-      variants in `harness/prompts/injecagent.py` (Delimiters, InstructionalPrevention,
-      Sandwich). 50 attack cases each (25 dh + 25 ds, base). Delimiters 4.3% / Sandwich 4.3%
-      / baseline 6.8% / InstrPrev 8.9% ASR. Valid rate: Delimiters 92.0% / Sandwich 92.0%
-      / baseline 88.0%. Delimiters + Sandwich reduce ASR ~37% but still far behind full gate
-      (0.7% InjecAgent).
-- [x] **E25 third backbone pilot (Gap 4: generality is n=1.5).** Goal: replicate the ASR
-      delta on a new model family with full ReAct participation. How: same 100-case protocol
-      as E18 (`scripts/run_injecagent_ours.py --per-split 50 --setting base --gate none|ours
-      --model-name <new-family-via-API>`, parser stays `gpt-4o-mini`, explicit `--out` under
-      `results/phase7/e25_third_backbone/`). Candidates: DeepSeek, Claude, or Llama-70B-class.
-      Done when: per-backbone delta table (B1 ASR → ours ASR) has 3 rows in
-      `07_phase7_pilots.md#e25`; if it fails to replicate, document the boundary condition
-      instead (also publishable). Est. ~$1. If Luna-style prose-only output recurs, exclude
-      with the same convention-#7 justification as E18.
-      → COMPLETE (boundary condition): DeepSeek V4.1 Flash (`deepseek-flash`,
-      DeepSeek-V4.1-Flash-1017, thinking off) refused all 100 static InjecAgent injections
-      in both conditions: B1 ASR 0.0% (100), ours ASR 0.0% (100), 0 gate blocks, valid
-      96%/97%. The gate was never exercised, so the delta is undefined and this is not a
-      third replication; qwen remains the only replication. Artifacts:
-      `results/phase7/e25_third_backbone/deepseek_{none,ours}/`.
-- [x] **E26 adaptive attacker pilots (Gap 2: all attacks are static).** Goal: attack the gate
-      itself, live. Two arms, both on the InjecAgent pilot slice: (a) paraphrase-delivery —
-      ASB's 5 injection phrasings (`literature_review/papers/04-asb-zhang-2025.md`) applied to
-      attack delivery, re-scored live vs τ=0.75, ASR delta vs E20; (b) threshold-aware —
-      attacker aiming at the E16 near-miss band (S ∈ [0.75, 0.79]) à la Kerckhoffs (τ public),
-      report how many crafted calls land above τ. Done when: ASR-under-adaptation table +
-      honest scope sentence (static vs adaptive) lands in `07_phase7_pilots.md#e26`.
-      Est. ~$1. Keep the static-attack scope claim prominent either way.
-      → COMPLETE: (a) live delivery 0/90 naive, 0/84 escape, 1/90 context, 1/92 fake,
-      2/92 combined (ASR 0.0-2.2%); no monotone delivery effect and no delivery-only bypass.
-      (b) offline: 262 prevented attacker-tool calls replayed; 34 instances (11 unique
-      free-text templates) cross τ after echoing the trusted request (median ΔS +0.176),
-      with no rule veto; the lenient all-parameter upper bound crosses 180/262. This is a
-      call-level counterfactual, not end-to-end ASR. (c) six-token echo guard: 34/34
-      strict calls (11/11 templates) blocked, with no new blocks among 194 allowed
-      user-tool calls. Artifacts: `scripts/e26_threshold_probe.py`,
-      `scripts/e26c_echo_guard.py`, `src/intent_gate/scoring/echo_guard.py`,
-      `results/phase7/e26_adaptive/`.
-
-### P1 — acceptance-makers (staff the starred ones first: specialist effort, not runner time)
-
-- [x] **E27 Progent comparison (Gap 1b).** Goal: position vs the closest neighbor (policy-language
-      tool-call gate, 2025 — currently missing from related work). How: ★ needs someone to read
-      Progent, then either a faithful-mini port on the 100-case slice or a documented scope-out
-      (why a port is infeasible + a feature-by-feature table vs our gate). Done when: Progent is
-      cited in `literature_review/` + `docs/references.bib`, and `07_phase7_pilots.md#e27` holds
-      either delta numbers or the scope-out table. Absence here reads as unawareness — do not skip.
-      → COMPLETE: scope-out table written; `shi2025progent` (arXiv:2504.11703) added to
-      `docs/references.bib` + paper-local `IEEE-conference/references.bib`; cited in paper related work.
-- [x] **Method formalism (Upgrade A, writing task, no new runs).** Goal: read as a contribution,
-      not just measurements. How: (a) one paragraph framing τ-selection as FPR-constrained ASR
-      minimization (Neyman–Pearson) pointing at the existing Pareto figure; (b) an
-      assumption-violation table (trusted request / untrusted tool content / single-turn scope →
-      what breaks when each is violated, with E16/E18/E26 as evidence). Done when: both land in
-      Ch 3 draft + blueprint Sec 9 pointer; Anderson reference-monitor framing added (2 sentences).
-      → COMPLETE: `docs/thesis/chapter3_method.md` states the constrained threshold objective,
-      reference-monitor placement, and assumption-violation table without claiming a formal
-      security guarantee.
-- [x] **E30 conformal escalate band (Upgrade A, offline, no LLM calls).** Goal: turn the
-      heuristic [τ−δ, τ+δ] band into a distribution-free guarantee. How: ★ needs conformal-prediction
-      comfort — calibrate a coverage guarantee on cached Phase 5 traces
-      (`results/phase5/ours_*_trace.jsonl`), report empirical coverage at the chosen α, add
-      `conformal_band()` next to `power_analysis()` in `src/intent_gate/eval/stats.py` + tests.
-      Done when: calibrated (α, empirical coverage) pair + method note in
-      `07_phase7_pilots.md#e30`. Highest leverage-per-line item in this phase.
-      → COMPLETE (negative practical result): α=0.1 calibrates δ=0.75 and interval [0,1],
-      covering 100% of 204 held-out request groups but providing no useful escalation width.
-- [x] **E28 parser ablation (Upgrade B).** Goal: answer "why not just heuristics." How: one
-      InjecAgent 200-case subset, B1 + ours with the LLM parser swapped for the heuristic
-      fallback → ASR/valid-rate deltas. Done when: delta table in `07_phase7_pilots.md#e28`.
-      Est. ~$1–2.
-      → COMPLETE (negative/underpowered): B1 17.9% (30/168); ours+heuristic 0.0% (0/169,
-      29 gate-blocked calls); ours+LLM 0.0% (0/171, 32 blocked). Both gated conditions block
-      every attacker call; a 200-case slice cannot resolve the full-run 0.7% ASR. The LLM
-      parser is retained for contract quality and utility, not an ASR advantage here.
-- [x] **E29 embedding swap + τ transfer (Upgrade B, offline, free).** Goal: show τ is a
-      procedure, not a magic number. How: re-score cached traces with one stronger embedding
-      (E5/MPNet) + report τ tuned on base tested on enhanced (and vice versa). Done when:
-      transfer table + recalibration note in `07_phase7_pilots.md#e29`.
-      → COMPLETE: real pinned MPNet embeddings and disjoint request groups show that thresholds
-      are encoder- and direction-specific; results are call-level replay, not end-to-end ASR.
-- [x] **E31 contract-vs-semantic contribution (supervisor Q5).** Goal: E12 showed A1
-      (semantic-only) ≈ ours on headline ASR — locate *where* the full contract + rules +
-      escalate add value, or scope the claim honestly. How: offline on cached traces
-      (`results/phase5/ours_*` vs `a1_*` JSONLs, no LLM calls): (a) per-category/per-risk
-      outcome flips — ours blocks where A1 allows and vice versa (expect rules decisive on
-      high-severity veto categories); (b) escalate-band ablation — what the band loses
-      without S_rule/veto input; (c) cost/latency parity check (contract parse is
-      once-per-session, amortized). Done when: flip table + "where the contract
-      wins/ties/loses" verdict in `07_phase7_pilots.md#e31`; if A1 ties everywhere, the
-      contract claim is scoped to auditability + fail-closed guarantees (already stated in
-      E12 — this makes it measured, not asserted).
-      → COMPLETE (corrected): same-proposal replay covers 2,013 calls. Critical vetoes prevent
-      28 calls semantic-only permits; score fusion allows 332 calls semantic-only prevents.
-      Available tool-role labels include both user and attacker proxies, so these flips are not
-      presented as false positives or prevented attacks. Headline Phase 5 results are unchanged.
-- [x] **Artifact packaging (venue requirement).** Goal: one-command repro. How: Dockerfile +
-      pinned `pip install` + `results/` manifest check (`scripts/run_phase5.py --check`
-      already exists — wire it into the container entrypoint). Done when: clean-machine
-      `docker build && docker run pytest -q` passes and the repro commands in
-      `docs/experiments/README.md` run unmodified inside the container.
-      → COMPLETE: GitHub Actions `container` job (PR #44, run `39299936752`) built the image
-      on a clean `ubuntu-latest` runner, passed `pytest -q`, ran the artifacts-only check via
-      the entrypoint, and ran `report_phase5.py`. `report_phase5.py` now tolerates missing
-      raw benchmark metadata so the offline reporter runs without benchmark clones.
-- [x] Write up E23–E31 → `docs/experiments/07_phase7_pilots.md` (same template as 06).
-      → COMPLETE: all experiment sections written, including E25 boundary condition, E26
-      live/offline adaptive arms, and E28 negative/underpowered parser ablation.
-
-**Explicitly deferred to future work (Ch 6 material, not pilots):** live-server MCPTox slice
-(static-snapshot limitation stands, blueprint Sec 8) · 20-case multi-turn drift pilot
-(AgentDojo subset) — new infra + cost, lowest return before submission.
+**Interpretation:** these phases establish a conference-paper prototype and a reproducible baseline.
+They do not, by themselves, establish journal-level novelty, robust end-to-end safety, or broad
+external validity. The next study must address the open risks below before a journal submission.
 
 ## Phase 8 — Thesis + Paper Writing (merged; old Phase 7 + old Phase 8)
 
-**Goal: thesis chapters + workshop/Findings-tier submission paper from the same frozen
-evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings.**
+**Goal: finish the thesis and prepare the ICEEICT conference paper from the frozen evidence and
+reported pilots. A substantially extended journal study is tracked separately in Phase 9.**
 
 ### Thesis
 
@@ -355,7 +49,7 @@ evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings
 - [ ] Reproducibility appendix: hashes, configs, contract examples, JSONL sample
 - [ ] Supervisor review rounds; final defence
 
-### Paper (workshop/Findings, ~4–8 pages)
+### Paper (ICEEICT conference submission)
 
 - [x] Outline (2-column short paper) → COMPLETE: `IEEE-conference/IEEE-conference.tex` drafted (abstract, intro, related work, method, ToolGate baseline, evaluation, results, limitations, conclusion, LLM-usage acknowledgment); double-blind anonymized; 5 pages, compiles via pdflatex+bibtex.
 - [x] Related work: ToolGate "same gate, opposite policy source" framing (blueprint Sec 18) → COMPLETE: Progent (shi2025progent) added to references + cited.
@@ -364,7 +58,7 @@ evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings
 - [x] ICEEICT final pass to submission quality (≤6 pages incl. references, 30 verified refs, vector figures, cell-grid tables, no first-person pronouns): **DONE 2026-10-18** (steps A–D + expert-review pass): 6 pages, 254 KB, Type 1 fonts only, double-blind; title covers injection + poisoning. Remaining: co-author/supervisor info (placeholders in) + CMT upload.
 - [ ] Reviewer #2 checklist (blueprint Sec 18) cleared item by item
 - [ ] Reproducibility package: pip wrapper + contracts + logs + one-slide "ToolGate vs Ours" table
-- [ ] (Optional, after Findings) Expand to journal: Q2 security journal (e.g., JISA / Applied Intelligence)
+- [ ] Journal extension: complete the evidence and manuscript gates in Phase 9; verify each target journal's current quartile, scope, and prior-publication policy before selecting it.
 
 ### Paper final reviewer-risk fixes (2026-10-20)
 
@@ -374,6 +68,172 @@ evidence (E11–E17) + pilots (E18+). Journal expansion optional, after Findings
 - [x] Paper integration (novelty + echo + DeepSeek, strict 6 pages)
 - [x] Rebuild anonymous + author PDFs (strict 6 pages)
 - [x] Final QA, tests, CI, promote
+
+---
+
+## Phase 9 — Journal-strengthening study (PLANNED; start after conference evidence is frozen)
+
+**Goal:** produce a substantially extended, independently reproducible study suitable for submission
+to a reputable Q1 journal in the best-fitting category. “80%+” is an internal evidence-readiness
+target, not a forecast or guarantee of acceptance; editorial fit, novelty, reviewer judgment, and
+journal selectivity remain outside the team’s control. Select the journal only after checking its
+current Scopus/SJR and JCR category quartiles, scope, article type, fees, and policy for extending a
+conference paper.
+
+**Study rule:** keep the published/frozen Phase 5 and Phase 7 artifacts immutable. Assign new run IDs
+(E32 onward), save raw outputs and config/hash manifests under `results/phase9/`, and write each
+completed experiment using the `docs/experiments/` template. Run only against benchmark fixtures and
+sandboxed/simulated tools; do not send live email, modify real files, or perform external side effects.
+
+### 9.0 — Decide the journal claim and novelty boundary (Weeks 1–2; before new implementation)
+
+- [ ] Build a dated related-work matrix around the closest request-derived action authorization,
+  prompt-injection defense, tool-schema/contract, and agent-monitoring systems (including ClawGuard,
+  AgentSpec, Task Shield, Progent, ToolGate/CaMeL, and AgentDojo). Record each system’s trusted input,
+  policy representation, decision point, argument/resource awareness, threat model, datasets, and
+  evaluation. Verify all sources and versions; do not treat an arXiv label or a different wording as
+  novelty by itself.
+- [ ] Ask whether the proposed contribution remains distinct after the comparison. Prefer a narrow,
+  testable claim: a model-agnostic, request-derived action authorization monitor with typed operation,
+  resource, argument/destination, data-scope, and side-effect constraints, plus a measured abstain /
+  escalation policy. If this distinction cannot be demonstrated, revise the contribution before
+  expanding the implementation.
+- [ ] Select 1–2 realistic journal candidates only after verifying their current quartiles by the
+  intended subject category and publication policies. Record the evidence and article limits in the
+  journal experiment plan. The ICEEICT paper alone is not the journal contribution: document the
+  substantial new method, datasets, analyses, and results planned for the extension.
+- **Exit gate:** supervisor/team approves a one-page contribution statement, closest-work table, and
+  falsifiable research questions before coding or running the confirmatory test set.
+
+### 9.1 — Lock the protocol, labels, and threat model (Weeks 2–4)
+
+- [ ] Specify attacker capabilities and exclusions: malicious user text, retrieved/tool-returned
+  content, poisoned tool descriptions, benign echoed text, multi-step requests, and proposed
+  consequential actions. State the trusted boundary, when parsing occurs, what the gate can observe,
+  and what “attack success” means at task level.
+- [ ] Define typed intent fields and decision semantics before collecting final labels: authorized
+  operations, resources, argument constraints, recipients/destinations, data access, side-effect
+  limits, uncertainty, and escalation. Missing or contradictory authorization for a consequential
+  action must block or escalate. Freeze a versioned schema and migration note.
+- [ ] Create a human labeling guide and a blinded set of trusted requests, allowed actions, forbidden
+  actions, and ambiguous cases. Use at least two independent annotators for a meaningful subset,
+  report agreement and adjudication, and keep test labels hidden during tuning. Do not use an LLM as
+  the sole judge of success or safety.
+- [ ] Pre-register hypotheses, primary/secondary outcomes, split rules, exclusion rules, seeds,
+  planned comparisons, and a power/sample-size analysis based on independent task groups and pilot
+  paired discordance. Split by task/request or attack template to prevent near-duplicate leakage.
+- **Exit gate:** protocol, annotation guide, schema, and analysis plan are versioned before any
+  confirmatory test run; threshold selection is confined to development data.
+
+### 9.2 — Implement and verify the stronger authorization method (Weeks 4–8)
+
+- [ ] Audit the paper against the running code first. Resolve and document the score normalization
+  and equation; align names and behavior for contract fields, hard vetoes, allow/block/escalate,
+  parser fallback, and the exact threshold semantics. Add a paper-to-code traceability table.
+- [ ] Implement a versioned argument-aware policy layer that checks tool identity, operation,
+  resource, recipient/destination, and relevant argument values against the frozen intent contract.
+  Keep semantic similarity as a relevance/ambiguity signal; it must not grant an otherwise
+  unauthorized side effect. Unknown consequential actions fail closed or escalate.
+- [ ] Test benign paraphrases, implicit authorization, multi-action requests, missing fields, tool
+  aliases, schema drift, indirect injection, poisoned descriptions, and attacker text that echoes
+  trusted words. Measure whether any echo or exact-match guard rejects legitimate echoed content.
+- [ ] Add ablations isolating semantic score, each rule family, typed argument checks, parser quality,
+  and escalation. Test deterministic decisions, malformed inputs, ordering, trace completeness, and
+  the no-bypass invariant. Do not add provenance or other mechanisms unless the novelty review and
+  threat model show they are needed for the central claim.
+- **Exit gate:** security invariants and existing regression suite pass; blinded development results
+  show the method has a plausible safety/utility operating point before confirmatory evaluation.
+
+### 9.3 — Build a fair and useful evaluation matrix (Weeks 7–11)
+
+- [ ] Retain pinned InjecAgent and MCPTox comparisons, and add a dynamic/multi-turn benchmark such
+  as AgentDojo plus at most one additional compatible tool/MCP attack suite after checking license,
+  task format, and label quality. Report each dataset’s limitations; do not combine incompatible
+  metrics into one headline number.
+- [ ] Compare B1 (no defense), current IntentGate (v1), proposed typed-policy method (v2), prompt-only
+  defense, ToolGate where its contract coverage permits, and one close request-derived competitor
+  where a faithful implementation or reproducible artifact exists. If a competitor cannot be run
+  on the same cases/tools/prompts, present it as contextual related work rather than a direct
+  numerical comparison.
+- [ ] Use identical agent prompts, tool definitions, task order, model settings, and seeds across
+  comparable arms; change only the defense under test. Report benchmark commits, tool universe,
+  evaluated-tool coverage, omitted cases, and all exclusions. Retain a raw, per-task paired record.
+- [ ] Run at least three independently hosted model families only where the unprotected arm produces
+  enough valid attack opportunities to exercise the gate. OpenAI, DeepSeek, and Qwen3.5 are candidate
+  families; a provider refusal/zero-attack baseline is a boundary result, not evidence of gate
+  effectiveness. Pin exact model IDs and API dates/versions in every run.
+- **Exit gate:** matrix and comparison fairness reviewed before the final test split is unlocked.
+
+### 9.4 — Measure end-to-end safety, utility, and cost (Weeks 10–16)
+
+- [ ] Make task-level unauthorized side effect / attack success the primary outcome. Report both
+  strict attack success and attack-influenced/tool-call rates where definitions differ, with
+  hand-audited validation of any heuristic MCPTox success label.
+- [ ] Report benign end-to-end task completion and safe completion, false block and false escalation
+  rates, escalation precision/recall, attack-category results, coverage, and failures by tool and
+  model. Call-level “allowed” rate is not a substitute for task utility.
+- [ ] Evaluate adaptive attackers against the documented observation boundary: intent mimicry,
+  argument substitution, destination changes, multi-turn drift, echoing trusted wording, and
+  threshold-aware probing. Include both offline replay and end-to-end runs; measure the attacker’s
+  success and the benign cost of each defense.
+- [ ] Measure p50/p95/p99 gate latency, end-to-end task latency, parser/agent token and monetary cost,
+  throughput, memory/hardware, and setup effort. Separate model inference cost from gate overhead.
+- [ ] Use paired confidence intervals clustered by independent task/request groups, appropriate paired
+  tests, correction for planned multiple comparisons, and effect sizes. Report uncertainty and
+  negative results; do not present a post-hoc power calculation as proof of adequate design.
+- **Exit gate:** primary claim is supported on held-out tasks across datasets and meaningful model
+  arms, without unacceptable benign task-completion loss. If it is not, narrow the claim and report
+  the limitation rather than tuning on the test set.
+
+### 9.5 — Reproducibility and artifact review (Weeks 15–19)
+
+- [ ] Publish a clean artifact: pinned benchmark versions, schema/policy, configs, scripts, anonymized
+  traces, metric definitions, hashes, environment/hardware details, and a one-command offline
+  reproduction path. Ensure benchmark licenses and data handling permit redistribution; otherwise
+  document bootstrap instructions and provide derived artifacts only.
+- [ ] Add a clean-environment artifact check and independently reproduce a subset of the primary
+  tables from saved traces. Record discrepancies and fix the artifact before manuscript submission.
+- [ ] Log provider, endpoint type, exact model ID/revision, parameters, API date, retries/refusals,
+  and token/cost data. Keep API keys out of traces and version control. Report unavailable models and
+  failed runs rather than silently replacing them.
+- **Exit gate:** a second team member can reproduce the principal tables without access to the
+  original author’s machine or secrets.
+
+### 9.6 — Write and submit the journal extension (Weeks 18–24)
+
+- [ ] Write from the approved journal outline using `docs/prompt.md` and
+  `docs/writing-guideline.md`. Include a clear threat model, formal policy/method, closest-work
+  comparison, full protocol, task-level results, uncertainty, error analysis, limitations, ethics,
+  and artifact availability. Keep the conference and journal claims/results traceable.
+- [ ] Run a reviewer-style audit for claim/evidence alignment, paper/code consistency, baseline
+  fairness, leakage, label validity, statistical reporting, reproducibility, and journal scope. Ask
+  at least one reviewer who did not implement the gate to challenge the novelty and evaluation.
+- [ ] Disclose and cite the ICEEICT version as required by the target journal; clearly identify the
+  substantial new material and verify the journal’s extension and simultaneous-submission rules.
+  Re-check quartile and submission requirements on the submission date.
+- **Exit gate:** submit only when every primary claim has a reproducible artifact and the independent
+  review has no unresolved validity or novelty blocker.
+
+### Provider setup for controlled model comparisons
+
+`.env.example` already exposes the generic agent/parser endpoint overrides, Qwen-compatible endpoint,
+DeepSeek settings, and model IDs. Do not put provider keys in tracked configs or traces; never copy
+secrets into this roadmap. Use one provider/model per experimental arm, pin the exact model ID, and
+keep the parser endpoint fixed (or explicitly vary it as a separate factor). CLI values override
+`.env` values. Leave the real `.env` unchanged until running an authorized experiment.
+
+| Arm | `.env` setup | Run guidance |
+|---|---|---|
+| OpenAI | Set `OPENAI_API_KEY`; `AGENT_MODEL_ID` and `PARSER_MODEL_ID` to the exact supported model IDs. Leave endpoint overrides empty for the default OpenAI endpoint. | Run the same harness command/cases used for other arms; save resolved IDs and settings in the run manifest. |
+| DeepSeek | Set `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`, and `DEEPSEEK_MODEL` for the pinned model. For the general harness, route the agent with `AGENT_BASE_URL` / `AGENT_API_KEY` and the CLI model-name option; keep parser on OpenAI unless intentionally testing parser choice. | Use `--agent-reasoning-effort none` for the documented DeepSeek thinking-mode behavior. Confirm the actual endpoint and model in metadata; a DeepSeek arm that refuses every attack cannot estimate gate efficacy. |
+| Qwen3.5 via Ollama/OpenAI-compatible server | Start the pinned Qwen3.5 model/server; set `QWEN_BASE_URL` to its `/v1` endpoint and `QWEN_API_KEY` as required by that server (often a local placeholder). Set the exact model/tag via `AGENT_MODEL_ID` or the CLI model-name option. | Use `--agent-reasoning-effort none` for the documented Qwen3.5 compatibility issue. Confirm context length, quantization, server version, and resolved model tag; keep parser separately pinned. |
+
+For any provider, `AGENT_BASE_URL` / `AGENT_API_KEY` are the explicit agent overrides;
+`PARSER_BASE_URL` / `PARSER_API_KEY` independently route the parser. The legacy `QWEN_*` endpoint is
+an agent fallback only. `PARSER_MODEL_ID` sets the parser model ID. Run an inexpensive connectivity
+and output-format smoke check on development cases, then use pinned settings on development data;
+never change endpoint/model midway through a paired run. Add a new `.env.example` variable only if
+an implementation gap is found; this plan does not require new secrets or a real `.env` edit.
 
 ---
 
