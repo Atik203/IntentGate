@@ -67,11 +67,23 @@ defensible difference; and (C3) a reproducible evaluation package with adjudicat
 traces, and full cost/latency reporting. Request-derived policies and argument constraints already
 appear in related systems, so the project must not claim to invent either one.
 
+**Strengthening additions A1–A7 (2026-10-22 expert review):** seven additions harden the study
+toward the ~80% evidence-readiness target at a mid-tier Q1 venue. Items are tagged `[A#]` below and
+priced in the model-strategy table at the end of this phase.
+
+- **A1** — Pre-registered fallback framing if the RQ3 lifecycle comparison is null.
+- **A2** — Named, released benchmark artifact (adjudicated labels + paired traces, GitHub + Zenodo DOI).
+- **A3** — Formal security property plus contract-completeness measurement.
+- **A4** — Optimization-based adaptive attacker (LLM hill-climb) with a local-first inner loop.
+- **A5** — Explicit CaMeL handling (faithful subset arm or principled non-comparability note).
+- **A6** — Venue selection bound as a hard gate before any confirmatory run.
+- **A7** — Presentation package (threat-model figure, one results figure per RQ, artifact DOI on page 1).
+
 ### 8.0 — Decide the journal claim and novelty boundary (Weeks 1–2; before new implementation)
 
 - [ ] Build a dated related-work matrix around the closest request-derived action authorization,
   prompt-injection defense, tool-schema/contract, and agent-monitoring systems (including ClawGuard,
-  AgentSpec, Task Shield, Progent, ToolGate/CaMeL, and AgentDojo). Record each system’s trusted input,
+  CaMeL, AgentSpec, Task Shield, Progent, ToolGate, and AgentDojo) [A5]. Record each system's trusted input,
   policy representation, decision point, argument/resource awareness, threat model, datasets, and
   evaluation. Verify all sources and versions; do not treat an arXiv label or a different wording as
   novelty by itself.
@@ -79,10 +91,11 @@ appear in related systems, so the project must not claim to invent either one.
   task-specific policies or check structured arguments. Prefer the lifecycle/comparative study in the
   RQs above unless the review demonstrates a concrete technical distinction. Do not treat a new schema
   or field list as novelty by itself.
-- [ ] Select 1–2 realistic journal candidates only after verifying their current quartiles by the
-  intended subject category and publication policies. Record the evidence and article limits in the
-  journal experiment plan. The ICEEICT paper alone is not the journal contribution: document the
-  substantial new method, datasets, analyses, and results planned for the extension.
+- [ ] Select and bind 1–2 realistic journal candidates as a hard gate [A6]: no confirmatory run
+  starts before this item is `[x]`. Verify current quartiles by the intended subject category,
+  scope, article type, fees, and publication policies; record the evidence and article limits in
+  the journal experiment plan. The ICEEICT paper alone is not the journal contribution: document
+  the substantial new method, datasets, analyses, and results planned for the extension.
 - **Exit gate:** supervisor/team approves a one-page contribution statement, closest-work table, and
   falsifiable research questions before coding or running the confirmatory test set.
 
@@ -103,6 +116,9 @@ appear in related systems, so the project must not claim to invent either one.
 - [ ] Pre-register hypotheses, primary/secondary outcomes, split rules, exclusion rules, seeds,
   planned comparisons, and a power/sample-size analysis based on independent task groups and pilot
   paired discordance. Split by task/request or attack template to prevent near-duplicate leakage.
+- [ ] Pre-register the fallback framing [A1]: if the RQ3 lifecycle comparison is null on the
+  confirmatory split, the headline pivots to the measurement study + formal boundary + released
+  benchmark artifact. Freeze this decision before unblinding; never choose the framing post hoc.
 - **Exit gate:** protocol, annotation guide, schema, and analysis plan are versioned before any
   confirmatory test run; threshold selection is confined to development data.
 
@@ -122,6 +138,10 @@ appear in related systems, so the project must not claim to invent either one.
   and escalation. Test deterministic decisions, malformed inputs, ordering, trace completeness, and
   the no-bypass invariant. Do not add provenance or other mechanisms unless the novelty review and
   threat model show they are needed for the central claim.
+- [ ] State and verify the formal property [A3]: under the documented observation boundary, any
+  unauthorized consequential action requires either contract incompleteness or contract-internal
+  ambiguity. Measure contract completeness and ambiguity on the labeled development data so the
+  property has an empirical counterpart, not only a statement.
 - **Exit gate:** security invariants and existing regression suite pass; blinded development results
   show the method has a plausible safety/utility operating point before confirmatory evaluation.
 
@@ -155,8 +175,12 @@ appear in related systems, so the project must not claim to invent either one.
   model. Call-level “allowed” rate is not a substitute for task utility.
 - [ ] Evaluate adaptive attackers against the documented observation boundary: intent mimicry,
   argument substitution, destination changes, multi-turn drift, echoing trusted wording, and
-  threshold-aware probing. Include both offline replay and end-to-end runs; measure the attacker’s
+  threshold-aware probing. Include both offline replay and end-to-end runs; measure the attacker's
   success and the benign cost of each defense.
+- [ ] Add an optimization-based adaptive attacker [A4]: an LLM-in-the-loop hill-climb rewrites
+  free-text arguments to push $S$ above $\tau$ and past the v2 typed checks. The inner loop runs
+  against the local CPU scorer only ($0); top-k surviving candidates get end-to-end verification.
+  Report offline and end-to-end results, the attacker's success, and each defense's benign cost.
 - [ ] Measure p50/p95/p99 gate latency, end-to-end task latency, parser/agent token and monetary cost,
   throughput, memory/hardware, and setup effort. Separate model inference cost from gate overhead.
 - [ ] Use paired confidence intervals clustered by independent task/request groups, appropriate paired
@@ -172,6 +196,9 @@ appear in related systems, so the project must not claim to invent either one.
   traces, metric definitions, hashes, environment/hardware details, and a one-command offline
   reproduction path. Ensure benchmark licenses and data handling permit redistribution; otherwise
   document bootstrap instructions and provide derived artifacts only.
+- [ ] Package the adjudicated labels + paired traces as a named, citable benchmark artifact [A2]:
+  GitHub release + Zenodo DOI, license-checked, with metric definitions and the one-command
+  reproduction path. Present it as a first-class contribution, not an appendix.
 - [ ] Add a clean-environment artifact check and independently reproduce a subset of the primary
   tables from saved traces. Record discrepancies and fix the artifact before manuscript submission.
 - [ ] Log provider, endpoint type, exact model ID/revision, parameters, API date, retries/refusals,
@@ -186,6 +213,8 @@ appear in related systems, so the project must not claim to invent either one.
   `docs/writing-guideline.md`. Include a clear threat model, formal policy/method, closest-work
   comparison, full protocol, task-level results, uncertainty, error analysis, limitations, ethics,
   and artifact availability. Keep the conference and journal claims/results traceable.
+- [ ] Apply the presentation package [A7]: threat-model figure, one results figure per RQ, and the
+  artifact DOI on page 1; combine with the non-implementer review below.
 - [ ] Run a reviewer-style audit for claim/evidence alignment, paper/code consistency, baseline
   fairness, leakage, label validity, statistical reporting, reproducibility, and journal scope. Ask
   at least one reviewer who did not implement the gate to challenge the novelty and evaluation.
@@ -194,6 +223,40 @@ appear in related systems, so the project must not claim to invent either one.
   Re-check quartile and submission requirements on the submission date.
 - **Exit gate:** submit only when every primary claim has a reproducible artifact and the independent
   review has no unresolved validity or novelty blocker.
+
+### Model strategy and cost guardrails (local-first; 2026-10-22)
+
+Minimize API spend: local models wherever scientifically acceptable; the paid API only where frozen
+comparability or attack strength requires it. Estimated budget: **minimum ~$25, expected ~$40–60,
+worst case ~$100+** if the levers below are ignored. Cost basis: Gate 3 billed $9.64 for 30 jobs /
+20,736 cases (~$0.47 per 1k cases).
+
+| Arm | gpt-4o-mini (anchor, paid) | Qwen3.5:4b local (workhorse, $0) | DeepSeek (boundary, cheap) |
+|---|---|---|---|
+| B1 (no gate) | frozen Phase 5 reuse — no rerun | full rerun $0 | refusal/boundary doc only (~$2–5) |
+| v1 (IntentGate) | frozen reuse — no rerun | full rerun $0 | skip (refuses; E25) |
+| v2 (typed argument policy) | run (~$8–15) | run $0 | — |
+| Prompt-only defense | run (~$5–10) | run $0 | — |
+| ToolGate B2 | frozen reuse | rerun $0 | — |
+| Close competitor (Progent/ClawGuard-lite) | subset run (~$5–10) | subset $0 | — |
+| CaMeL [A5] | subset arm or non-comparability note ($0–10) | subset $0 | — |
+| Adaptive attacker inner loop [A4] | attacker = gpt-4o-mini (~$10–20) | attacker = local $0 (weaker; report as lower bound) | attacker variant (~$2–5) if the paid attacker refuses |
+| Adaptive end-to-end verification [A4] | top-k survivors only (~$5–15) | $0 | — |
+| End-to-end utility | subset (~$5–10) | full $0 | — |
+| Parser re-runs (contract completeness [A3]) | cached (~$1–3) | $0 | — |
+
+Rules:
+
+- Frozen B1/v1/B2 traces are reused, never rerun; new run IDs (E32+) only for new arms.
+- Offline-first: every probe/hill-climb iteration runs against the local CPU scorer; the paid API is
+  touched only by top-k end-to-end verification and anchor-family arms.
+- AgentDojo: 200–300-task subset on paid families; the full set only on local Qwen.
+- Qwen local is the replication/robustness workhorse ($0); headline numbers stay on the anchor
+  family, and 4B results are labeled as such in every table.
+- Per-arm budget caps are set before launch; billed tokens are logged in the run manifest. Kill
+  rule: if an arm exceeds its cap by >50%, stop and re-scope (subset) instead of continuing.
+- Existing cache discipline (AGENTS.md) applies: stable prefixes, pinned model IDs, batched
+  embeddings, parser once per session, temperature 0, repair-retry only on parse failure.
 
 ### Provider setup for controlled model comparisons
 

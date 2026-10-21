@@ -859,14 +859,19 @@ sample size from independent development data before opening the final test spli
    demonstrable way from existing systems; otherwise treat the implementation as a comparative
    baseline, not the paper's novelty.
 3. A reproducible evaluation artifact with blinded/adjudicated task labels, paired traces, benchmark
-   and model pins, utility outcomes, uncertainty, setup effort, latency, and cost.
+   and model pins, utility outcomes, uncertainty, setup effort, latency, and cost — packaged as a
+   named, citable benchmark (GitHub release + Zenodo DOI) and presented as a first-class contribution,
+   not an appendix.
 
 The related-work audit must compare policy source, representation, argument/resource scope, update
 rules, user confirmation, trust boundary, enforcement point, datasets, model families, and metrics.
 Relevant primary sources include [Task Shield](https://aclanthology.org/2025.acl-long.1435/),
 [Progent](https://arxiv.org/abs/2504.11703), [ClawGuard](https://arxiv.org/abs/2604.11790),
+[CaMeL](https://arxiv.org/abs/2503.18813),
 [AgentSpec](https://doi.org/10.1145/3744916.3764546), and
-[ToolGate](https://arxiv.org/abs/2601.04688). Refresh these sources and search for newer work before
+[ToolGate](https://arxiv.org/abs/2601.04688). CaMeL is the strongest related system and must appear
+either as a faithful subset comparison or behind an explicit, principled non-comparability note.
+Refresh these sources and search for newer work before
 submission. Do not claim “first,” “novel,” or “state of the art” until the matrix and shared-protocol
 results support the exact wording.
 
@@ -874,14 +879,29 @@ results support the exact wording.
 
 - Freeze the research questions, attack-success definition, annotator guide, split strategy, and
   analysis plan before confirmatory runs. Use grouped splits and blinded human adjudication; do not
-  rely on an LLM as the sole safety judge.
+  rely on an LLM as the sole safety judge. Pre-register the fallback framing at the same time: if
+  the lifecycle comparison (RQ3) is null on the confirmatory split, the headline pivots to the
+  measurement study + formal boundary + released artifact; the framing is chosen before unblinding,
+  never post hoc.
+- State the formal property and measure its empirical counterpart: under the documented observation
+  boundary, any unauthorized consequential action requires contract incompleteness or contract-
+  internal ambiguity; completeness and ambiguity are measured on the labeled development data.
 - Compare no gate, IntentGate v1, the proposed v2 if justified, prompt-only defenses, and the closest
-  faithful gate implementations. Use identical prompts, tools, task order, model settings, and seeds
-  whenever a numerical comparison is claimed.
+  faithful gate implementations (including CaMeL or its non-comparability note). Use identical
+  prompts, tools, task order, model settings, and seeds whenever a numerical comparison is claimed.
 - Primary outcome: task-level unauthorized side effect. Report benign end-to-end completion,
   safe completion, false block/escalation, attack coverage, latency, token/cost, and model refusals.
-- Select journal candidates only after current scope, quartile category, fees, and conference-extension
-  policies are checked. Conference publication does not automatically imply journal acceptance.
+- Include an optimization-based adaptive attacker: an LLM hill-climb that rewrites free-text
+  arguments to cross the threshold and defeat typed checks. Its inner loop runs against the local
+  CPU scorer only; top-k surviving candidates receive end-to-end verification. Handcrafted echo and
+  threshold probes alone are not sufficient for a security-venue claim.
+- Select and bind journal candidates as a hard gate before any confirmatory run: current scope,
+  quartile category, fees, and conference-extension policies are checked first. Conference
+  publication does not automatically imply journal acceptance.
+- Cost and compute policy: local-first arms (Qwen local workhorse, frozen-trace reuse for B1/v1/B2,
+  paid API only for new anchor-family arms and top-k adaptive verification), per-arm budget caps
+  with a kill rule at +50% overrun. Expected budget ~$40–60, hard worst case ~$100; the priced arm
+  table and rules live in `roadmap.md` Phase 8.
 
 ---
 
