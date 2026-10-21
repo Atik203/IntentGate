@@ -6,9 +6,10 @@
 
 ---
 
-> **Design source of truth.** Sections 0–18 define the research design, pipeline, evaluation and
-> risks. Status lives in [`roadmap.md`](../roadmap.md); measured results live in
-> [`experiments/`](experiments/README.md). If this document and the roadmap disagree, flag it.
+> **Design source of truth.** Sections 0–18 preserve the v1 design and frozen evaluation; Section 19
+> defines the current journal-extension research direction, updated 2026-10-22. The latter governs
+> new contribution and novelty claims. Status lives in [`roadmap.md`](../roadmap.md); measured results
+> live in [`experiments/`](experiments/README.md). If this document and the roadmap disagree, flag it.
 
 ## Index
 
@@ -38,6 +39,7 @@
 - [Sec 16 — Expected research outcome](#sec16)
 - [Sec 17 — Future extensions](#sec17)
 - [Sec 18 — Final critical review (Reviewer #2)](#sec18)
+- [Sec 19 — Journal-extension research questions and contribution boundary](#sec19)
 
 > **Key invariants (read these first):** ordering invariant — the intent is parsed before any
 > attacker content ([Sec 5](#sec5), [Sec 10](#sec10)); scorer `S = α·S_sem + (1−α)·S_rule` with a
@@ -52,20 +54,26 @@
 
 ## Section 0 — Research Design Decisions & Assumptions
 
-**Why this problem was selected.** By 2026, LLM agents have shifted from "chat" to "action" — they book, pay, run code, modify files, and call third-party tools via MCP-style protocols. Every benchmark in our review shows the same pattern: once an agent has tool permissions, a hijacked tool call succeeds at scale — AgentDojo (NeurIPS 2024) 629 cases, InjecAgent (ACL Findings 2024) 1,054 cases with GPT-4 vulnerable 24% → 47% enhanced, MCPTox (AAAI 2026) 72.8% ASR on live servers with <3% refusal, ASB (ICLR 2025) 84.3% max ASR. The attack paths differ (injected output, poisoned tool description, multi-turn drift) but converge to one observable: the agent executes an action the user never intended. The defense literature is split — benchmarks reveal the vulnerability and propose no defense; defenses are tested only on their own threat model. The only published gate that intercepts at the action itself is ToolGate (Jan 2026, arXiv), but it requires hand-authored Hoare contracts per tool and has never been tested on any adversarial benchmark. That leaves a clean, falsifiable question for a 4–5 month thesis: can a gate derived *automatically* from the user's own request match formal contract gating without its setup cost, and does it hold across injection + poisoning?
+**Why this problem was selected.** Tool-using agents can turn indirect prompt injection and poisoned tool metadata into external side effects. The original v1 study tested one response to that problem: derive a frozen intent contract before untrusted content is loaded, then enforce it at the tool boundary. Since that design was drafted, several systems have explored task-derived policies or runtime action constraints. The project therefore treats the v1 results as a completed implementation/evaluation, not as proof that request-derived policy or action gating is new. The current research question is whether these policy designs can be compared fairly across shared tasks, attack conditions, utility measures, and model families, and which policy lifecycle best balances safety and task completion.
 
 **Why it's important.** Excessive/hijacked agency is now a named Top-10 risk in OWASP LLM / Agentic AI Top 10 (2025–26 revisions). Unlike hallucination, a hijacked tool call is not a wrong sentence — it is an irreversible side effect (money moved, file deleted, email exfiltrated). As agents are deployed with real permissions, a single successful hijack outweighs many correct turns. A lightweight, model-agnostic gate that sits between decision and execution addresses the risk at its narrowest chokepoint, independent of which attack vector got there.
 
-**Why current solutions are insufficient (verified against literature, Aug 2026):**
+**Related system landscape (review refreshed 2026-10-21):**
 
-- **Benchmarks only:** AgentDojo, InjecAgent, MCPTox, ASB all document high ASR (50–84%) and propose no defense. They are evaluation substrates, not solutions.
-- **Single-vector filters:** Prompt-level defenses (spotlighting, delimiters, tool filters in AgentDojo) reduce but never eliminate ASR and are bypassed by adaptive attacks (Zhan et al., NAACL Findings 2025: >85% ASR against several defenses when attacker knows the defense).
-- **Hand-authored safety specs:** TrustAgent (Findings of EMNLP 2024) uses a hand-authored Agent Constitution + GPT-4-emulated tools; not live, not scalable to new domains, no MCPTox/InjecAgent evaluation.
-- **Formal contract gating (ToolGate, arXiv 2601.04688):** Provides Hoare-style pre/postconditions per tool and checks world-state before/after execution. It remains the formal High-threat baseline, but its evaluation differs from InjecAgent and MCPTox.
-- **Symbolic privilege gating (Progent, arXiv 2504.11703v3):** Automatically generates an initial privilege policy from the user task, checks calls with symbolic rules, and uses SMT checks plus approval for policy expansion. It is the closest request-derived neighbor; the documented comparison is positional because its released adapters and benchmarks differ from this protocol.
-- **Heavyweight structural defenses:** StruQ (USENIX Security 2025) separates instruction/data channels via fine-tuning; CaMeL (arXiv 2025) separates planner/executor with capabilities for provable security on AgentDojo. Both require model-level changes, heavy deployment cost vs. our middleware wrapper claim. MELON (arXiv 2025) needs masked re-execution (2× inference cost).
+- [Task Shield](https://aclanthology.org/2025.acl-long.1435/) evaluates whether instructions and tool calls serve user goals on AgentDojo.
+- [Progent](https://arxiv.org/abs/2504.11703) generates symbolic privilege rules from a task and can update them during execution, with checks on policy expansion.
+- [ClawGuard](https://arxiv.org/abs/2604.11790) derives task-specific access constraints before tool use and presents them for user confirmation.
+- [AgentSpec](https://doi.org/10.1145/3744916.3764546) provides a runtime constraint DSL across agent domains.
+- [ToolGate](https://arxiv.org/abs/2601.04688) checks per-tool Hoare contracts against symbolic state.
 
-**Why a middleware gate instead of fine-tuning or prompt hardening.** The gate is the only placement that is (a) attack-vector agnostic — injection, poisoning, and drift all must eventually emit a tool call, (b) model-agnostic — no fine-tuning, works as wrapper around any ReAct/MCP agent, (c) auditable — allow/block/escalate + score is logged per call. Prompt hardening is in-band and therefore attacker-controllable; fine-tuning is out-of-scope for a 4-month thesis and couples the defense to one backbone.
+These works overlap with the v1 idea in task alignment, request-derived policies, argument constraints,
+or runtime enforcement. Their evaluation settings differ, but benchmark mismatch alone does not
+establish novelty. The journal study must compare their mechanisms and, where feasible, run faithful
+implementations under matched prompts, tasks, model settings, and task-level outcomes.
+
+**Why a middleware gate remains a useful implementation choice.** It places an auditable check at the
+tool execution boundary and can operate without model fine-tuning. This is a deployment property to
+measure against the nearest systems, not a claim that other action-level enforcement is absent.
 
 **Core research assumptions:**
 
@@ -89,7 +97,10 @@
 - *Post-hoc audit log (detect after execution)* — rejected because it does not prevent the side effect; prevention at the gate is the thesis claim.
 - *LLM-as-judge on full trajectory* — rejected as sole gate because it is itself prompt-injectable and non-deterministic; we use embeddings + rules as primary signal, LLM only for intent parsing (offline, before any attacker content is seen).
 
-**Why this final design was chosen.** It is the only design that (a) unifies multiple attack vectors under one mechanism (the tool call itself), (b) derives policy automatically from the user's own request (zero per-tool authoring vs. ToolGate's manual cost), and (c) can be evaluated *directly* against the adversarial benchmarks ToolGate never tested on — which is the exact cross-paper gap identified in `literature_review.md:288-289`.
+**Why this design was chosen for v1.** The team selected it to test whether an automatically derived
+intent contract could cover the evaluated injection and poisoning suites without per-tool authoring.
+That design choice and the completed v1 results do not establish exclusivity or novelty against
+current systems. The journal claim must follow the updated comparison in Section 19.
 
 ---
 
@@ -117,23 +128,27 @@ We build that gate as a pip-installable Python wrapper that sits between any age
 
 **Why this problem matters.** Tool-using agents are no longer demos — by 2026 they handle email, calendars, payments, code execution, and file systems via MCP. A hijack is not a "wrong answer" but an action with external consequences. OWASP now lists excessive agency as a top risk precisely because benchmarks show it is not hypothetical.
 
-**Existing limitations (verified, Aug 2026):**
+**Current field and gap (review refreshed 2026-10-21):** Runtime policies derived from user tasks
+and action-level enforcement already appear in Task Shield, Progent, ClawGuard, and AgentSpec, while
+ToolGate studies stateful Hoare contracts. Their policy sources, update lifecycles, tool/argument
+semantics, threat models, and evaluation protocols differ. The current evidence therefore does not
+support a claim that IntentGate is the first request-derived policy or the first adversarially tested
+action gate. The remaining research opportunity is a controlled, task-level comparison that makes
+those differences explicit and measures security, benign utility, escalation, and cost under shared
+tasks and attacker conditions.
 
-- Diagnosis is settled, defense is not. All four anchor benchmarks (AgentDojo, InjecAgent, MCPTox, ASB) report high ASR and propose no defense. AgentDojo's best agent (Claude 3.5 Sonnet) still only reaches ~78% benign utility; GPT-4o drops 69% → 50% under attack; MCPTox shows <3% refusal across 20 agents.
-- Defenses are siloed. TrustAgent, MELON, StruQ, CaMeL each evaluated on one threat model, almost never on a benchmark built by a different team. ToolGate — the only gate at the action itself — has never been tested on InjecAgent or MCPTox at all.
-- Setup cost is the hidden blocker. ToolGate's formal contracts catch hallucinated calls in their own evaluation, but require hand-authoring per tool. No paper measures "contracts needed per tool" as a metric — we will.
-- Adaptive attackers break static defenses. Zhan et al. (NAACL Findings 2025, same lead author as InjecAgent) show defense-aware attacks push ASR >85% against several defenses that looked strong under static attacks. Any claim of robustness must be tested against adaptive pressure, or explicitly scoped as non-adaptive.
+**Frozen v1 contribution (conference study):** an open-source middleware that parses the trusted
+request once, applies embedding similarity plus deterministic veto rules at the tool boundary, and
+records allow/block/escalate decisions; and a frozen evaluation of that implementation on InjecAgent
+and MCPTox with a ToolGate reimplementation, setup-cost, latency, and ablation results. These are
+contributions of the completed study, not evidence that its core mechanism is new relative to all
+current systems. The exact claim limits and results are recorded in Sections 16 and 19.
 
-**Research gap (one sentence):** Recent peer-reviewed work explores request-derived policies (Task Shield, ACL 2025), and concurrent arXiv work also derives task-scoped constraints from the user’s objective (ClawGuard, arXiv:2604.11790, 2026). However, much of this work focuses on LLM-as-judge checkers or differs in enforcement; we study a lightweight, CPU-only, no-LLM-per-action approach (embedding similarity + deterministic hard-rule veto) with a frozen, reproducible head-to-head against a faithful ToolGate reimplementation on both injection (InjecAgent) and tool-poisoning (MCPTox).
-
-**Why our approach is different.** It is not another LLM-as-judge detector; it is a *policy* derived from the user's intent and enforced at the single chokepoint every attack must pass (the tool call). The policy is explicit (allowed entities/operations/resources, constraints, high-risk flags) and enforced with embedding-based similarity + hard veto, requiring no LLM call per action (16–20 ms CPU). That makes enforcement predictable and auditable. We also replace ToolGate's manual per-tool contracts with zero-setup automatic derivation and measure the manual cost directly.
-
-**Expected research contribution:**
-
-- **Primary (C1):** The intent-derived, model-agnostic middleware gate (parser + scorer + allow/block/escalate) with open-source implementation.
-- **Co-primary (C2):** A fair, adversarial evaluation of contract-style gating — our gate vs. a ToolGate reimplementation — on InjecAgent + MCPTox, including setup-cost and latency reporting, reusable by others.
-
-**Why publication-worthy.** It closes the exact cross-paper gap flagged in our own synthesis: benchmarks measure vulnerability, defenses don't cross-evaluate, and the closest gate has never seen an adversarial test. A workshop/Findings-tier paper that does that cross-evaluation — even if the gate is simple — is a citable artifact. The gate itself is a practical contribution with very-high real-world impact (pip wrapper, low-medium compute).
+**Journal contribution boundary:** do not claim novelty for request-derived policy, typed argument
+constraints, middleware placement, or embedding-plus-rule scoring alone. The candidate journal value
+is a reproducible comparison of policy representation and policy-update lifecycle under a common
+threat model, plus a measured argument-aware extension only if the related-work audit identifies a
+specific, defensible difference. Section 19 defines the research questions and evidence gates.
 
 ---
 
@@ -141,9 +156,9 @@ We build that gate as a pip-installable Python wrapper that sits between any age
 
 ## Section 3 — Problem Statement
 
-**Current problem.** An LLM agent given tool permissions can be induced — via injected text in tool outputs, poisoned tool metadata at registration, or gradual multi-turn drift — to execute a tool call that diverges from the user's original intent, causing financial, privacy, or system harm. Existing guardrails either cover one vector or require manual per-tool contracts and have never been tested against the adversarial benchmarks that demonstrate the problem.
+**Current problem.** An LLM agent given tool permissions can be induced — via injected text in tool outputs, poisoned tool metadata at registration, or gradual multi-turn drift — to execute a tool call that diverges from the user's original intent, causing financial, privacy, or system harm. Existing defenses and authorization systems span several designs; their coverage and assumptions differ, and the journal study must compare them against matched tasks before claiming a remaining gap.
 
-**Existing limitations.** No mechanism (a) derives policy automatically from the request (no manual authoring), (b) enforces at the action gate across vectors, and (c) is tested on both InjecAgent and MCPTox.
+**Original v1 gap (historical framing).** At the start of the project, the team identified an opportunity to test an automatically derived intent contract against both InjecAgent and MCPTox and to measure setup cost against ToolGate. That evaluation is now complete. It is not a current claim that no other system derives policies from requests or enforces action constraints.
 
 **Research hypothesis.** If every proposed tool call is scored for consistency against a structured intent contract automatically derived from the user's original request, and blocked/escalated when inconsistent, then Attack Success Rate will measurably drop on both InjecAgent (injection) and MCPTox (poisoning) compared to an unprotected ReAct agent, with competitive ASR to a ToolGate-style formal gate but at zero per-tool setup cost and with acceptable False Positive Rate and latency.
 
@@ -155,7 +170,7 @@ We build that gate as a pip-installable Python wrapper that sits between any age
 4. Empirically validate on InjecAgent (1,054) + MCPTox (1,348, or a reproducible subset if live servers require re-registration) with ASR, FPR, latency, and setup-cost reporting; include threshold ablation and error taxonomy.
 5. (Stretch, months 4–5) Pilot a small multi-turn drift condition to test whether the same gate catches slow-build manipulation, not just single-call hijacks.
 
-**Expected contribution.** A working, evaluated gate + a reproducible adversarial evaluation of contract-style gating that the community can reuse (see Section 2, C1+C2).
+**Completed v1 contribution.** A working implementation and its frozen evaluation on InjecAgent and MCPTox, including the measured comparison and limits recorded in Section 16. The journal extension has separate research questions and candidate contributions in Section 19.
 
 ---
 
@@ -516,8 +531,8 @@ establish optimality, a global security guarantee, or a multi-turn guarantee.
 | **Technical** | Intent parser drops goals or hallucinates contract fields | Medium | Moderate | Constrained JSON + schema validation + retry + conservative defaults; spot-check 30 cases early |
 | **Technical** | Over-blocking legitimate actions (high FPR) | Medium | High | Tunable τ + escalate band; report Pareto curve, not single threshold; escalate fallback is the FPR safety valve |
 | **Research** | ToolGate reimplementation fidelity questioned by reviewers | Medium | Moderate | Validate on ToolBench subset first; document any divergence transparently; count setup cost honestly; appendix with contract examples |
-| **Research** | Reviewers see this as "just a threshold on embeddings" — incremental | Low-Medium | Moderate | Position as *evaluation* contribution: first adversarial test of contract-style gating + zero-setup vs. manual cost — the mechanism's simplicity is a feature (low-medium compute) |
-| **Research** | Novelty erosion — ToolGate is preprint, may be published/updated before submission | Medium | Low | Cite as preprint accurately; our contribution is the *evaluation* they didn't do (adversarial) + auto derivation; not competing on same benchmark |
+| **Research** | Reviewers see v1 as incremental or overlapping with newer policy gates | High | High | Do not claim novelty for request-derived policy, action gating, or argument constraints alone; use Section 19's dated comparison and prove any remaining distinction |
+| **Research** | Cross-system comparison is unfair because tasks, prompts, policy lifecycles, and tools differ | High | High | Match these factors where feasible; otherwise label results as contextual, not directly comparable |
 | **Dataset** | MCPTox live servers unavailable / require re-registration | Medium | Moderate | Clone snapshot early (Week 1); fallback to static tool definitions; document exact versions; report excluded count |
 | **Timeline** | ToolGate reimpl takes longer than 4 weeks | Medium | High | Scope reimpl to *evaluated tools only* (not all 353); minimal world-state; timebox to 4 weeks, then freeze and report coverage % |
 | **Timeline** | Scope creep: trying to also solve multi-turn drift deeply | High | High | Drift is *explicit stretch goal*, not requirement (Idea §10); core deliverable is injection + poisoning only; gate stretch to 1 pilot figure max |
@@ -711,7 +726,9 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 > non-overlapping, McNemar p < 0.05); FPR < 10% at the chosen τ; 0 contracts vs the documented B2
 > count; latency p95 < 100 ms; B2 runs and is documented with coverage %.
 
-**Expected technical improvements (hypotheses, not promises):** On InjecAgent+MCPTox, meaningful ASR reduction vs. B1 (unprotected) — e.g., B1 ~24–47% (InjecAgent) and ~40–73% (MCPTox per risk category) → ours substantially lower, with FPR kept in single digits via escalate band. Parity or near-parity ASR vs. ToolGate B2 on covered tools, but with 0 manual contracts vs. B2's manual count and lower latency (embedding vs. symbolic world-state). Exact numbers are hypotheses to be measured; the thesis claim is directional + cost, not a specific percentage.
+**Original v1 hypotheses (resolved below):** the study expected lower measured ASR than B1 and compared its
+results with ToolGate B2 on the covered tools. Those hypotheses are resolved by the frozen evidence;
+they are not untested expectations or claims of parity.
 
 > **Measured 2026-10-12 (Gate 3, E11–E17 — hypotheses resolved):** InjecAgent ASR-valid
 > 19.0%→0.7% (dh 8.8%→0.0%, ds 28.3%→1.3%); MCPTox attack-influenced 279→144; B2 ≈ B1
@@ -726,11 +743,11 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 - Threshold Pareto: lower τ → lower ASR but higher FPR; escalate band captures borderline cases that would otherwise be FPR.
 - ToolGate B2 shows coverage gaps: high ASR on tools without authored contracts; ours has no coverage gap by construction.
 
-**Expected contribution:** C1 (zero-setup intent gate middleware) + C2 (first adversarial evaluation of contract-style gating, with setup-cost metric) — both independently reusable. The gate is a pip package; the evaluation is a citable artifact even if ASR parity with ToolGate is not achieved on every category.
+**Completed v1 contribution:** IntentGate's frozen v1 implementation and the measured InjecAgent/MCPTox study are the current completed artifact. The implementation uses request parsing, embedding similarity, deterministic vetoes, and an allow/block/escalate gate; results include setup cost, latency, ablations, and limitations. These facts do not establish that the mechanism is novel relative to every later or concurrent system.
 
-**Novelty:** We do not claim first-ever request-derived policy; recent work (Task Shield, ACL 2025) and concurrent preprints (ClawGuard, arXiv:2604.11790, 2026) derive task-scoped policies from the user’s request. Our contribution is the lightweight enforcement mechanism (embedding similarity + deterministic hard-rule veto, no LLM call per action), the frozen, reproducible head-to-head against a faithful ToolGate reimplementation, and the direct measurement of manual contract setup cost (0 vs 145) on InjecAgent and MCPTox. We also provide ablations and paired statistics. The policy itself is explicit and auditable, trading LLM-as-judge flexibility for CPU-only speed (16–20 ms).
+**Journal contribution status:** no journal novelty claim is approved yet. Section 19 defines a candidate comparative study of policy representation and update lifecycle. It requires an updated literature matrix, faithful comparisons where artifacts permit, and evidence that the study adds a defensible insight beyond existing task-derived or runtime-policy systems. Any argument-aware v2 is a research candidate, not an established contribution.
 
-**Publication potential:** Realistic primary target: security/agentic-AI workshop or Findings track (EMNLP/ACL Findings, USENIX-adjacent workshop) — matches "short paper draft" in Idea §9. Main-conference is a stretch conditional on strong ASR reduction + low FPR + clean ToolGate comparison. Workshop is the safe floor and still valuable as an open-source artifact.
+**Publication target:** a journal candidate will be selected only after checking current scope, category quartile, article type, publication fees, and the venue's policy for substantial extensions of the ICEEICT manuscript. A Q1 label or acceptance probability is not guaranteed by the current results.
 
 **Success criteria (concrete, falsifiable) — all met 2026-10-12 (E11–E17):**
 
@@ -740,7 +757,7 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 - [x] Latency overhead p95 < 100ms per tool call on CPU (embedding) — 16–20 ms.
 - [x] ToolGate reimpl runs and is documented (coverage % reported) — InjecAgent 100%, MCPTox 8.1%/37.2% weighted.
 
-**Graduation outcome:** Completed Thesis + evaluated gate + pip package + evaluation report + paper draft (minimum: workshop submission; target: Findings-tier), fully reproducible with `blueprint.md` as single source of truth.
+**Completed v1 research outcome:** evaluated gate + pip package + frozen evaluation report + ICEEICT conference manuscript final pass (2026-10-20). Thesis completion is tracked separately. Phase 8 is the planned journal-strengthening study and must meet the Section 19 evidence gates before any journal contribution or venue claim is made.
 
 ---
 
@@ -772,7 +789,7 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 
 **On the core mechanism:**
 
-- *"Your scorer is just cosine similarity plus a few if-statements — how is this not trivial?"* — Mitigated by the evaluation framing: trivial is a feature if it works at zero setup cost. The paper's claim is not "novel math" but "first adversarial test of contract-style gating without manual cost." Preempt by leading with setup-cost and cross-benchmark results, not scorer novelty. Ablations (A1–A3) prove each piece matters — if they don't, the reviewer is right and we must report it.
+- *"Your scorer is just cosine similarity plus a few if-statements — how is this not trivial?"* — The v1 paper does not claim novel math. Its measured value is the frozen implementation/evaluation and the documented cost/latency results. The journal extension must add a defensible question and evidence beyond repeating the v1 comparison.
 - *"Intent parsing is itself an LLM call — isn't that also hijackable?"* — No, because it runs *before* any attacker content is loaded (enforced ordering). This must be stated and tested explicitly; otherwise the whole trust assumption collapses. Include an integration test that proves ordering.
 - *"You tuned τ until the Pareto curve looked good — how do we know this generalizes?"* — Mitigated by reporting the full sweep, not a single τ, and by stratified results (vague vs. specific requests). If τ is brittle across benchmarks, report it honestly as limitation — threshold sensitivity is a finding, not a failure to hide.
 
@@ -783,11 +800,11 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 - **ToolGate fidelity:** "Your ToolGate is not the real ToolGate." — Already mitigated by validating on ToolBench subset and documenting coverage % and any divergence. Have contract examples in appendix so reviewers can judge fidelity themselves.
 - **Vague-request stratification:** If most real requests are vague, FPR may be higher in practice than on benchmarks (which have crisp tasks). A reviewer will ask for this slice.
 
-**Missing datasets:** None critical — InjecAgent + MCPTox is exactly the right pair (injection + poisoning) and matches the gap we claim. AgentDojo is optional stretch; do not add more benchmarks at the cost of depth.
+**Missing datasets:** InjecAgent + MCPTox anchor the frozen v1 study, but they do not cover the full task-level, multi-turn, or MCP-specific surface. The journal plan should add at least one compatible dynamic benchmark and validate licenses and labels before selection.
 
 **Possible reviewer criticisms, ranked by severity:**
 
-1. **"How is this meaningfully different from ToolGate's contracts — you just replaced formal logic with embeddings?"** — This is the #1 question and must be answered in the first paragraph of related work: same gate placement, opposite policy source (manual Hoare vs. auto intent), opposite evaluation (task completion vs. adversarial), and we *measure* the manual cost they don't. We also cite concurrent work (Task Shield, ACL 2025; ClawGuard, arXiv:2604.11790, 2026) to situate request-derived policies, noting ClawGuard is a preprint and our differentiation is CPU-only no-LLM-per-action enforcement (embedding similarity + deterministic hard-rule veto) with a frozen, reproducible head-to-head on InjecAgent and MCPTox under identical metrics.
+1. **"How is this meaningfully different from existing task-derived and runtime policy systems?"** — This remains unresolved for the journal extension. Section 19 requires a feature-level comparison with Task Shield, Progent, ClawGuard, AgentSpec, and ToolGate. A novelty claim must follow that analysis and comparative evidence; lower latency or use of embeddings alone is not sufficient.
 2. **"Your MCPTox results are on a static snapshot, not live servers — does this count?"** — Acknowledge live vs. static explicitly; argue that poisoning-at-registration logic is identical in both, and document server versions; treat as honest limitation.
 3. **"FPR in single digits is still too high for deployment."** — Counter with escalate band: hard-block FPR is lower, escalate FPR is user-confirmed. Report both separately so reviewer can see the tradeoff.
 
@@ -797,14 +814,97 @@ Agent proposes tool_call ──────────→ [Gate: embed + rules 
 - "Why only two baselines?" — Answer: two is sufficient because they isolate the exact claim (unprotected vs. closest gate); adding more baselines (MELON, StruQ) would be citing their published numbers, not reimplementing, and would dilute depth. Depth over breadth for a 4-month thesis.
 - "What if the gate is bypassed via a single `exec` that does everything?" — Answer: `code_exec` is a hard-veto category when not in intent; this is scope boundary, not oversight — and is a named future extension (sequence-aware scoring).
 
-**Recommended pre-implementation actions, in priority order:**
-
-1. Week 1: clone both benchmarks and run B1 on 20 cases each to confirm harness reproduces ballpark ASR — do this before writing any gate code.
-2. Week 1–2: run the 50-case scorer pilot and decide α/τ range — this is the cheapest Go/No-Go.
-3. Week 2: freeze intent contract JSON schema and write 3 few-shot parser examples — schema churn later is expensive.
-4. Before defense: prepare the one-slide "ToolGate vs. Ours" table (setup cost, ASR on InjecAgent, ASR on MCPTox, latency) — this is the slide the committee will remember.
+**Current actions:** the v1 implementation and conference manuscript are complete. Follow the phased
+journal study in Section 19 and [`roadmap.md`](../roadmap.md); do not rerun or overwrite the frozen
+Phase 5 matrix.
 
 ---
 
-**Blueprint complete.** All 18 sections are internally consistent with `literature_review.md` (10 papers), `literature_review/index.md` (Master Matrix for 5 anchors + ToolGate as closest), and Idea 1 §1–12. The only net-new additions beyond your Idea text are: the Week 1–2 pilot as explicit Go/No-Go, the escalate band as FPR safety valve, the ToolGate coverage % reporting, and the threshold Pareto + error taxonomy as required figures — each flagged with rationale.
+<a id="sec19"></a>
+
+## Section 19 — Journal-Extension Research Questions and Contribution Boundary
+
+This section is the current research direction as of 2026-10-22. Sections 0–18 document the v1
+design and its resolved evaluation; Section 19 governs new novelty and contribution claims.
+
+### Research questions
+
+- **RQ1 — Comparative safety:** Under matched tasks and attack opportunities, how do frozen
+  request-derived intent policies, dynamic privilege policies, user-confirmed task constraints, and
+  non-policy defenses differ in preventing task-level unauthorized side effects?
+- **RQ2 — Safety and utility:** How do request ambiguity and benign task complexity change successful
+  task completion, false blocks, and escalation burden for these policy types?
+- **RQ3 — Policy lifecycle:** Does keeping a policy immutable after trusted-request parsing resist
+  adaptive and multi-step attacks better than policies that evolve during execution, and what utility
+  cost does that choice impose?
+- **RQ4 — Generalization and cost:** Which results hold across distinct model families, benchmark
+  families, and tool schemas after separating backbone refusal, gate effect, latency, and cost?
+
+### Candidate hypotheses
+
+These are prospective and must be preregistered before confirmatory testing. H1 predicts that a
+well-specified action policy lowers task-level unauthorized side effects relative to no gate. H2
+predicts that a fixed policy that cannot be expanded by attacker-controlled content reduces policy
+drift, while its effect on benign completion depends on request ambiguity and escalation design. H3
+predicts that model and benchmark differences moderate the observed effect; zero-attack/refusal arms
+cannot be treated as evidence of gate effectiveness. Define the utility non-inferiority margin and
+sample size from independent development data before opening the final test split.
+
+### Candidate contributions; novelty remains unproven
+
+1. A controlled comparison of policy representation and policy-update lifecycle under a shared,
+   task-level threat model, including fair implementation or explicit non-comparability notes for
+   Task Shield, Progent, ClawGuard, AgentSpec, and ToolGate.
+2. An argument-aware version of IntentGate only if its policy semantics and enforcement differ in a
+   demonstrable way from existing systems; otherwise treat the implementation as a comparative
+   baseline, not the paper's novelty.
+3. A reproducible evaluation artifact with blinded/adjudicated task labels, paired traces, benchmark
+   and model pins, utility outcomes, uncertainty, setup effort, latency, and cost — packaged as a
+   named, citable benchmark (GitHub release + Zenodo DOI) and presented as a first-class contribution,
+   not an appendix.
+
+The related-work audit must compare policy source, representation, argument/resource scope, update
+rules, user confirmation, trust boundary, enforcement point, datasets, model families, and metrics.
+Relevant primary sources include [Task Shield](https://aclanthology.org/2025.acl-long.1435/),
+[Progent](https://arxiv.org/abs/2504.11703), [ClawGuard](https://arxiv.org/abs/2604.11790),
+[CaMeL](https://arxiv.org/abs/2503.18813),
+[AgentSpec](https://doi.org/10.1145/3744916.3764546), and
+[ToolGate](https://arxiv.org/abs/2601.04688). CaMeL is the strongest related system and must appear
+either as a faithful subset comparison or behind an explicit, principled non-comparability note.
+Refresh these sources and search for newer work before
+submission. Do not claim “first,” “novel,” or “state of the art” until the matrix and shared-protocol
+results support the exact wording.
+
+### Evidence and decision gates
+
+- Freeze the research questions, attack-success definition, annotator guide, split strategy, and
+  analysis plan before confirmatory runs. Use grouped splits and blinded human adjudication; do not
+  rely on an LLM as the sole safety judge. Pre-register the fallback framing at the same time: if
+  the lifecycle comparison (RQ3) is null on the confirmatory split, the headline pivots to the
+  measurement study + formal boundary + released artifact; the framing is chosen before unblinding,
+  never post hoc.
+- State the formal property and measure its empirical counterpart: under the documented observation
+  boundary, any unauthorized consequential action requires contract incompleteness or contract-
+  internal ambiguity; completeness and ambiguity are measured on the labeled development data.
+- Compare no gate, IntentGate v1, the proposed v2 if justified, prompt-only defenses, and the closest
+  faithful gate implementations (including CaMeL or its non-comparability note). Use identical
+  prompts, tools, task order, model settings, and seeds whenever a numerical comparison is claimed.
+- Primary outcome: task-level unauthorized side effect. Report benign end-to-end completion,
+  safe completion, false block/escalation, attack coverage, latency, token/cost, and model refusals.
+- Include an optimization-based adaptive attacker: an LLM hill-climb that rewrites free-text
+  arguments to cross the threshold and defeat typed checks. Its inner loop runs against the local
+  CPU scorer only; top-k surviving candidates receive end-to-end verification. Handcrafted echo and
+  threshold probes alone are not sufficient for a security-venue claim.
+- Select and bind journal candidates as a hard gate before any confirmatory run: current scope,
+  quartile category, fees, and conference-extension policies are checked first. Conference
+  publication does not automatically imply journal acceptance.
+- Cost and compute policy: local-first arms (Qwen local workhorse, frozen-trace reuse for B1/v1/B2,
+  paid API only for new anchor-family arms and top-k adaptive verification), per-arm budget caps
+  with a kill rule at +50% overrun. Expected budget ~$40–60, hard worst case ~$100; the priced arm
+  table and rules live in `roadmap.md` Phase 8.
+
+---
+
+**Blueprint status:** Sections 0–18 specify the completed v1 method and evaluation; Section 19 defines
+the planned journal study. Progress and completion status remain in [`roadmap.md`](../roadmap.md).
 

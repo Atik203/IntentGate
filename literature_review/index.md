@@ -2,11 +2,11 @@
 
 **Project:** Intent-Consistency Verification at the Action Gate for Tool-Using LLM Agents
 
-**Last updated:** 2026-10-18 (Phase 7 Progent addition, earlier reviews retained)
+**Last updated:** 2026-10-22 (journal novelty audit opened; full feature-level review pending)
 
-> **FROZEN for Phase 2 (Gate 0, 2026-09-11).** This index and the 5 detailed paper reviews
-> are the citation basis for the thesis/paper (BibTeX: `docs/references.bib`). Re-verification of
-> flagged figures happens only via a roadmap + CHANGELOG entry.
+> **Historical citation baseline:** the detailed v1 reviews and their figures remain frozen unless
+> updated through the roadmap and CHANGELOG. The ICEEICT manuscript uses its own verified citation
+> set. The Phase 8 journal audit is open and must update this matrix before fixing novelty claims.
 
 ---
 
@@ -20,6 +20,9 @@
 | 4 | Agent Security Bench / ASB (Zhang et al.) | 2025 | ICLR 2025 | **Anchor (Benchmark)** | Low | 2026-08-24 | [papers/04-asb-zhang-2025.md](papers/04-asb-zhang-2025.md) |
 | 5 | ToolGate (Liu et al.) | 2026 | arXiv preprint (2601.04688v1) | **Closest (System)** | High | 2026-08-24 | [papers/05-toolgate-liu-2026.md](papers/05-toolgate-liu-2026.md) |
 | 6 | Progent (Shi et al.) | 2025, revised 2026 | arXiv preprint (2504.11703v3) | **Closest (System)** | High | 2026-10-18 | [papers/06-progent-shi-2025.md](papers/06-progent-shi-2025.md) |
+| 7 | Task Shield (ACL 2025) | 2025 | ACL 2025 | **Closest (System)** | High | 2026-10-21 (source checked; full comparison pending) | [ACL Anthology](https://aclanthology.org/2025.acl-long.1435/) |
+| 8 | ClawGuard | 2026 | arXiv preprint (2604.11790) | **Closest (System)** | High | 2026-10-21 (source checked; full comparison pending) | [arXiv](https://arxiv.org/abs/2604.11790) |
+| 9 | AgentSpec | 2026 | ICSE 2026 | **Closest (System)** | High | 2026-10-21 (source checked; full comparison pending) | [ACM DOI](https://doi.org/10.1145/3744916.3764546) |
 | — | TrustAgent (Hua et al.) | 2024 | Findings of EMNLP | Pending | Pending | — | — |
 | — | MELON (Zhu et al.) | 2025 | arXiv preprint | Pending | Pending | — | — |
 | — | StruQ (Chen et al.) | 2025 | USENIX Security | Pending | Pending | — | — |
@@ -46,7 +49,7 @@
 ## Quick Triage (At a Glance)
 
 **Essential reading (must-read before team meetings):**
-- ToolGate (Liu et al., 2026) — **Closest system**; only contract-grounded tool execution gate published; High threat — never tested on adversarial injection benchmarks; manual contract authoring is key gap
+- Task Shield, Progent, ClawGuard, AgentSpec, and ToolGate — **Closest systems**; compare task-derived policy construction, representation, update lifecycle, decision point, and evaluation before stating a gap. Existing work makes “first request-derived gate” and “first adversarial test” unsafe claims.
 - InjecAgent (Zhan et al., 2024) — **Anchor**; standard indirect prompt injection benchmark (1,054 cases, 62 attacker tools); GPT-4 vulnerable 24% → 47% enhanced; our primary evaluation substrate
 - AgentDojo (Debenedetti et al., 2024) — **Anchor**; most extensible harness (97 tasks, 629 test cases, 4 environments); best benign utility 78% (Claude 3.5 Sonnet); defenses fail to get both high utility + low ASR
 
@@ -64,11 +67,11 @@
 
 | What our idea does | Who else does it | Gap remaining |
 |---|---|---|
-| Request-derived policy at action gate | Progent v3 | Compare policy lifecycle and enforcement, not uniqueness of request-derived gating |
+| Request-derived/task-derived policy | Task Shield, Progent, ClawGuard, and AgentSpec (with different policy and enforcement designs) | The journal study must compare policy representation, update lifecycle, enforcement point, threat model, and evidence; request-derived gating alone is not a novelty gap |
 | Block tool calls diverging from user intent under injection | TrustAgent (EMNLP 2024) — via hand-authored Agent Constitution pre/in/post-planning | TrustAgent uses static natural-language constitution + GPT-4 sandbox emulation; no live tool evaluation; requires hand-authoring per domain |
-| Contract-grounded tool execution | ToolGate (Liu et al., 2026) — Hoare-style pre/postconditions on symbolic world-state | ToolGate requires manual contract per tool, never evaluated on injection/poisoning benchmarks (InjecAgent/MCPTox), no adaptive-attack testing |
+| Contract-grounded tool execution | ToolGate (Liu et al., 2026) — Hoare-style pre/postconditions on symbolic world-state | Compare evaluated-tool coverage, contract assumptions, benchmark compatibility, and measured task outcomes; do not generalize from the current B2 reimplementation alone |
 | Indirect prompt injection benchmarking | InjecAgent (ACL 2024), AgentDojo (NeurIPS 2024), ASB (ICLR 2025) | All reveal high ASR but propose no defense — we reuse as evaluation harness |
-| Tool-poisoning at registration time | MCPTox (2508.14925v1) — 1,312 live-server cases, 45 servers, 353 tools | MCPTox measures vulnerability only; proposes no defense; registration-time surface never tested against ToolGate-style gates |
+| Tool-poisoning at registration time | MCPTox (2508.14925v1) — 1,312 live-server cases, 45 servers, 353 tools | MCPTox measures vulnerability; IntentGate v1 evaluated on a pinned snapshot. Phase 8 should assess whether any claimed registration-time protection generalizes across faithful baselines and task-level outcomes |
 | Cross-surface unified defense | ASB (ICLR 2025) — evaluates 11 defenses across 4 stages | No defense neutralizes all stages; ASB evaluates existing defenses but does not propose gate mechanism |
 | Formal/provable security | StruQ (USENIX 2025) — structured instruction/data channels via fine-tuning; CaMeL — planner/executor separation with capabilities | Both require model-level changes/fine-tuning; heavy deployment cost vs. our model-agnostic middleware claim |
 | Training-free injection detection | MELON (2025) — masked re-execution + tool comparison | Doubles inference cost (2× trajectory); empirical only, no formal guarantees |
@@ -76,6 +79,10 @@
 ---
 
 ## Verification Log
+
+| 2026-10-21 | Task Shield | Primary venue page checked; feature-level comparison pending for Phase 8 | [ACL Anthology](https://aclanthology.org/2025.acl-long.1435/) |
+| 2026-10-21 | ClawGuard | arXiv record checked; version and implementation comparison pending for Phase 8 | [arXiv](https://arxiv.org/abs/2604.11790) |
+| 2026-10-21 | AgentSpec | ACM publication record checked; feature-level comparison pending for Phase 8 | [ACM DOI](https://doi.org/10.1145/3744916.3764546) |
 
 | Date | Paper | Status Change | Source |
 |---|---|---|---|
