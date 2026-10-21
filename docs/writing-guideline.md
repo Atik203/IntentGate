@@ -6,10 +6,12 @@ this repo. Use together with `docs/prompt.md`.
 page controls the structure and the content of each section of the paper
 (`IEEE-conference/IEEE-conference.tex`).
 
-Repo note: the target is a 6-page IEEE conference paper, so the journal-only
-parts below (author contributions, declaration, acknowledgements) do not appear
-in the conference template and can be skipped. Where the guide sets paragraph
-counts, compress them to fit the page limit.
+Scope note: this extract governs the completed 6-page ICEEICT conference paper
+(`IEEE-conference/IEEE-conference.tex`). Its conference-specific length and
+section guidance do not govern a future journal manuscript. For Phase 8, follow
+the selected journal's current author instructions and include the full methods,
+limitations, reproducibility, and required declarations; do not assume a venue
+until the roadmap's journal-selection gate is complete.
 
 ---
 
