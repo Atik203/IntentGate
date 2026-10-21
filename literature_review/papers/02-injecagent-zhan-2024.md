@@ -143,7 +143,7 @@ Per §8: (1) fixed hacking prompt (variation and dynamic enhancement not explore
 | **AgentDojo (Debenedetti et al., 2024)** | Complementary — AgentDojo is multi-step stateful (629 cases), InjecAgent is single-turn (1,054 cases). We use InjecAgent as primary (cheaper, broader tool coverage) and AgentDojo as stretch. AgentDojo §4.2 shows InjecAgent phrasing underperforms Important message — our gate must handle both. |
 | **MCPTox (Wang et al., 2025)** | Orthogonal vector — MCPTox §4.3 shows InjecAgent payloads adapted to tool descriptions drop to near 0% ASR, proving Tool Poisoning needs its own benchmark. Evaluating both vectors as separate studies tests whether one gate mechanism generalizes. |
 | **ASB (Zhang et al., 2025)** | Superset — ASB includes DPI/IPI among 27 methods but InjecAgent's per-tool breakdown (17×62) is more granular for IPI alone; ASB's 84% mixed-attack ASR shows single-vector ASR (24–47% here) underestimates combined threat. |
-| **ToolGate (Liu et al., 2026)** | Baseline to beat — ToolGate is a gate that has never been tested on InjecAgent; we will be the first to report ToolGate-style gating ASR on InjecAgent. |
+| **ToolGate (Liu et al., 2026)** | Historical v1 baseline: IntentGate implemented a ToolGate comparison on the studied InjecAgent slice. This does not support a current “first” claim; compare newer task-derived/runtime policy systems in the Phase 8 audit. |
 
 ### 9. Relevance to Thesis
 
