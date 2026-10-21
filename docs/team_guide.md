@@ -84,14 +84,15 @@ Without a gate, the intern just does it. Our project puts a **supervisor at the 
 every action against your original instruction: *"Did the boss ask for shredding or external
 mail? No → block."*
 
-**Why our approach is interesting to researchers.** The closest published system (called
-**ToolGate**) does the same door-checking, but a human must hand-write a rule for every single
-tool. Our gate needs **zero hand-written rules**: the "note" is derived automatically from the
-user's request. The thesis measures whether that works as well, on two different kinds of
-attacks (injection and poisoning), and how much cheaper it is to deploy.
+**What the completed v1 study measures.** IntentGate derives its "note" automatically from the
+user's request and was evaluated against no gate and a ToolGate reimplementation on injection and
+poisoning suites. Newer systems also study task-derived policies and runtime authorization, so this
+result does not establish that the mechanism is unique. Phase 8 will compare policy designs and
+update lifecycles under a shared protocol before fixing the journal contribution.
 
-**What we produce:** a pip-installable gate + a fair evaluation (numbers for attack blocking,
-false alarms, speed, and setup cost) + a thesis + a short paper draft.
+**Completed outputs:** a pip-installable gate, frozen evaluation artifacts, and the ICEEICT
+conference manuscript final pass. Phase 8 plans additional journal evidence; thesis completion is
+tracked separately.
 
 ---
 
@@ -184,9 +185,9 @@ Full numbers and caveats live in the linked reports under [`experiments/`](exper
 | InjecAgent | Prompt injection (hidden instructions in tool outputs) | 1,054 base cases + 1,054 "enhanced" variants | commit `f19c9f2c` |
 | MCPTox | Tool poisoning (malicious tool descriptions on MCP servers) | 1,348 cases from 45 servers | snapshot downloaded 2026-09-11 (static) |
 
-**Why two?** They are the two attack styles our thesis targets, and the closest published gate
-was never tested on either as an adversarial benchmark. We report them **separately** (their
-numbers are not combined into one headline).
+**Why two?** They are the two attack styles covered in the frozen v1 study. We report them
+**separately** (their numbers are not combined into one headline). Their benchmark coverage alone
+does not establish a gap against other current defenses.
 
 **How.** A clone script downloads them into `data/raw/` (git-ignored, so results are not bloated
 by data). Exact versions are stored in `configs/benchmark_versions.yaml`. Our code reads them
@@ -448,32 +449,23 @@ reproducibility.
 | **P0-2 (E19)** | B2 coverage curve (65 → 583 contracts) | 37.2% → 84.9% weighted; curve flat (structural weakness) |
 | **P1 (E20–E22)** | Mimicry / Escalate / Stats | Avg S inflation +0.0112; 80.5% escalate precision; Power=1.0 |
 
-All P0/P1 items complete — Phase 6 is DONE. Next: Phase 7 Q1 hardening (E23–E30,
-all 9 submission-gate items) — see [`../roadmap.md`](../roadmap.md) §Phase 7. Live-server
-slice and drift pilot are deferred to future work (Ch 6 material).
+All Phase 6 items are complete. Phase 7 hardening is also complete; the ICEEICT conference manuscript
+completed its final pass on 2026-10-20. The active research plan is Phase 8, a journal-strengthening
+study. Its novelty and contributions remain provisional until its audit and protocol gates pass; see
+[`../roadmap.md`](../roadmap.md) Phase 8 and [`blueprint.md`](blueprint.md) Section 19.
 
-### Phase 7 — Q1 Hardening
+### Phase 7 — Q1 Hardening (COMPLETE)
 
 | Pilot | What | Status |
 |---|---|---|
-| E23 | Legitimate-only utility suite (measured completion, gate ON vs OFF) | ⏳ next |
-| E24 | Prompt-level baselines (delimiters, instructional-prevention, sandwich) | ⏳ |
-| E25 | Third backbone pilot (new family, same 100-case protocol) | ⏳ |
-| E26 | Adaptive attacker (paraphrase-delivery + threshold-aware) | ⏳ |
-| E27–E31 | Progent comparison · formalism · conformal band · parser ablation · embedding swap · contract-vs-semantic · artifact | ⏳ |
+| E23–E31 | Utility, prompt baselines, backbone boundary, adaptive-call/echo, Progent, parser, embedding transfer, conformal band, formalism, and artifact studies | ✅ Complete; reports and limitations are in `results/phase7/` and `docs/experiments/` |
 
-### Phase 8 — Thesis + Paper Writing (merged)
+### Phase 8 — Journal-Strengthening Study (PLANNED)
 
-| Chapter | Focus | Status |
-|---|---|---|
-| Ch 1 | Intro & motivation (OWASP excessive agency, why action gate) | ⏳ |
-| Ch 2 | Related work — answer Reviewer #2 Q#1 | ⏳ |
-| Ch 3 | Method — parser, contract, scorer, gate, escalate | ⏳ |
-| Ch 4 | ToolGate B2 baseline (Appendix G translation, coverage %, fidelity) | ⏳ |
-| Ch 5 | Evaluation — metrics, baselines, ablations, per-category, stats, taxonomy | ⏳ |
-| Ch 6 | Limitations & future work | ⏳ |
-| Appendix | Reproducibility: hashes, configs, contract examples, JSONL samples | ⏳ |
-| Paper | Workshop/Findings draft from frozen results (E11–E17) + pilots (E18+) | ⏳ |
+The ICEEICT manuscript is the completed v1 conference artifact. Journal work starts with the closest-work
+matrix, a falsifiable contribution statement, preregistered protocol, independent annotations, and
+matched policy-lifecycle comparisons. Candidate RQs and work stages are in `roadmap.md`; no journal
+claim is established until the evidence gates are met.
 
 **What "freeze" means for everyone:** After Gate 3 (2026-10-12), the Phase 5 numbers are final.
 Phase 6 (E18+) is preliminary and never rewrites E11–E17. This protects reproducibility.
@@ -530,7 +522,7 @@ runner code. The orchestrator refuses to run if these changed after the freeze.
 |---|---|---|
 | [`setup.md`](setup.md) | Install & verify guide | First day |
 | [`team_guide.md`](team_guide.md) | This guide | Start here |
-| [`blueprint.md`](blueprint.md) | The design document (Sections 0–18, indexed) | When you need the *why* behind a design choice |
+| [`blueprint.md`](blueprint.md) | Completed v1 design (Sections 0–18) and journal plan (Section 19) | When you need the *why* behind a design choice |
 | [`experiments/README.md`](experiments/README.md) | Experiment hub: status, index E1–E17, datasets, artifacts, commands | To find a specific result |
 | [`experiments/01_gate0_foundation.md`](experiments/01_gate0_foundation.md) | Baseline + pilot (E1–E4) | Understanding the trust checks |
 | [`experiments/02_parser_schema.md`](experiments/02_parser_schema.md) | Parser & contract schema (E5–E6) | Parser questions |
