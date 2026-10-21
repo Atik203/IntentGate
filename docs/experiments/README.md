@@ -7,7 +7,7 @@
 > **New to the project?** Read [`../team_guide.md`](../team_guide.md) first — it explains the
 > project and summarizes these results in plain words.
 
-**Current state (2026-10-13):** Gate 0 ✅ · Gate 1 ✅ · Gate 2 ✅ · Gate 3 ✅ (results frozen — Phase 5 full matrix). **Phase 6 (E18–E22) COMPLETE** — all P0/P1 pilots done.
+**Current state (2026-10-22):** Gates 0–3 ✅ · Phases 1–7 complete · Phase 5 full matrix remains frozen · ICEEICT manuscript final pass complete (2026-10-20). Phase 8 journal-strengthening study is planned; its research claims remain provisional.
 
 ## Gate status
 
@@ -56,8 +56,9 @@
 | E22 | **Phase 6: Power + Bonferroni + FPR** | n=2,108 / 1,348 | Power=1.0 at α=0.005; FPR specific 12.8% | [06](06_phase6_pilots.md#e22) |
 
 Status legend: E1–E10 were development-set evidence; **E11–E17 are the frozen full-suite
-results** (Gate 3, 2026-10-12). **E18–E22 are Phase 6 preliminary pilots** (2026-10-13, never
-rewrite E11–E17). Next: Phase 7 Q1 hardening (E23–E31, all 10 submission-gate items) → roadmap.
+results** (Gate 3, 2026-10-12). **E18–E22 are Phase 6 pilots**; E23–E31 are completed Phase 7
+studies. Preserve those artifacts. The next planned work is Phase 8 (new E32+ IDs), described in
+the roadmap; do not treat planned questions or candidate contributions as results.
 
 ## Datasets & versions
 
@@ -130,16 +131,17 @@ No content was dropped in the merge; each old section maps to a named section in
 **Q: What is the one-line status of the project?**
 A: Gate 3 frozen: on the full suites ours takes InjecAgent ASR-valid 19.0% → 0.7% and MCPTox
 attack-influenced 279 → 144 (both McNemar p < 1e-6 vs B1), B2 is statistically indistinguishable
-from unprotected, valid-rate parity holds, p95 ≤ 20 ms, billed $9.64. Thesis Chapters 4–5 and
-the paper draft now write from E11–E17.
+from unprotected, valid-rate parity holds, p95 ≤ 20 ms, billed $9.64. The ICEEICT manuscript final
+pass is complete; Phase 8 plans new journal evidence under separate run IDs.
 
 **Q: Which results are final vs development?**
 A: E11–E17 are final (full suites, frozen 2026-10-12, Gate 3). E1–E10 were development-set
 evidence (50–100 case slices) that motivated the design; they are superseded, not repeated.
 
-**Q: Why InjecAgent + MCPTox and not AgentDojo/ASB?**
-A: They are the two vectors where the closest gate (ToolGate) was never tested, and they are the
-vectors our supervisor approved for the thesis. AgentDojo is stretch-only.
+**Q: Why InjecAgent + MCPTox for the frozen v1 evaluation?**
+A: They were selected to represent injection and tool poisoning under the approved v1 protocol.
+Their use does not establish that other systems lack evaluations on those attack surfaces. Phase 8
+plans a compatible dynamic benchmark after checking task format, labels, and license.
 
 **Q: How do I know the setup is reproducible?**
 A: Every report pins dataset versions, model IDs, seeds and thresholds, and lists the exact

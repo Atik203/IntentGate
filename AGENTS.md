@@ -4,9 +4,9 @@ Instructions for AI coding agents (opencode, Claude Code, Cursor, etc.) working 
 
 ## Project overview
 
-IntentGate = thesis project. A model-agnostic **middleware action gate** for tool-using LLM agents: it derives an *intent contract* from the user's original request (once, before any attacker content), scores every proposed `tool_call` against it (embedding similarity + hard rule veto), and decides `allow / block / escalate`.
+IntentGate is a completed v1 research prototype and evaluation, with a planned journal-strengthening study. The v1 is a model-agnostic **middleware action gate** for tool-using LLM agents: it derives an *intent contract* from the user's original request (once, before any attacker content), scores every proposed `tool_call` against it (embedding similarity + hard rule veto), and decides `allow / block / escalate`. The journal study's research questions and candidate contributions are provisional until the related-work and protocol gates in Phase 8 pass.
 
-- **Blueprint (single source of truth):** `docs/blueprint.md` — design Sec 0–18 (indexed with anchors)
+- **Blueprint (single source of truth):** `docs/blueprint.md` — completed v1 design Sec 0–18 and journal research direction Sec 19 (indexed with anchors)
 - **Status tracker:** `roadmap.md` — Phases 0–8, Gates 0–3, success criteria. **Update its checkboxes in the same commit that completes a task.**
 - **Setup for humans:** `docs/setup.md`
 
@@ -78,7 +78,8 @@ To maximize context cache hits (DeepSeek context caching, OpenAI automatic promp
 
 - Blueprint (`docs/blueprint.md`) is the design source of truth; roadmap (`roadmap.md`) is the status source. If they conflict, flag it — don't silently pick one.
 - Doc sync: literature-review changes (`literature_review/`, `docs/references.bib`) and design edits must update the affected docs (`docs/blueprint.md`, `README.md`, `literature_review/index.md`) **and** `roadmap.md` + `CHANGELOG.md` in the same PR. Experiment results go in `docs/experiments/` following its template (At a glance → Goal → Setup → Results → Artifacts → Limitations → Supervisor Q&A).
-- **Paper/thesis prose follows the repo guides:** read `docs/prompt.md` (voice: simple student register + anti-AI patterns; editing vs generation modes) and `docs/writing-guideline.md` (section-by-section structure and content) before writing or polishing any `IEEE-conference/` text or thesis chapter. Voice rule: no first-person pronouns — use `this study`, `the proposed method`, or `the system` as the subject. References: edit `docs/references.bib` (verified source of truth), then re-copy to `IEEE-conference/references.bib`; the paper builds from the local copy.
+- **Paper/thesis prose follows the repo guides:** read `docs/prompt.md` (voice: simple student register + anti-AI patterns; editing vs generation modes) and `docs/writing-guideline.md` before editing paper text. The ICEEICT manuscript is the frozen v1 conference artifact; journal writing belongs to Phase 8 and must follow the selected journal's current instructions. Do not carry conference page limits into a journal plan. Voice rule: no first-person pronouns — use `this study`, `the proposed method`, or `the system` as the subject. References: edit `docs/references.bib` (verified source of truth), then re-copy to `IEEE-conference/references.bib` only when intentionally revising that artifact.
+- **Novelty discipline:** do not claim IntentGate is the first request-derived policy, action gate, or argument-constraint system. Treat Phase 8 contributions in `roadmap.md` and blueprint Sec 19 as candidates until the dated literature audit and comparative evidence support a narrower claim.
 - Check the roadmap before starting work: a `[ ]` item in the current phase is the next thing to do. Mark `[~]` while working, `[x]` when done + tested.
 - Before touching `src/` or `harness/`, run `pytest -q` and keep it green.
 - **Never commit:** `.env`, `data/raw/`, `.venv/`, `node_modules/`, `config.bat`. These are gitignored.
