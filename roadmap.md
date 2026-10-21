@@ -71,32 +71,6 @@ appear in related systems, so the project must not claim to invent either one.
 toward the ~80% evidence-readiness target at a mid-tier Q1 venue. Items are tagged `[A#]` below and
 priced in the model-strategy table at the end of this phase.
 
-### Conference sprint — ICEEICT upload first (do before 8.0; only paper-side work in the window)
-
-The manuscript is frozen and submission-ready (6 pages, both PDFs verified 2026-10-20). Nothing in
-the journal study below changes the conference outcome, so the remaining conference work — upload
-logistics — outranks 8.0. The only paper-side lever left (+3–5 acceptance points, ~$2–5) is the
-end-to-end utility experiment; it is deliberately excluded from the window because it would inject
-new numbers into a verified PDF days before the deadline. It stays planned as the Phase 8
-end-to-end utility item instead.
-
-- [ ] Register/verify the submission-system (CMT/easychair) account for all five authors; confirm
-  the paper record exists with title/abstract/keywords matching the PDF. Owner: lead author.
-- [ ] Upload `IEEE-conference/IEEE-conference.pdf` (anonymous) as soon as the system accepts
-  submissions; verify the rendered PDF in the system preview. Never wait for deadline day.
-- [ ] Run the IEEE PDF eXpress / venue compliance check on the uploaded PDF (Type-1 fonts and
-  ≤3 MB already verified locally; fix any flags via patch-rebuild only).
-- [ ] One non-author reads the anonymous PDF end-to-end for typos/metadata; patch-rebuild only for
-  blocking issues, and re-run the two-PDF check after any change.
-- [ ] Keep `IEEE-conference_authors.pdf` and the source untouched for camera-ready; record the
-  author build command from AGENTS.md.
-- [ ] Only if ≥48h of margin remains after upload and the supervisor approves: run the utility
-  experiment as journal-study prep (E32), with its numbers kept out of the conference PDF.
-  Default: skip.
-- **Exit gate:** anonymous PDF uploaded and visible in the system ≥24h before the deadline; the
-  named version stored for camera-ready; the upload receipt/screenshot recorded under
-  `results/phase8/conference_upload/`.
-
 - **A1** — Pre-registered fallback framing if the RQ3 lifecycle comparison is null.
 - **A2** — Named, released benchmark artifact (adjudicated labels + paired traces, GitHub + Zenodo DOI).
 - **A3** — Formal security property plus contract-completeness measurement.
@@ -104,6 +78,87 @@ end-to-end utility item instead.
 - **A5** — Explicit CaMeL handling (faithful subset arm or principled non-comparability note).
 - **A6** — Venue selection bound as a hard gate before any confirmatory run.
 - **A7** — Presentation package (threat-model figure, one results figure per RQ, artifact DOI on page 1).
+
+### Sprint 0 (Oct 22–27) — run before 8.x: conference upload first, then agent-executable fast start
+
+The manuscript is frozen and submission-ready (6 pages, both PDFs verified 2026-10-20). Nothing in
+the journal study changes the conference outcome, so Part A outranks everything and takes under a
+day of agent time. Part B starts Phase 8 with near-zero API spend. Human-gated items (supervisor
+approval, blinded labels) are *prepared* by agents and *closed* by humans; agents must stop at the
+gate and record what is pending. Suggested order: T1–T4 in parallel → T5 → T6 and T7 → T8.
+
+**Part A — conference upload (owner: lead author; every other step agent-doable)**
+
+- [ ] Verify the submission-system (CMT/easychair) account for all five authors; confirm the paper
+  record (title/abstract/keywords) matches the PDF.
+- [ ] Upload `IEEE-conference/IEEE-conference.pdf` (anonymous) as soon as the system accepts
+  submissions; verify the rendered preview. Never wait for deadline day.
+- [ ] Run the venue compliance check (PDF eXpress or equivalent); fix flags via patch-rebuild only.
+- [ ] One non-author reads the anonymous PDF end-to-end; patch-rebuild only for blocking issues.
+- [ ] Keep `IEEE-conference_authors.pdf` and the source for camera-ready; record the author build
+  command.
+- [ ] Record the upload receipt/screenshot under `results/phase8/conference_upload/`.
+- **Done when:** the anonymous PDF is visible in the system ≥24h before the deadline.
+
+**Part B — Phase 8 fast start (run IDs E32+ under `results/phase8/`; frozen Phase 5/7 artifacts
+immutable; expected window cost ≈ $0–5)**
+
+Global rules for every agent picking these up: activate `.venv`; keep `pytest -q` green (246
+passing) before and after touching `src/` or `harness/`; keep `ruff` clean with lines ≤100; follow
+the AGENTS.md cache discipline (stable prefixes, pinned model IDs, temperature 0, parser once per
+session, batched embeddings); log seeds/model hashes per run; no live email, files, or side
+effects. Verify every source with the web tools (hound/tavily) by fetching the real arXiv/DOI
+page — never invent a title, DOI, number, or result.
+
+- [ ] **T1 (drafts 8.0) — dated related-work matrix.** Input: `literature_review/index.md`,
+  `docs/references.bib`. Create `literature_review/phase8_related_work_matrix.md`, one row per
+  system (ClawGuard, CaMeL, AgentSpec, Task Shield, Progent, ToolGate + fresh 2026 search) with
+  columns: trusted input / policy representation / decision point / argument and resource
+  awareness / update lifecycle / user confirmation / threat model / datasets / model families /
+  metrics / artifact availability / source + version + access date. Done when: every row cites a
+  verified source with date and version and open gaps are listed. Cost: $0.
+- [ ] **T2 (drafts 8.0) — one-page contribution statement.** Draft C1–C3 as falsifiable statements
+  per Sec 19; mark claims blocked pending the audit. Done when: posted for supervisor approval —
+  silence is not approval. [Human gate] Cost: $0.
+- [ ] **T3 (drafts 8.1) — protocol package.** Create `docs/experiments/08_phase8_protocol.md`:
+  threat model and exclusions, task-level attack-success definition, schema v2 field list (new
+  file such as `configs/intent_schema_v2.json` — v1 is not mutated), annotator guide with a
+  blinded labeling workflow, grouped split rules, preregistration skeleton including the A1
+  fallback framing, and the analysis plan with primary/secondary outcomes. Done when: versioned;
+  confirmatory runs stay blocked until human sign-off. [Human gate] Cost: $0.
+- [ ] **T4 (starts 8.2) — paper-to-code audit.** Compare `IEEE-conference/IEEE-conference.tex`
+  against `src/intent_gate/`: score normalization and equation, veto semantics, schema fields,
+  escalate band, parser fallback, exact τ semantics. Write `docs/experiments/09_paper_code_audit.md`
+  with a claim-to-code traceability table; fix discrepancies with tests or file them as issues.
+  Done when: the table is complete and no mismatch is left marked must-fix. Cost: $0.
+- [ ] **T5 (starts 8.2) — v2 typed argument-policy layer, feature-flagged.** Add
+  `src/intent_gate/scoring/argument_policy.py`: check tool identity, operation, resource,
+  destination/recipient, and argument values against the contract; the semantic score may only
+  downgrade or abstain, never authorize a disallowed side effect; unknown consequential action
+  fails closed or escalates. Wire as `--gate ours-v2` without changing v1 defaults; extend
+  `types.py` only if required. Tests: benign paraphrase, implicit authorization, multi-action
+  requests, missing fields, tool alias, schema drift, trusted-word echo, plus ordering and
+  no-bypass. Done when: full `pytest -q` green including the new tests and an offline dev-slice
+  replay shows a plausible safety/utility operating point. Cost: $0.
+- [ ] **T6 (starts A4/8.4 prep) — E32a offline optimization-based attacker.** Add
+  `scripts/e32a_adaptive_hillclimb.py`: an LLM-in-the-loop rewrite of free-text arguments that
+  iteratively pushes S above τ and past the T5 checks; the inner loop runs entirely against the
+  local CPU scorer (local model, or gpt-4o-mini attacker ≤$5); end-to-end verification of top-k
+  survivors only if the anchor-family arm is approved. Report attacker success vs. v1 and v2 plus
+  each defense's benign cost. Output: `results/phase8/e32a_adaptive/` + template write-up. Done
+  when: per-case traces and the success/benign-cost table land; negative results kept. Cost: $0–5.
+- [ ] **T7 (prepares RQ2) — E32b end-to-end utility on the local Qwen workhorse.** Run the deferred
+  utility experiment end-to-end (task-level completion) on local Qwen across benign cases with
+  arms none / v1 / v2 (v2 only if T5 is done). Numbers stay out of the conference PDF. Output:
+  `results/phase8/e32b_utility/` + write-up. Done when: the task-level utility and
+  false-intervention table land. Cost: $0.
+- [ ] **T8 — manifests and write-ups.** Write a SHA-256 manifest plus config/hash pins for
+  everything in `results/phase8/`; one `docs/experiments/` write-up per completed run; update
+  `roadmap.md` checkboxes and `CHANGELOG.md` in the same commit. Done when: a teammate can
+  reproduce the offline parts from the manifest alone.
+
+**Sprint exit:** Part A uploaded ≥24h before the deadline; T1–T8 done with `pytest -q` green and
+T2/T3 awaiting only human approval; no frozen artifact modified; window spend ≈ $0–5.
 
 ### 8.0 — Decide the journal claim and novelty boundary (Weeks 1–2; before new implementation)
 
