@@ -1,4 +1,4 @@
-# IntentGate — Supervisor Summary (Phases 0–6)
+# IntentGate — Supervisor Summary (Completed v1 and Journal Plan)
 
 > **One-paragraph verdict.** IntentGate is a middleware action gate that derives an *intent
 > contract* from the user's original request and scores every proposed tool call against it
@@ -8,6 +8,10 @@
 > parity), p95 latency **16–20 ms** per gated call, zero manual contracts, and a billed cost of
 > **$9.64**. Phase 6 pilots replicated the effect on a second backbone (Qwen 27.1% → 2.1%)
 > and showed the baseline's weakness is structural, not coverage-limited.
+>
+> **Status:** Phases 1–7 are complete, and the ICEEICT manuscript completed its final pass on
+> 2026-10-20. The Phase 8 journal study is planned; its research questions and contributions are
+> provisional until the related-work and protocol gates pass. No novelty claim is approved yet.
 >
 > | Gate | Meaning | Status |
 > |---|---|---|
@@ -35,11 +39,11 @@ cases and <3% refusal).
 The attack paths differ (injected tool output, poisoned tool description, multi-turn drift)
 but converge on one observable: **the agent executes an action the user never intended.**
 
-Existing answers are unsatisfying: benchmarks reveal the vulnerability but propose no
-defense, and the only published action-level gate (ToolGate, Jan 2026) needs a
-hand-authored formal contract **per tool** — expensive, and never tested on any adversarial
-benchmark. Our question: *can a gate derived automatically from the user's own request
-match that protection at zero contract cost?*
+Existing systems include task-derived policies and action-level authorization. IntentGate v1
+evaluated a request-derived gate against a ToolGate reimplementation and no-gate baseline on the
+frozen InjecAgent and MCPTox suites. That comparison is bounded to the evaluated methods and does
+not establish novelty against current systems. Phase 8 provisionally asks how policy representation
+and update lifecycle affect safety, utility, and cost under a common evaluation protocol.
 
 ---
 
@@ -69,7 +73,7 @@ visible (ordering invariant, tested); **every** tool execution passes through th
 | User's original request | **Trusted** (parsed once, then frozen) | The one thing the attacker cannot rewrite |
 | Tool definitions + tool outputs | **Untrusted** (may carry injections/poisoning) | This is where all three attack vectors live |
 | Agent backbone | Untrusted-but-observed (participates in ReAct) | Gate scores its proposals; backbone choice is varied (E18/E25) |
-| Single-turn scope | Assumed (multi-turn drift out of scope) | Stated limitation, Phase 7-deferred pilots aside |
+| Single-turn scope | Assumed (multi-turn drift out of scope) | Remains a limitation; Phase 8 considers a compatible multi-turn benchmark |
 
 ### Illustrative walkthrough (not measured data — shows the mechanism)
 
@@ -332,40 +336,39 @@ are conservative.
 | Test suite | **199 tests**, green on every branch |
 | Spend discipline | `results/` committed (teammates read, never re-run); every run resumable |
 
-## 12. Honest limitations (Ch 6 material — each with its planned answer)
+## 12. Honest limitations of the frozen v1 study
 
-1. **Static attacks only** → E26 live adaptive pilots (paraphrase-delivery + threshold-aware).
-2. **Two effective backbones** → E25 third backbone, same 100-case protocol.
-3. **Utility is proxied** → E23 dedicated benign-task suite replaces the proxy with a number.
+1. **Adaptive attacks** → E26 includes delivery phrasings and an offline threshold-aware call probe,
+   but not end-to-end adaptive ASR.
+2. **Backbone coverage** → DeepSeek's tested arm refused all injections, so it did not exercise the
+   gate; Qwen is the only effective replication.
+3. **Utility evidence** → E23 is a small benign suite; broader task completion and independent labels
+   are required for the journal study.
 4. **Static MCPTox snapshot**, not live servers → stands; documented, deferred to future work.
 5. **Single-turn scope** → stands; drift pilot deferred to future work.
-6. **A3 ≈ ours** → E28 parser ablation quantifies exactly what the LLM parser buys.
+6. **A3 ≈ ours** → E28 is a limited 200-case parser ablation and does not establish a full-run ASR
+   advantage for the LLM parser.
 7. **Heuristic MCPTox evaluator** (precision 0.82 / recall 0.26, conservative) → shared
    across all conditions so deltas are fair; absolute counts understate attacks.
 
-## 13. What's next
+## 13. Journal-strengthening study (Phase 8)
 
 | Phase | Work | Status |
 |---|---|---|
-| Phase 7 | Q1 hardening (~$8): E23 utility suite · E24 prompt baselines · E25 third backbone · E26 adaptive attacker · E27 Progent · E28 parser ablation · E29 embedding/transfer · E30 conformal band · E31 contract-vs-semantic · formalism + artifact | ⏳ next |
-| Phase 8 | Thesis + paper (chapters below) from frozen evidence + pilots | ⏳ after Phase 7 |
+| Phase 7 | E23–E31 hardening, formalism, and reproducibility package | ✅ complete; see `results/phase7/` |
+| ICEEICT manuscript | Conference paper from the frozen v1 study | ✅ final pass completed 2026-10-20 |
+| Phase 8 | Journal-strengthening study: related-work audit, locked protocol, policy-lifecycle comparison, independent evaluation | ⏳ planned; candidate claims only |
 
-| Chapter | Source (already written) |
-|---|---|
-| Ch 1 Intro & motivation | §1–§2 of this summary + blueprint Sec 0–2 |
-| Ch 2 Related work | literature_review/index.md + E27 Progent positioning |
-| Ch 3 Method | §2 + formalism (Neyman–Pearson τ, assumption table, reference monitor) |
-| Ch 4 B2 baseline | §6 + `03_b2_toolgate.md` + E19 curve |
-| Ch 5 Evaluation | §8–§10 (frozen) + §9 pilots + E23–E30 |
-| Ch 6 Limitations | §12 (each item already paired with its answer or plan) |
-| Appendix | §14 pins + sample contract/trace |
+Provisional questions cover task-level safety (RQ1), benign utility and intervention (RQ2), policy
+representation/update lifecycle (RQ3), and cross-model/dataset stability and cost (RQ4). The closest
+systems already include task-derived policy and runtime authorization approaches; therefore the
+study's defensible contribution may be comparative evidence rather than a new gate mechanism. The
+full questions, candidate contributions, and exit gates are in `roadmap.md` Phase 8 and
+`docs/blueprint.md` Section 19.
 
-After Phase 7 the package targets a Q1 security venue (TDSC/TIFS or Computers & Security;
-JISA/Applied Intelligence as backup) — the adaptive loop + third backbone + conformal band
-are what separate the first group from the second.
-
-Staffing: E27 (Progent) and E30 (conformal) need specialist effort — staff those first;
-E23–E26/E28–E29 plus the artifact run parallel across the remaining members.
+No journal is selected yet. Select one only after checking current subject-category quartiles, scope,
+article type, fees, and conference-extension policy. “80%+” is an internal evidence-readiness target,
+not a prediction of acceptance.
 
 ## 14. Where to look (artifact map)
 
@@ -373,8 +376,8 @@ E23–E26/E28–E29 plus the artifact run parallel across the remaining members.
 |---|---|
 | Full frozen numbers | `docs/experiments/05_phase5_full_evaluation.md` (E11–E17) |
 | Pilot numbers | `docs/experiments/06_phase6_pilots.md` (E18–E22) |
-| Live status + Phase 7/8 plan | `roadmap.md` |
-| Design (source of truth) | `docs/blueprint.md` |
+| Live status + Phase 8 plan | `roadmap.md` |
+| Design (source of truth) | `docs/blueprint.md` (v1 Sections 0–18; journal direction Section 19) |
 | Raw evidence (committed, read don't re-run) | `results/phase5/`, `results/phase6/` |
 | Run it yourself | `docs/setup.md` → `pytest -q` (199 green) → `docs/experiments/README.md` commands |
 | Benchmark pins | `configs/benchmark_versions.yaml` (InjecAgent `f19c9f2c`, MCPTox snapshot 2026-09-11: 1,348 cases, 45 servers, 801 tools) |
@@ -384,19 +387,16 @@ Pinned models: agent + parser `gpt-4o-mini` (temp 0); embeddings
 `sentence-transformers/all-MiniLM-L6-v2` (CPU, hash `4588b3f9e962`); pilots add
 `qwen3.5:4b` (local Ollama) and `gpt-6-luna` (excluded arm, documented).
 
-*Status: Phases 0–6 complete. This file is a briefing distillate — every number above is
+*Status: Phases 0–7 complete; ICEEICT manuscript final pass complete. This file is a briefing distillate — every number above is
 cited to the report or results file named beside it; nothing here is new evidence.*
 
 ## Appendix — questions a supervisor typically asks (with one-line answers)
 
 1. *"Why not just use a bigger model?"* — attacks scale with capability (paper figures
    24–72.8% across models); the gate sits outside the model and replicates on Qwen.
-2. *"What breaks first under adaptive attack?"* — the E16 near-miss band (S 0.75–0.79);
-   E20 shows paraphrase adds almost nothing, E26 will attack it live.
+2. *"What breaks first under adaptive attack?"* — E26 showed that threshold-aware calls can cross τ after echoing trusted text; the measured probe is call-level, not end-to-end ASR.
 3. *"Can this run inline in production?"* — p95 16–20 ms vs a 100 ms budget, CPU-only;
    the LLM parser call is once per session, not per action.
 4. *"Why trust the MCPTox counts?"* — heuristic evaluator, precision 0.82/recall 0.26,
    shared across conditions: deltas fair, absolutes conservative. See measurement note §10.
-5. *"What remains open before submission?"* — Phase 7's nine items (§13): utility suite,
-   prompt baselines, third backbone, and a live adaptive loop first; formalism and the
-   artifact in parallel.
+5. *"What remains before a journal submission?"* — the Phase 8 related-work and novelty gate, locked protocol and blinded labels, stronger authorization method only if justified, fair benchmark comparisons, and independent end-to-end evaluation.
