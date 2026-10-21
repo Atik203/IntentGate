@@ -145,7 +145,7 @@ Our gate costs ~1.55× B1 per case (the extra parser call), but automatic prompt
 | Latency p95 < 100ms | ✅ 16–20 ms |
 | B2 runs & documented | ✅ coverage frozen + reported |
 | Valid-rate parity | ✅ Δ ≤ 0.6pp on all slices |
-| Deliverables | ⏳ thesis + package + report; paper draft = Phase 8 |
+| Deliverables | ✅ package + frozen report + ICEEICT conference manuscript final pass (2026-10-20); journal extension = Phase 8 planned |
 
 ---
 
