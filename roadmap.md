@@ -71,6 +71,32 @@ appear in related systems, so the project must not claim to invent either one.
 toward the ~80% evidence-readiness target at a mid-tier Q1 venue. Items are tagged `[A#]` below and
 priced in the model-strategy table at the end of this phase.
 
+### Conference sprint — ICEEICT upload first (do before 8.0; only paper-side work in the window)
+
+The manuscript is frozen and submission-ready (6 pages, both PDFs verified 2026-10-20). Nothing in
+the journal study below changes the conference outcome, so the remaining conference work — upload
+logistics — outranks 8.0. The only paper-side lever left (+3–5 acceptance points, ~$2–5) is the
+end-to-end utility experiment; it is deliberately excluded from the window because it would inject
+new numbers into a verified PDF days before the deadline. It stays planned as the Phase 8
+end-to-end utility item instead.
+
+- [ ] Register/verify the submission-system (CMT/easychair) account for all five authors; confirm
+  the paper record exists with title/abstract/keywords matching the PDF. Owner: lead author.
+- [ ] Upload `IEEE-conference/IEEE-conference.pdf` (anonymous) as soon as the system accepts
+  submissions; verify the rendered PDF in the system preview. Never wait for deadline day.
+- [ ] Run the IEEE PDF eXpress / venue compliance check on the uploaded PDF (Type-1 fonts and
+  ≤3 MB already verified locally; fix any flags via patch-rebuild only).
+- [ ] One non-author reads the anonymous PDF end-to-end for typos/metadata; patch-rebuild only for
+  blocking issues, and re-run the two-PDF check after any change.
+- [ ] Keep `IEEE-conference_authors.pdf` and the source untouched for camera-ready; record the
+  author build command from AGENTS.md.
+- [ ] Only if ≥48h of margin remains after upload and the supervisor approves: run the utility
+  experiment as journal-study prep (E32), with its numbers kept out of the conference PDF.
+  Default: skip.
+- **Exit gate:** anonymous PDF uploaded and visible in the system ≥24h before the deadline; the
+  named version stored for camera-ready; the upload receipt/screenshot recorded under
+  `results/phase8/conference_upload/`.
+
 - **A1** — Pre-registered fallback framing if the RQ3 lifecycle comparison is null.
 - **A2** — Named, released benchmark artifact (adjudicated labels + paired traces, GitHub + Zenodo DOI).
 - **A3** — Formal security property plus contract-completeness measurement.
@@ -300,4 +326,4 @@ an implementation gap is found; this plan does not require new secrets or a real
 | Gate 1 | B2 reimpl validated on ToolBench subset (coverage reported) | [x] 2026-09-16 — InjecAgent 79/79; MCPTox 65 contracts (37.2% availability-weighted); ToolBench not cloned → blueprint Sec 10 fallback validation (`docs/experiments/03_b2_toolgate.md`) |
 | Gate 2 | Gate integrated; unit tests green; p95 latency measured | [x] 2026-09-16 — 130 tests green then (199 today); p95 ≤ 23 ms on gated calls; `docs/experiments/04_gate2_gated_eval.md` |
 | Gate 3 | Results freeze (Phases 4–5 complete) | [x] 2026-10-12 — 30 jobs, 20,736 cases, InjecAgent 19.0%→0.7%, MCPTox 279→144, B2≈B1 (n.s.), p95 ≤20 ms, $9.64 billed |
-| Submission | Thesis + paper draft complete | [ ] |
+| Submission | Thesis + paper draft complete | [~] paper draft final 2026-10-20; CMT upload tracked in the Phase 8 conference sprint; thesis completion separate |
