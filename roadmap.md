@@ -110,28 +110,29 @@ session, batched embeddings); log seeds/model hashes per run; no live email, fil
 effects. Verify every source with the web tools (hound/tavily) by fetching the real arXiv/DOI
 page — never invent a title, DOI, number, or result.
 
-- [x] **T1 (drafts 8.0) — dated related-work matrix.** Output: `literature_review/phase8_related_work_matrix.md` with rows for ClawGuard (arXiv:2604.11790 v2, 2026-05-11), CaMeL (local review `08-camel-2025.md`), AgentSpec (ICSE 2026, DOI 10.1145/3744916.3764546), Task Shield (ACL 2025), Progent (arXiv 2504.11703 v3), ToolGate (arXiv 2601.04688 v1) plus a pending list (MELON, StruQ, TrustAgent, adaptive attacks). Implementation status recorded per system (ToolGate implemented as B2; Progent design-only; others reviewed only). AgentSpec BibTeX added to `docs/references.bib`. ClawGuard review file renamed `07-clawguard-2026.md`. No "first/novel/SOTA" claim made; gap statement deferred to T2. Completed 2026-10-22.
+- [x] **T1 (drafts 8.0) — dated related-work matrix.** Output: `literature_review/phase8_related_work_matrix.md` with rows for ClawGuard (arXiv:2604.11790 v2, 2026-05-11), CaMeL (local review `08-camel-2025.md`), AgentSpec (ICSE 2026, DOI 10.1145/3744916.3764546), Task Shield (ACL 2025), MELON (ICML 2025), Progent (arXiv 2504.11703 v3), ToolGate (arXiv 2601.04688 v1) plus a pending list (StruQ, TrustAgent, adaptive attacks). Implementation status recorded per system (ToolGate implemented as B2; Progent design-only; others reviewed only). AgentSpec BibTeX added to `docs/references.bib`. ClawGuard review file renamed `07-clawguard-2026.md`. No "first/novel/SOTA" claim made; gap statement deferred to T2. Completed 2026-10-22; **v2 updated 2026-10-24** after the fresh 2026 related-work search added full rows for Task Shield, AgentSpec, and MELON with their local review files.
 - [ ] **T2 (drafts 8.0) — one-page contribution statement.** Draft C1–C3 as falsifiable statements
   per Sec 19; mark claims blocked pending the audit. Done when: posted for supervisor approval —
-  silence is not approval. [Human gate] Cost: $0. *Draft v2 exists (unsigned):*
-  `literature_review/phase8_contribution_statement.md` — one-page core (framing, falsifiable C1–C3
+  silence is not approval. [Human gate] Cost: $0. *Draft v3 exists (unsigned):*
+  `literature_review/phase8_contribution_statement.md` — one-page core (framing, falsifiable C1–T3
   with falsification conditions, A1 fallback fixed before unblinding, C2 withdrawal condition bound to
   the T1 matrix gap, ClawGuard overlap with a comparability rule, blocked claims, sign-off) plus
   annexes for established evidence with numerators and denominators, preliminary pilots with their
   real units of analysis, model coverage with a PROPOSED unapproved eligibility rule, and the D1–D10
-  decision table. Awaiting supervisor approval.
+  decision table. D10 (fresh 2026 search) marked completed 2026-10-24. Awaiting supervisor approval.
 - [ ] **T3 (drafts 8.1) — protocol package.** Create `docs/experiments/08_phase8_protocol.md`:
   threat model and exclusions, task-level attack-success definition, schema v2 field list (new
   file such as `configs/intent_schema_v2.json` — v1 is not mutated), annotator guide with a
   blinded labeling workflow, grouped split rules, preregistration skeleton including the A1
   fallback framing, and the analysis plan with primary/secondary outcomes. Done when: versioned;
-  confirmatory runs stay blocked until human sign-off. [Human gate] Cost: $0. *Draft v0.2 exists
+  confirmatory runs stay blocked until human sign-off. [Human gate] Cost: $0. *Draft v0.3 exists
   (unsigned):* `docs/experiments/08_phase8_protocol.md` — 13 sections covering the required items
   plus model eligibility with refusal separated from effectiveness, baseline fairness and the
   contextual-only rule for ClawGuard/Task Shield/CaMeL/Progent, a bounded four-family adaptive-attack
   design, an a-priori sample-size and power plan that explicitly refuses the post-hoc Phase 5 power
   artifact, and cost/latency/artifact/budget/deviation rules. All thresholds are labelled PROPOSED
-  and not approved; no `configs/intent_schema_v2.json` was created. Awaiting supervisor sign-off.
+  and not approved; no `configs/intent_schema_v2.json` was created. The Task Shield/AgentSpec/MELON
+  review gap and the missing 2026 search are closed (2026-10-24). Awaiting supervisor sign-off.
 - [x] **T4 (starts 8.2) — paper-to-code audit.** Output: `docs/experiments/09_paper_code_audit.md` with a 20-row claim-to-code traceability table. One must-fix found and resolved in the manuscript (eq. 2 `S_sem` rescaling (1+cos)/2 to match `scorer.py`); rebuild required. Two items filed as issues (latent default τ 0.6 vs frozen 0.75; unsourced n= qualifiers on escalate precision, qwen replication, and the A1 utility line). Schema naming (A,K,H vs code fields) documented as an abstraction mapping. No source or frozen-result changes. Completed 2026-10-22.
 - [ ] **T5 (starts 8.2) — v2 typed argument-policy layer, feature-flagged.** Add
   `src/intent_gate/scoring/argument_policy.py`: check tool identity, operation, resource,

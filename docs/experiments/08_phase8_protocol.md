@@ -1,7 +1,7 @@
 # Phase 8 Protocol — Journal-strengthening study
 
-**Status:** DRAFT v0.2 — pending human sign-off. Silence is not approval.
-**Date:** 2026-10-22
+**Status:** DRAFT v0.3 — pending human sign-off. Silence is not approval.
+**Date:** 2026-10-24
 **Phase:** 8.1 — lock the protocol, labels, and threat model (`roadmap.md` 8.1), with the additions the Phase 7 audit and the supervisor review require.
 **Scope:** journal extension only. It does not alter the ICEEICT conference manuscript, and it does not alter the frozen Phase 5 or Phase 7 artifacts.
 **Frozen artifacts:** Phase 5 (Gate 3) and Phase 7 stay immutable. New run IDs start at E32 under `results/phase8/`. Schema v1.1 stays frozen; the v2 design in section 5 is document-level only and no `configs/intent_schema_v2.json` is created until the supervisor approves it.
@@ -330,7 +330,7 @@ Pinned benchmark commits, pinned model IDs, fixed seeds, logged temperature, cac
 | Contribution statement | `literature_review/phase8_contribution_statement.md` | draft v2, unsigned |
 | Related-work matrix | `literature_review/phase8_related_work_matrix.md` | T1, complete |
 | Paper-to-code audit | `docs/experiments/09_paper_code_audit.md` | T4, complete |
-| Closest-work reviews | `literature_review/papers/07-clawguard-2026.md`, `08-camel-2025.md` | new, unverified for the pending full-text reviews of Task Shield and AgentSpec |
+| Closest-work reviews | `literature_review/papers/07-clawguard-2026.md`, `08-camel-2025.md`, `09-melon-zhu-2025.md`, `10-task-shield-jia-2025.md`, `11-agentspec-wang-2026.md` | all fetched and reviewed 2026-10-24 |
 | Frozen reference results | `results/phase5/`, `results/phase6/`, `results/phase7/` | immutable, read-only inputs |
 | New run outputs | `results/phase8/`, IDs from E32 | not created |
 | Label store | `results/phase8/labels/` | not created |
@@ -341,7 +341,7 @@ Pinned benchmark commits, pinned model IDs, fixed seeds, logged temperature, cac
 - The protocol describes how the journal study would be run; it does not establish that the study has adequate power, and no adequacy claim is made until section 11 is computed.
 - The arms for the lifecycle comparison do not exist yet. If they are not approved and built, H3 cannot be tested, and the A1 fallback applies by default.
 - The current evidence base for the journal study is a call-level and heuristic-label set of results. The journal study must not inherit those denominators.
-- Two related-work systems, Task Shield and AgentSpec, are still reviewed at abstract level, and a fresh 2026 search has not been run. Neither gap blocks this protocol, and both must close before any novelty wording is used.
+- Two related-work systems, Task Shield and AgentSpec, were reviewed at abstract level in an earlier pass; full-text reviews of Task Shield, AgentSpec, and MELON were completed on 2026-10-24 (see `literature_review/papers/`), and a fresh 2026 related-work search was run the same day. Those gaps are closed, and no novelty wording may be used until the T1 matrix and T2 statement are supervisor-approved.
 
 ## Supervisor Q&A
 
