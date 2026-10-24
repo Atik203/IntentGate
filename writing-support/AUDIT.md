@@ -87,3 +87,13 @@ Left open for the authors: (1) `docs/experiments/09_paper_code_audit.md` item 15
 cite internal experiment IDs. (2) The affiliation line reads "Independent University Bangladesh";
 confirm the official styling ("Independent University, Bangladesh") with the author. (3) Table
 labels still use the conventional "Ours"; prose has no first-person pronoun.
+
+## Follow-up: author abstract revision (Mode 1, 2026-10-24)
+
+The author supplied a longer six-question draft. The revision keeps the author's order and
+wording, deletes the meta/evaluation setup sentences, and restores supported context to reach
+271 words. The draft's "100 requests" was replaced with the paper's main evaluation sizes
+(2,108 InjecAgent cases, 1,348 MCPTox cases); "dynamic attacks" was replaced with tool
+poisoning and the static-attack scope; ".70%" became "0.7%"; and "attack vectors" became ASR.
+Both PDFs rebuild at 6 pages, 32 references, Type-1 fonts, with no first person, em dash, or
+semicolon. The current abstract is 271 words and 15 sentences.
