@@ -97,3 +97,21 @@ wording, deletes the meta/evaluation setup sentences, and restores supported con
 poisoning and the static-attack scope; ".70%" became "0.7%"; and "attack vectors" became ASR.
 Both PDFs rebuild at 6 pages, 32 references, Type-1 fonts, with no first person, em dash, or
 semicolon. The current abstract is 271 words and 15 sentences.
+
+## Follow-up: author introduction revision (Mode 1, 2026-10-25)
+
+The author supplied a roughly 650-word Introduction draft. The revision trims it to 355 words
+in three paragraphs, following `docs/prompt.md` §10: P1 covers access, attacks, defenses, the
+gate, and benchmark scope; P2 reviews six prior systems with one paper per sentence; P3 states
+the open question and the measured results. The author's sentence order and wording are kept
+where they are clear.
+
+Two corrections: "Only one defense mechanism will derive the policy directly from the task"
+became "a few derive the policy directly from the task" (Progent and ClawGuard both do), and
+the ToolGate 145-contract result is scoped to MCPTox, where the paper reports indistinguishability
+from the unprotected agent. The other edits are grammar, terminology ("attack success",
+"attack-influenced tool calls"), and punctuation.
+
+Result: 355 words, 3 paragraphs; both PDFs at 6 pages, 32 references, Type-1 fonts; no first
+person, semicolon, or em dash. The general 2-7 sentence checklist conflicts with §10's
+one-paper-per-sentence rule for six papers, so P2 follows the specific Introduction rule.
