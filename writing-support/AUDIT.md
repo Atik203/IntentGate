@@ -151,8 +151,8 @@ MCPTox, 8.1% distinct, 37.2% availability-weighted, 145 contracts, 84.9% extende
 `no_contract` logging. ToolBench was unavailable, so contract review and recorded-call replay
 are the fidelity check.
 
-The author's draft errors (`\ cite`, `8.1 \%`, `stattically identical`, `minimum
-implementation`, `has been`) are already corrected in the paper. Two wording fixes applied:
-"not a ToolBench run" instead of "instead of a ToolBench run", and the duplicated "attack calls
-look legitimate" sentence merged into "the attack is in the poisoned registration and the tool
-call itself looks legitimate". No numbers or claims changed.
+The author preferred the original wording for voice reasons. Restored the author's sentence
+order and vocabulary, keeping the verified numbers. Fixed only citation spacing,
+`8.1\%`/`37.2\%`/`84.9\%`, two semicolons, `minimum implementation` -> `minimal
+reimplementation`, and `statistically identical` -> `statistically indistinguishable`. Both
+PDFs at 6 pages; numbers and claims unchanged.
