@@ -222,16 +222,16 @@ Hand-authored contracts were required for ToolGate: 145 on InjecAgent, and none 
 \section{Evaluation}
 
 \subsection{Benchmarks and cases}
-\textbf{InjecAgent}~\cite{zhan2024injecagent}: indirect prompt injection in tool-integrated agents, 2,108 cases (direct-harm and data-stealing attacker intents, in base and enhanced settings), frozen at pinned commits. \textbf{MCPTox}~\cite{wang2026mcptox}: tool poisoning on real-world MCP servers, 1,348 static-snapshot cases. MCPTox results are explicitly scoped to the static snapshot (live-server evaluation is deferred, and the poisoning-at-registration logic is identical in both).
+\textbf{InjecAgent}~\cite{zhan2024injecagent}: indirect prompt injection into tool-integrated agents, 2,108 cases (data-stealing and direct-harm attacker intents, base and enhanced settings). \textbf{MCPTox}~\cite{wang2026mcptox}: tool-poisoning attacks against real-world MCP servers, 1,348 static-snapshot cases. MCPTox results are scoped to the static snapshot. Live-server testing has been deferred.
 
 \subsection{Metrics}
-Attack success rate (ASR): share of attack cases where the attacker's objective is achieved. For MCPTox, the same quantity is reported as attack-influenced calls because the heuristic evaluator flags payload or sensitive-path evidence rather than a strict objective. Block rate: share of gated calls blocked or escalated, reported by stratum where stratified. Valid rate: share of user-tool calls the gate allows, a call-level utility proxy. Latency: p50/p95 per-call gate overhead. Setup cost: hand-authored contracts required.
+The attack success rate (ASR) is the proportion of attack cases that completed the attacker's objective. For MCPTox, this measure is reported as attack-influenced calls, since the heuristic evaluator identifies payload or sensitive-path evidence. The block rate is the proportion of gated calls blocked or escalated, by stratum where stratified. The valid rate is the proportion of user-tool calls the gate allows, a call-level proxy for utility. Latency reports p50 and p95 per-call gate overhead. Setup cost is the number of hand-authored contracts required.
 
 \subsection{Baselines and ablations}
-B1 is the unprotected agent. B2 is the ToolGate reimplementation. IntentGate uses $\tau=0.75$, $\delta=0.1$, and $\alpha=0.7$. The full matrix adds three ablations: A1 semantic-only (no rule veto), A2 rule-only (no embeddings), A3 raw-request embedding (similarity to the request text instead of the parsed contract). All conditions run with identical prompts, tool blocks, agent model (gpt-4o-mini), embedding model (all-MiniLM-L6-v2~\cite{reimers2019sentence}), and seed 42.
+B1 is the unprotected agent. B2 is the ToolGate reimplementation. IntentGate employs $\tau=0.75$, $\delta=0.1$, and $\alpha=0.7$. The full matrix includes three ablations: A1 semantic-only (rule veto disabled), A2 rule-only (embeddings disabled), and A3 raw-request embedding (similarity to the request text instead of the parsed contract). Each condition employed identical prompts, tool blocks, agent model (gpt-4o-mini), embedding model (all-MiniLM-L6-v2~\cite{reimers2019sentence}), and seed 42.
 
 \subsection{Statistics}
-All comparisons use the paired McNemar test with continuity correction~\cite{dietterich1998approximate}. Confidence intervals come from a seeded bootstrap with 10k resamples for each benchmark and risk breakdown. The 10 risk breakdowns use Bonferroni correction ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Results from the full matrix are reported as-is. Pilot results are labeled preliminary.
+Comparisons used the paired McNemar test with continuity correction~\cite{dietterich1998approximate}. Confidence intervals used a seeded bootstrap with 10k resamples for each benchmark and risk breakdown. The ten risk breakdowns use Bonferroni correction ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Full-matrix results are presented as-is. Pilot results are labeled preliminary.
 
 \section{Results}
 
