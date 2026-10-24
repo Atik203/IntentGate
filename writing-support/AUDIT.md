@@ -118,11 +118,10 @@ one-paper-per-sentence rule for six papers, so P2 follows the specific Introduct
 
 ## Follow-up: Background and Related Work trim (Mode 1, 2026-10-25)
 
-The author supplied an 804-word draft. The paper's existing section was already the trimmed
-version at 740 words (617 + 123). Four minor fixes bring it to 620 + 130 = 750: "All of these
-methods", "used in this paper", "user's objective", and a split setup-cost sentence. No
-whole-sentence deletions. Prompt Flow Integrity, TrustAgent, and the emulated-environment
-citation remain because removing them would drop the section below the 620-word floor.
-
-The 800-820 full-text target conflicts with 620-670 + 130-150 = 750-820. The text is 750 and
-the table adds 92 words. No padding was added.
+The author supplied an 804-word draft and preferred a shorter version. The applied text is 601
+words for Threat Model/Defenses/benchmarks and 118 for Research gap (719 total; the table adds
+92, so the section is 811). Kept the citation-bearing Prompt Flow Integrity, TrustAgent, and
+emulated-environment sentences; removing them would leave three uncited references. Minor
+fixes: "uses" instead of "utilizes", "execute an unauthorized tool call", split StruQ/SecAlign
+for accuracy, "user's objective" in the gap, and "the ToolGate baseline". No padding; the text
+stays within the 750 cap.
