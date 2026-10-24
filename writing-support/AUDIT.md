@@ -62,3 +62,12 @@ Order: equations (C1, M9) → schema mapping (C2) → claim attribution (C3–C7
 scoping (M1, M4, M5) → wording and structure (M2, M3, M6–M8, M10) → minor (D2, N2). Every edit
 preserves numbers, symbols, citation keys, and section order. Target: length-neutral; re-run the
 two-PDF build and the six verification checks afterwards. No new claims, no new citations.
+
+## Follow-up: abstract pass (Mode 1, 2026-10-24)
+
+Five edits applied after the audit: split the 32-word opener; removed the "This paper presents"
+frame; scoped the headline results to static attacks; named the qwen3.5:4b replication; replaced
+the meta "two benchmarks cover..." sentence. Abstract is now 199 words across 12 sentences
+(9--23 words), with no first person, em dash, semicolon, or banned word. Post-edit judgment:
+clarity 9.0, specificity 9.5, claim accuracy 9.0, structure 9.0, voice 9.5, AI-pattern risk 8.5,
+overall about 9.0/10. Detector scores remain unpredictable and were not targeted.
