@@ -115,3 +115,14 @@ from the unprotected agent. The other edits are grammar, terminology ("attack su
 Result: 355 words, 3 paragraphs; both PDFs at 6 pages, 32 references, Type-1 fonts; no first
 person, semicolon, or em dash. The general 2-7 sentence checklist conflicts with §10's
 one-paper-per-sentence rule for six papers, so P2 follows the specific Introduction rule.
+
+## Follow-up: Background and Related Work trim (Mode 1, 2026-10-25)
+
+The author supplied an 804-word draft. The paper's existing section was already the trimmed
+version at 740 words (617 + 123). Four minor fixes bring it to 620 + 130 = 750: "All of these
+methods", "used in this paper", "user's objective", and a split setup-cost sentence. No
+whole-sentence deletions. Prompt Flow Integrity, TrustAgent, and the emulated-environment
+citation remain because removing them would drop the section below the 620-word floor.
+
+The 800-820 full-text target conflicts with 620-670 + 130-150 = 750-820. The text is 750 and
+the table adds 92 words. No padding was added.
