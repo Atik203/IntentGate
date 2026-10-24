@@ -60,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Adapters + LLM parser v1** (InjecAgent/MCPTox loaders, runners, JSON-mode parser with repair retry, schema v1 + spot-checks, `_limit_allows` word-boundary fix).
 
 ### Changed
+- **Paper post-merge compliance pass (2026-10-24):** removed the only first-person prose ("to our knowledge"), replaced "Ours is IntentGate" with "IntentGate uses", narrowed the benign-task sentence to call-level ("preserves more of them"), and recorded the qwen3.5:4b pilot size (n=100 per condition). Both PDFs rebuilt at 6 pages; abstract, numbers, equations, citations, and section order unchanged.
 - `IEEE-conference/TODO.md` removed (final-pass checklist complete); roadmap + `AGENTS.md` pointers updated. The file remains in git history.
 - `--out` (`scripts/run_*_ours.py`) and `--report` (`harness/run_*.py`) are now **required** so a run can never default onto a tracked baseline path and clobber committed results; pilot `--tau` default aligned to the frozen 0.75; doc examples updated.
 - Phase 6 restructured into step-by-step checkboxes (P0 backbone pilot E18 + B2 curve E19, P1 probes E20–E21 + stats, P2 buffer items); parked until the team says go.
