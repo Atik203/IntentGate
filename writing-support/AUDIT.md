@@ -71,3 +71,19 @@ the meta "two benchmarks cover..." sentence. Abstract is now 199 words across 12
 (9--23 words), with no first person, em dash, semicolon, or banned word. Post-edit judgment:
 clarity 9.0, specificity 9.5, claim accuracy 9.0, structure 9.0, voice 9.5, AI-pattern risk 8.5,
 overall about 9.0/10. Detector scores remain unpredictable and were not targeted.
+
+## Follow-up: post-merge compliance pass (Mode 4/1, 2026-10-24)
+
+The Phase 8 merge (`5b1b701`) changed ten paper lines. Audit of that diff found one voice-rule
+violation ("to our knowledge"), one pre-existing prose label ("Ours is IntentGate"), one
+over-broad utility sentence ("preserves utility"), and a missing pilot size for the qwen3.5:4b
+replication. Applied: "to our knowledge" replaced with "the reviewed literature reports no";
+"Ours is IntentGate" replaced with "IntentGate uses"; "preserves utility" narrowed to
+"preserves more of them" (call-level); and `n=100` per condition added to the qwen sentence.
+Both PDFs rebuilt at 6 pages; all 23 checks pass.
+
+Left open for the authors: (1) `docs/experiments/09_paper_code_audit.md` item 15 still quotes
+"n=100 attack cases per condition, E18"; the paper now says "n=100 per condition" and does not
+cite internal experiment IDs. (2) The affiliation line reads "Independent University Bangladesh";
+confirm the official styling ("Independent University, Bangladesh") with the author. (3) Table
+labels still use the conventional "Ours"; prose has no first-person pronoun.
