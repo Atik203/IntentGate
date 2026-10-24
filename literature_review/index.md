@@ -20,9 +20,9 @@
 | 4 | Agent Security Bench / ASB (Zhang et al.) | 2025 | ICLR 2025 | **Anchor (Benchmark)** | Low | 2026-08-24 | [papers/04-asb-zhang-2025.md](papers/04-asb-zhang-2025.md) |
 | 5 | ToolGate (Liu et al.) | 2026 | arXiv preprint (2601.04688v1) | **Closest (System)** | High | 2026-08-24 | [papers/05-toolgate-liu-2026.md](papers/05-toolgate-liu-2026.md) |
 | 6 | Progent (Shi et al.) | 2025, revised 2026 | arXiv preprint (2504.11703v3) | **Closest (System)** | High | 2026-10-18 | [papers/06-progent-shi-2025.md](papers/06-progent-shi-2025.md) |
-| 7 | Task Shield (ACL 2025) | 2025 | ACL 2025 | **Closest (System)** | High | 2026-10-21 (source checked; full comparison pending) | [ACL Anthology](https://aclanthology.org/2025.acl-long.1435/) |
-| 8 | ClawGuard | 2026 | arXiv preprint (2604.11790) | **Closest (System)** | High | 2026-10-21 (source checked; full comparison pending) | [arXiv](https://arxiv.org/abs/2604.11790) |
-| 9 | AgentSpec | 2026 | ICSE 2026 | **Closest (System)** | High | 2026-10-21 (source checked; full comparison pending) | [ACM DOI](https://doi.org/10.1145/3744916.3764546) |
+| 7 | Task Shield (ACL 2025) | 2025 | ACL 2025 | **Closest (System)** | High | 2026-10-22 (reviewed; matrix row in phase8_related_work_matrix.md) | [ACL Anthology](https://aclanthology.org/2025.acl-long.1435/) |
+| 8 | ClawGuard | 2026 | arXiv preprint (2604.11790) | **Closest (System)** | High | 2026-10-22 (reviewed; matrix row in phase8_related_work_matrix.md) | [arXiv](https://arxiv.org/abs/2604.11790) |
+| 9 | AgentSpec | 2026 | ICSE 2026 | **Closest (System)** | High | 2026-10-22 (reviewed; matrix row in phase8_related_work_matrix.md) | [ACM DOI](https://doi.org/10.1145/3744916.3764546) |
 | — | TrustAgent (Hua et al.) | 2024 | Findings of EMNLP | Pending | Pending | — | — |
 | — | MELON (Zhu et al.) | 2025 | arXiv preprint | Pending | Pending | — | — |
 | — | StruQ (Chen et al.) | 2025 | USENIX Security | Pending | Pending | — | — |
