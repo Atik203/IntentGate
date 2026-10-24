@@ -172,3 +172,13 @@ parsed contract" -> "similarity to the request text instead of the parsed contra
 results are denoted as such" -> "Pilot results are labeled preliminary"; "post-hoc power for
 each pair-wise comparison" -> "post-hoc power ... for both benchmarks". Both PDFs at 6 pages;
 numbers unchanged.
+
+## Follow-up: Limitations trim (Mode 1, 2026-10-25)
+
+The author's Limitations draft used first person and attributed the qwen3.5:4b replication to
+MCPTox. Restored the author's sentence order and trimmed it to 212 words (within the 250 cap)
+to keep 6 pages. Fixed: "our analysis" -> "the analysis"; "We do not claim..." ->
+"Adaptive-attacker performance is not claimed"; "Our primary conclusions" -> "The primary
+conclusions"; qwen3.5:4b now replicates on InjecAgent (the pilot is InjecAgent only);
+gpt-6-luna uses the paper's wording. The ToolGate, valid-rate, block-rate, and evaluator
+sentences were already correct. Both PDFs at 6 pages; numbers unchanged.
