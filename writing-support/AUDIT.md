@@ -142,3 +142,17 @@ calls, 60.7%...`, `16-20` -> `16--20`, `per-action time` -> `per-call latency`.
 Two wording fixes applied: line 114 `strict` -> `strictly enforced`; line 132 `the choice is
 optimal` -> `τ or δ are optimal or that they transfer`. Code note: `decide()` defaults to
 `tau=0.6` while the paper's operating point is `τ=0.75`; runs pass 0.75 (already filed in T4).
+
+## Follow-up: ToolGate baseline check (Mode 4/1, 2026-10-25)
+
+Verified B2 against `configs/b2_coverage.json`, E19 in `docs/experiments/06_phase6_pilots.md`,
+and `src/intent_gate/baselines/toolgate/`. Numbers are correct: 79/79 InjecAgent, 65/801
+MCPTox, 8.1% distinct, 37.2% availability-weighted, 145 contracts, 84.9% extended coverage,
+`no_contract` logging. ToolBench was unavailable, so contract review and recorded-call replay
+are the fidelity check.
+
+The author's draft errors (`\ cite`, `8.1 \%`, `stattically identical`, `minimum
+implementation`, `has been`) are already corrected in the paper. Two wording fixes applied:
+"not a ToolBench run" instead of "instead of a ToolBench run", and the duplicated "attack calls
+look legitimate" sentence merged into "the attack is in the poisoned registration and the tool
+call itself looks legitimate". No numbers or claims changed.
