@@ -20,8 +20,9 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
 - Interpretation: semantic-only over-blocks legitimate calls (42.9% block rate) while
   allowing fewer user tools (8.0%) — confirming semantic-only is NOT equivalent to ours.
   The contract preserves more legitimate calls (12.0% allowed vs 8.0% for semantic-only)
-  with fewer clean-call blocks (25.0% vs 42.9%). This settles E31: contract wins on
-  utility, ties on headline ASR. Latency p95 includes LLM call time (not gate-only),
+  with fewer clean-call blocks (25.0% vs 42.9%). Call-level proxy only: small sample
+  (50 cases, 7-8 proposed calls each) does not establish task-level utility parity;
+  see E31 for the corrected matching. Latency p95 includes LLM call time (not gate-only),
   so comparisons across conditions are valid but absolute numbers are dominated by
   model inference.
 - Limitations: small sample (50 cases, 7-8 proposed calls each); call-level utility only,
@@ -328,7 +329,7 @@ Template: At a glance → Goal → Setup → Results → Artifacts → Limitatio
     proxies. The measured tradeoff supports a narrower component claim.
 
 ## Artifact packaging
-- Status: [~] implemented and locally verified; clean-container validation pending
+- Status: [x] implemented and locally verified; clean-container CI run 39299936752 (PR #44) passed image build, pytest, and reporter on a clean runner; local Docker Desktop engine unavailable so local container run was not performed.
 - Goal: one-command repro (`docker build && docker run pytest -q`). Wire `scripts/run_phase5.py --check` into container entrypoint.
 - Results: local tests pass, and artifact-only verification checks all 30 frozen reports plus
   SHA-256 hashes for 94 Phase 5 files. Docker Desktop did not expose its Linux engine, so the
