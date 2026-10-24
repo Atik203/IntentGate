@@ -111,7 +111,7 @@ ToolGate & Manual pre/post contracts & Deterministic symbolic & No & No & 145 co
 \section{Method}
 
 \subsection{System overview and ordering invariant}
-IntentGate sits between the agent and the executor. Figure~\ref{fig:gate} shows the pipeline. The ordering invariant is strict. The intent contract is parsed from the trusted user request \emph{before} tool definitions or any attacker content (injected observations, poisoned tool descriptions) are assembled. Tool outputs are never passed to the parser. Every proposed tool call, user-initiated and attacker-influenced alike, passes through \texttt{GateMiddleware.execute()} with no bypass path.
+IntentGate sits between the agent and the executor. Figure~\ref{fig:gate} shows the pipeline. The ordering invariant is strictly enforced. The intent contract is parsed from the trusted user request \emph{before} tool definitions or any attacker content (injected observations, poisoned tool descriptions) are assembled. Tool outputs are never passed to the parser. Every proposed tool call, user-initiated and attacker-influenced alike, passes through \texttt{GateMiddleware.execute()} with no bypass path.
 
 \subsection{Intent parser and contract schema}
 A trusted intent parser (an LLM at temperature 0, JSON mode, one repair retry) reads the user request once per session and emits an intent contract, the request-derived policy used by the gate
@@ -129,7 +129,7 @@ The rule component is deterministic: $S_{\mathrm{rule}} \in \{0,1\}$. It is 1 wh
 \begin{equation}
 S = \alpha \, S_{\mathrm{sem}} + (1 - \alpha) \, S_{\mathrm{rule}}, \label{eq:score}
 \end{equation}
-A veto sets $S=0$ before thresholding. The default is $\alpha = 0.7$. The threshold $\tau = 0.75$ and half-width $\delta = 0.1$ were fixed on a 50-call pilot before any benchmark run. The study reports the operating point and does not claim that the choice is optimal or that it transfers across splits.
+A veto sets $S=0$ before thresholding. The default is $\alpha = 0.7$. The threshold $\tau = 0.75$ and half-width $\delta = 0.1$ were fixed on a 50-call pilot before any benchmark run. The study reports the operating point and does not claim that $\tau$ or $\delta$ are optimal or that they transfer across splits.
 
 \subsection{Gate middleware and escalate band}
 The middleware decides per call:

@@ -125,3 +125,20 @@ emulated-environment sentences; removing them would leave three uncited referenc
 fixes: "uses" instead of "utilizes", "execute an unauthorized tool call", split StruQ/SecAlign
 for accuracy, "user's objective" in the gap, and "the ToolGate baseline". No padding; the text
 stays within the 750 cap.
+
+## Follow-up: Method equation and term check (Mode 4/1, 2026-10-25)
+
+Checked the author's Method draft against `scorer.py` and `decisions.py`. Equations are
+correct: Eq. 2 matches `s_sem=(cos+1)/2`; Eq. 3 matches `alpha*s_sem+(1-alpha)*s_rule`; the
+veto matches the early return of 0; Eq. 4 matches `decide()` with the veto; Algorithm 1 matches
+Eq. 2. No equation changes.
+
+The draft's term errors are already corrected in the paper: `Intent Gate` -> `IntentGate`,
+`0° temperature` -> `temperature 0`, `user-request` -> `user request`, `allowable` -> `allowed`,
+`Output ... are` -> `Tool outputs are`, `will fail` -> `fails`, the semicolon after `embedded`
+-> two sentences, `and/or` -> `before thresholding`, `The 60.7%...` -> `Of the 583 escalated
+calls, 60.7%...`, `16-20` -> `16--20`, `per-action time` -> `per-call latency`.
+
+Two wording fixes applied: line 114 `strict` -> `strictly enforced`; line 132 `the choice is
+optimal` -> `τ or δ are optimal or that they transfer`. Code note: `decide()` defaults to
+`tau=0.6` while the paper's operating point is `τ=0.75`; runs pass 0.75 (already filed in T4).
