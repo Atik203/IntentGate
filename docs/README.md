@@ -23,7 +23,7 @@
 Related roots outside `docs/`:
 
 - [`roadmap.md`](../roadmap.md) — status tracker (Phases 0–8, Gates 0–3, success criteria).
-- [`literature_review/`](../literature_review/) — frozen paper reviews + index (5 anchors + ToolGate).
+- [`literature_review/`](../literature_review/) — frozen paper reviews + index (5 anchors + ToolGate + ClawGuard + CaMeL + Task Shield + AgentSpec + MELON).
 - [`CHANGELOG.md`](../CHANGELOG.md) — change log (`[Unreleased]` for the current PR window).
 - [`AGENTS.md`](../AGENTS.md) — conventions for AI coding agents working in this repo.
 
