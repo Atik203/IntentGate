@@ -175,10 +175,9 @@ numbers unchanged.
 
 ## Follow-up: Limitations trim (Mode 1, 2026-10-25)
 
-The author's Limitations draft used first person and attributed the qwen3.5:4b replication to
-MCPTox. Restored the author's sentence order and trimmed it to 212 words (within the 250 cap)
-to keep 6 pages. Fixed: "our analysis" -> "the analysis"; "We do not claim..." ->
-"Adaptive-attacker performance is not claimed"; "Our primary conclusions" -> "The primary
-conclusions"; qwen3.5:4b now replicates on InjecAgent (the pilot is InjecAgent only);
-gpt-6-luna uses the paper's wording. The ToolGate, valid-rate, block-rate, and evaluator
-sentences were already correct. Both PDFs at 6 pages; numbers unchanged.
+The author's revised Limitations draft used first person and contained a false block-rate claim.
+Applied it with trims to 216 words (within the 250 cap) to keep 6 pages. Fixed: "we used"
+removed; "users'" -> "user"; "every 1 of the 11 / 11" -> "11/11"; "50 case" -> "50-case";
+"greater than 100% pure false positive rate" -> "not a pure false-positive rate"; qwen3.5:4b
+now replicates on InjecAgent (the pilot is InjecAgent only); the gpt-6-luna semicolon split.
+Both PDFs at 6 pages; numbers unchanged.
