@@ -156,3 +156,19 @@ order and vocabulary, keeping the verified numbers. Fixed only citation spacing,
 `8.1\%`/`37.2\%`/`84.9\%`, two semicolons, `minimum implementation` -> `minimal
 reimplementation`, and `statistically identical` -> `statistically indistinguishable`. Both
 PDFs at 6 pages; numbers and claims unchanged.
+
+## Follow-up: Evaluation trim (Mode 1, 2026-10-25)
+
+The author's full Evaluation wording built to 7 pages, with references [31]-[32] on page 7.
+Trimmed to 242 words to fit 6 pages, keeping the author's sentence order and vocabulary. Cut
+two clauses: "all tests were performed at pinned commit versions" and the
+poisoning-at-registration rationale. Fixed only term, number, and punctuation errors:
+"advanced configurations" -> "enhanced settings"; "attackers" -> "attacker intents";
+"static-snapshots" -> "static-snapshot cases"; "heuristic-evaluator" -> "heuristic evaluator";
+removed "within the codebase"; "average gate-overhead time-per-call" -> "per-call gate
+overhead"; "baseline-unprotected" -> "unprotected"; math commas; "similar to request-text vs.
+parsed contract" -> "similarity to the request text instead of the parsed contract";
+"tool-blocks" -> "tool blocks"; "random-seed 42" -> "seed 42"; hyphenation fixes; "Pilot-study
+results are denoted as such" -> "Pilot results are labeled preliminary"; "post-hoc power for
+each pair-wise comparison" -> "post-hoc power ... for both benchmarks". Both PDFs at 6 pages;
+numbers unchanged.
