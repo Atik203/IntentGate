@@ -2,7 +2,7 @@
 
 **Project:** Intent-Consistency Verification at the Action Gate for Tool-Using LLM Agents
 
-**Last updated:** 2026-10-22 (journal novelty audit opened; full feature-level review pending)
+**Last updated:** 2026-10-24 (fresh 2026 related-work search + full-text reviews of Task Shield, AgentSpec, MELON complete)
 
 > **Historical citation baseline:** the detailed v1 reviews and their figures remain frozen unless
 > updated through the roadmap and CHANGELOG. The ICEEICT manuscript uses its own verified citation
@@ -20,11 +20,11 @@
 | 4 | Agent Security Bench / ASB (Zhang et al.) | 2025 | ICLR 2025 | **Anchor (Benchmark)** | Low | 2026-08-24 | [papers/04-asb-zhang-2025.md](papers/04-asb-zhang-2025.md) |
 | 5 | ToolGate (Liu et al.) | 2026 | arXiv preprint (2601.04688v1) | **Closest (System)** | High | 2026-08-24 | [papers/05-toolgate-liu-2026.md](papers/05-toolgate-liu-2026.md) |
 | 6 | Progent (Shi et al.) | 2025, revised 2026 | arXiv preprint (2504.11703v3) | **Closest (System)** | High | 2026-10-18 | [papers/06-progent-shi-2025.md](papers/06-progent-shi-2025.md) |
-| 7 | Task Shield (ACL 2025) | 2025 | ACL 2025 | **Closest (System)** | High | 2026-10-22 (reviewed; matrix row in phase8_related_work_matrix.md) | [ACL Anthology](https://aclanthology.org/2025.acl-long.1435/) |
-| 8 | ClawGuard | 2026 | arXiv preprint (2604.11790) | **Closest (System)** | High | 2026-10-22 (reviewed; matrix row in phase8_related_work_matrix.md) | [arXiv](https://arxiv.org/abs/2604.11790) |
-| 9 | AgentSpec | 2026 | ICSE 2026 | **Closest (System)** | High | 2026-10-22 (reviewed; matrix row in phase8_related_work_matrix.md) | [ACM DOI](https://doi.org/10.1145/3744916.3764546) |
+| 7 | Task Shield (Jia et al.) | 2025 | ACL 2025 | **Closest (System)** | High | 2026-10-24 (full-text review) | [papers/10-task-shield-jia-2025.md](papers/10-task-shield-jia-2025.md) |
+| 8 | ClawGuard (Zhao et al.) | 2026 | arXiv preprint (2604.11790) | **Closest (System)** | High | 2026-10-22 (reviewed; matrix row in phase8_related_work_matrix.md) | [papers/07-clawguard-2026.md](papers/07-clawguard-2026.md) |
+| 9 | AgentSpec (Wang et al.) | 2026 | ICSE 2026 | **Closest (System)** | High | 2026-10-24 (full-text review) | [papers/11-agentspec-wang-2026.md](papers/11-agentspec-wang-2026.md) |
+| 10 | MELON (Zhu et al.) | 2025 | ICML 2025 | **Supporting (Defense)** | Medium | 2026-10-24 (full-text review) | [papers/09-melon-zhu-2025.md](papers/09-melon-zhu-2025.md) |
 | — | TrustAgent (Hua et al.) | 2024 | Findings of EMNLP | Pending | Pending | — | — |
-| — | MELON (Zhu et al.) | 2025 | arXiv preprint | Pending | Pending | — | — |
 | — | StruQ (Chen et al.) | 2025 | USENIX Security | Pending | Pending | — | — |
 | — | CaMeL (Debenedetti et al.) | 2025 | arXiv preprint | Pending | Pending | — | — |
 | — | Adaptive Attacks (Zhan et al.) | 2025 | Findings of NAACL | Pending | Pending | — | — |

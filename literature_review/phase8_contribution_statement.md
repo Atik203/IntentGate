@@ -1,9 +1,9 @@
 ﻿# Contribution Statement — IntentGate Phase 8 Journal Extension
 
-**Status:** DRAFT v2 — PROVISIONAL. **Not approved.** Silence is not approval. Roadmap task T2 stays open
+**Status:** DRAFT v3 — PROVISIONAL. **Not approved.** Silence is not approval. Roadmap task T2 stays open
 until a supervisor signs §9.
-**Date:** 2026-10-22
-**Inputs:** `literature_review/phase8_related_work_matrix.md` (T1), `docs/experiments/08_phase8_protocol.md`
+**Date:** 2026-10-24
+**Inputs:** `literature_review/phase8_related_work_matrix.md` (T1 v2), `docs/experiments/08_phase8_protocol.md`
 (T3 draft), `docs/experiments/09_paper_code_audit.md` (T4), `results/phase5/report.json` (frozen Gate 3),
 `results/phase6/*`, `results/phase7/*`, `docs/blueprint.md` Sec 19, `roadmap.md` Phase 8.
 **Wording rule:** no "first", "novel", "state of the art", or superiority wording is used as an assertion
@@ -147,12 +147,17 @@ ClawGuard (arXiv:2604.11790v2, revised 2026-05-11) is the nearest competitor. It
 task-specific constraints from the user's stated objective before any external call, enforces them
 deterministically at the tool-call boundary, requires user confirmation, normalizes obfuscated arguments,
 sanitizes secrets, and covers three injection channels. Task Shield (ACL 2025) reframes defense as task
-alignment with a per-action LLM judge and reports ASR 2.07% at 69.79% utility on AgentDojo with GPT-4o.
-Progent (arXiv:2504.11703v3) derives symbolic task policies and updates them during execution with approval
-for expansion. ToolGate (arXiv:2601.04688v1) uses hand-authored Hoare contracts and is the only closest
-work implemented in this repository (B2). CaMeL (arXiv:2503.18813) separates control and data flow with
-capability policies and reports on AgentDojo only. AgentSpec (ICSE 2026) applies a runtime constraint DSL;
-its feature-level review is still pending.
+alignment with a per-action LLM judge and reports ASR 2.07% at 69.79% utility on AgentDojo with GPT-4o;
+its cost profile (one defender LLM call per assistant response and per tool output) is qualitatively
+different from IntentGate's embedding-only gate. Progent (arXiv:2504.11703v3) derives symbolic task
+policies and updates them during execution with approval for expansion. ToolGate (arXiv:2601.04688v1)
+uses hand-authored Hoare contracts and is the only closest work implemented in this repository (B2).
+CaMeL (arXiv:2503.18813) separates control and data flow with capability policies and reports on
+AgentDojo only. AgentSpec (ICSE 2026) applies a runtime constraint DSL across agent domains (code,
+embodied, autonomous driving) with a 5-part rule model; its trusted input, lifecycle, datasets, and
+metrics are not recoverable from the fetched abstract alone. MELON (ICML 2025) is a re-execution
+defense that compares tool calls between the original trajectory and a prompt-masked re-run; it is
+evaluated on AgentDojo only and adds one model pass per action.
 
 **Consequence.** Any claim of a first request-derived policy, a first adversarially evaluated action gate,
 or novelty in middleware placement is indefensible and is withdrawn. The remaining difference is narrow and
@@ -231,8 +236,8 @@ inspected if a faithful-lite arm is ever proposed.
 significance-tested user-tool intervention comparison (the matched replay shows the observed gap is
 deterministic threshold arithmetic on two distinct call templates, so a p-value over it would be spurious —
 an end-to-end benign study is the only honest substitute); powered multi-family runs; raw re-verification
-of the E25 rows; full-text reviews of Task Shield and AgentSpec; a fresh 2026 related-work search; a
-demonstrated value-level gap for C2.
+of the E25 rows; full-text reviews of Task Shield, AgentSpec, and MELON (completed 2026-10-24, see
+`literature_review/papers/`); a demonstrated value-level gap for C2.
 
 **Decisions required from the supervisor.** All entries are open; none is approved.
 
@@ -247,7 +252,7 @@ demonstrated value-level gap for C2.
 | D7 | A1 fallback framing and C1–C3 wording | Adopt as drafted; pivot fixed before unblinding | blueprint Sec 19 and roadmap 8.0 require a pre-registered pivot | post-hoc reframing invalidates the confirmatory claim | Yes |
 | D8 | Unit of analysis, annotator count, agreement threshold, double-labeled fraction | Unit = trusted-request group; at least 2 annotators on at least 20% (PROPOSED); agreement threshold 0.7 (PROPOSED); third-annotator adjudication | E29 and E30 already group by hash of the raw request, so splits can align | a per-case unit reintroduces near-duplicate leakage | Yes |
 | D9 | Schema v2 | Document-level design only; no `configs/intent_schema_v2.json` yet | T5 is blocked by the human gates; v1 stays frozen | a config with no consumer becomes an accidental specification | Yes |
-| D10 | Fresh 2026 related-work search | Run before any novelty wording | roadmap 8.0 requires it; the T1 pending list is still open | a novelty sentence written before the search is a retraction risk | Yes |
+| D10 | Fresh 2026 related-work search | **Completed 2026-10-24** — 6 searches run, 6 papers fetched and reviewed (Task Shield, AgentSpec, MELON, StruQ, TrustAgent, ClawGuard); T1 matrix updated to v2 | roadmap 8.0 required it; the T1 pending list is now closed | a novelty sentence written before the search was a retraction risk | No (completed) |
 
 ---
 
