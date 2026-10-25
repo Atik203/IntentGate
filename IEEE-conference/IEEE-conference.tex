@@ -31,40 +31,36 @@
 % The default build is anonymous for the double-blind submission. For the named version:
 % pdflatex -jobname=IEEE-conference_authors "\def\PaperAnonymous{0}\input{IEEE-conference.tex}"
 \ifnum\PaperAnonymous=1
-\author{\IEEEauthorblockN{Anonymous Author(s)}
-\IEEEauthorblockA{\textit{Anonymous Institution} \\
-City, Country \\
-anonymous@anonymous.org}
-}
+  \author{\IEEEauthorblockN{Anonymous Author(s)}}
 \else
-\author{
-\IEEEauthorblockN{Md. Atikur Rahaman\,\orcidlink{0009-0008-2945-4117}\textsuperscript{1},
-Faiaz Hossain Nirob\,\orcidlink{0009-0005-4168-4263}\textsuperscript{2}, Md. Farid Hossen Rehad\,\orcidlink{0009-0008-0200-0705}\textsuperscript{3},\\
-Md. Salman Rohoman Nayeem\textsuperscript{1}, and Md. Aquib Azmain\,\orcidlink{0000-0002-1141-1695}\textsuperscript{4}}
-\IEEEauthorblockA{\textsuperscript{1}\textit{Department of Computer Science and Engineering, United International University, Dhaka, Bangladesh}\\
-\textsuperscript{2}\textit{Department of Computer Science and Engineering, Independent University Bangladesh, Dhaka, Bangladesh}\\
-\textsuperscript{3}\textit{Department of Computer Science and Engineering, Khulna University, Khulna, Bangladesh}\\
-\textsuperscript{4}\textit{Department of Computer Science and Engineering, BRAC University, Dhaka, Bangladesh}}
-}
+  \author{
+    \IEEEauthorblockN{Md. Atikur Rahaman\,\orcidlink{0009-0008-2945-4117}\textsuperscript{1},
+      Faiaz Hossain Nirob\,\orcidlink{0009-0005-4168-4263}\textsuperscript{2}, Md. Farid Hossen Rehad\,\orcidlink{0009-0008-0200-0705}\textsuperscript{3},\\
+      Md. Salman Rohoman Nayeem\textsuperscript{1}, and Md. Aquib Azmain\,\orcidlink{0000-0002-1141-1695}\textsuperscript{4}}
+    \IEEEauthorblockA{\textsuperscript{1}\textit{Department of Computer Science and Engineering, United International University, Dhaka, Bangladesh}\\
+      \textsuperscript{2}\textit{Department of Computer Science and Engineering, Independent University Bangladesh, Dhaka, Bangladesh}\\
+      \textsuperscript{3}\textit{Department of Computer Science and Engineering, Khulna University, Khulna, Bangladesh}\\
+      \textsuperscript{4}\textit{Department of Computer Science and Engineering, BRAC University, Dhaka, Bangladesh}}
+  }
 \fi
 
 \maketitle
 
 \begin{abstract}
-Tool-using agents built on large language models (LLMs) can be manipulated through instructions embedded in tool output or tool descriptions. As tools move into email, calendars, databases, and programming languages, this risk will continue to grow. Existing defenses modify the model itself, add a judge call after each agent action, or require a user to hand-author a policy for each tool. These methods do not scale well and do not provide complete protection. IntentGate is a lightweight middleware gate that extracts an intent contract directly from the user's trusted request before any malicious content is added. Each tool call is evaluated by its similarity to the extracted contract and a simple rule-based veto. Based on this evaluation, the call is allowed, blocked, or escalated to human review. This is done without requiring a direct LLM call for every action taken by the agent. The location of IntentGate provides a single point at which all tool calls occur, so the required policy comes from the user rather than from any content provided by an attacker. Evaluation was performed on two attack types: indirect injection on 2{,}108 InjecAgent cases and tool poisoning on 1{,}348 MCPTox cases. Under static attacks, attack success on InjecAgent falls from 19.0\% to 0.7\%, and attack-influenced MCPTox tool calls fall from 20.7\% to 10.7\%. Both benchmarks show large reductions. The gate adds 16--20 ms p95 CPU latency and needs no hand-authored per-tool contracts, compared with 145 for the ToolGate baseline. Additional testing on a second backbone (qwen3.5:4b) produced a comparable ASR reduction on InjecAgent (27.1\% to 2.1\%). The evaluation of benign utility, prompt baselines, and adaptive probes remains preliminary.
+  Tool-using agents built on large language models (LLMs) can be manipulated through instructions embedded in tool output or tool descriptions. As tools move into email, calendars, databases, and programming languages, this risk will continue to grow. Existing defenses modify the model itself, add a judge call after each agent action, or require a user to hand-author a policy for each tool. These methods do not scale well and do not provide complete protection. IntentGate is a lightweight middleware gate that extracts an intent contract directly from the user's trusted request before any malicious content is added. Each tool call is evaluated by its similarity to the extracted contract and a simple rule-based veto. Based on this evaluation, the call is allowed, blocked, or escalated to human review. This is done without requiring a direct LLM call for every action taken by the agent. The location of IntentGate provides a single point at which all tool calls occur, so the required policy comes from the user rather than from any content provided by an attacker. Evaluation was performed on two attack types: indirect injection on 2{,}108 InjecAgent cases and tool poisoning on 1{,}348 MCPTox cases. Under static attacks, attack success on InjecAgent falls from 19.0\% to 0.7\%, and attack-influenced MCPTox tool calls fall from 20.7\% to 10.7\%. Both benchmarks show large reductions. The gate adds 16--20 ms p95 CPU latency and needs no hand-authored per-tool contracts, compared with 145 for the ToolGate baseline. Additional testing on a second backbone (qwen3.5:4b) produced a comparable ASR reduction on InjecAgent (27.1\% to 2.1\%). The evaluation of benign utility, prompt baselines, and adaptive probes remains preliminary.
 \end{abstract}
 
 \begin{IEEEkeywords}
-action gate, intent contract, LLM agents, MCP, middleware, prompt injection defense, tool poisoning
+  action gate, intent contract, LLM agents, MCP, middleware, prompt injection defense, tool poisoning
 \end{IEEEkeywords}
 
 \section{Introduction}
 
-LLM agents that use tools have access to the user's environment, including email, calendars, databases, and code, through a continuous cycle similar to ReAct~\cite{yao2023react}. At the same time, this access is also the attack surface. An attacker could send instructions via an email attachment, calendar invitation, database entry, or tool output, which are examples of indirect prompt injection~\cite{greshake2023notwhat,perez2022ignore}. A malicious tool description in the Model Context Protocol (MCP) could direct the agent through tool poisoning, described on actual MCP servers~\cite{wang2026mcptox,radosevich2025mcp}. In either case the agent acts on the attacker's instruction without user authorization, which is the excessive-agency risk in the OWASP Top 10 for LLM applications~\cite{owasp2025llmtop10}. A recent survey catalogues attack techniques across agent workflows and protocol layers~\cite{ferrag2026survey}. Current defenses modify the model, make a judge call on the input, or require a hand-authored tool policy before execution, and a few derive the policy directly from the task~\cite{shi2025progent}. IntentGate is a middleware gate that evaluates each tool call against an intent contract extracted from the trusted user request. It is evaluated on InjecAgent for indirect injection and MCPTox for tool poisoning.
+LLM agents that use tools have access to the user's environment, including email, calendars, databases, and code, through a continuous cycle similar to ReAct~\cite{yao2023react}. At the same time, this access is also the attack surface. An attacker could send instructions via an email attachment, calendar invitation, database entry, or tool output, which are examples of indirect prompt injection~\cite{greshake2023notwhat,perez2022ignore}. A malicious tool description in the Model Context Protocol (MCP) could direct the agent through tool poisoning, described on actual MCP servers~\cite{wang2026mcptox,radosevich2025mcp}. In either case the agent acts on the attacker's instruction without user authorization, which is the excessive-agency risk in the OWASP Top 10 for LLM applications~\cite{owasp2025llmtop10}. Current defenses modify the model, make a judge call on the input, or require a hand-authored tool policy before execution, and a few derive the policy directly from the task~\cite{shi2025progent}. IntentGate is a middleware gate that evaluates each tool call against an intent contract extracted from the trusted user request. It is evaluated on InjecAgent for indirect injection and MCPTox for tool poisoning.
 
 Some prior defense approaches differ in how and where control is enforced. Model-based defenses modify either the model itself or its training data. However, CaMeL modifies the model by placing it within a planning-execution architecture that includes capability tracking~\cite{debenedetti2025camel}. StruQ also alters the model through fine tuning it to differentiate the task-specific instruction from the relevant input data~\cite{chen2025struq}. Similarly, SecAlign uses preference optimization to achieve this same goal~\cite{chen2025secalign}. Models can be trained using an instruction hierarchy to force them to prioritize their most trusted instructions~\cite{wallace2024instruction}. The above-mentioned defense strategies all require model cooperation and have not been directly compared against each other for use against InjecAgent or MCPTox.
 
-The open question is whether a gate that scores each tool call against a contract from a single trusted request can reduce attacks on both benchmark classes. On InjecAgent, attack success fell from 19.0\% to 0.7\%, and on MCPTox attack-influenced tool calls fell from 20.7\% to 10.7\%. The gate adds 16--20 ms p95 CPU latency and needs no hand-authored per-tool contracts. On MCPTox, a ToolGate reimplementation with 145 contracts is statistically indistinguishable from the unprotected agent.
+The open question is whether a gate that scores each tool call against a contract from a single trusted request can reduce attacks on both benchmark classes. On InjecAgent, attack success fell from 19.0\% to 0.7\%, and on MCPTox attack-influenced tool calls fell from 20.7\% to 10.7\%. The gate adds 16--20 ms p95 CPU latency and needs no hand-authored per-tool contracts.
 
 \section{Background and Related Work}
 
@@ -82,30 +78,30 @@ AgentDojo~\cite{debenedetti2024agentdojo}, InjecAgent~\cite{zhan2024injecagent},
 ToolGate requires a hand-authored contract for each tool~\cite{liu2026toolgate}. Progent creates a symbolic policy and modifies it in real time~\cite{shi2025progent}. ClawGuard generates constraint-based policies (task-scoped) based on the user's goal, then asks the user to verify~\cite{clawguard2026}. Task Shield implements a language-model judge on every action~\cite{taskshield2025}. IntentGate parses the trusted input request into a single, immutable contract and enforces that contract using a CPU-embedded scoring system and a deterministic veto mechanism. As such, IntentGate does not require a new model to be developed or retrained, nor does it implement a new LLM for each action or tool. The authors' measured contribution was comparing the results of their implementation of IntentGate against an implementation of ToolGate on two benchmarks: an injection benchmark and a small subset of a tool poisoning benchmark. Additionally, they measured the setup costs directly. Specifically, they created 145 total contracts as part of the ToolGate baseline and zero as part of their IntentGate implementation.
 
 \begin{table*}[t]
-\caption{Related-work comparison: policy source, enforcement, per-action LLM use, benchmarks, and setup cost.}
-\label{tab:relatedwork}
-\centering
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{|p{56pt}|p{82pt}|p{92pt}|c|p{88pt}|p{88pt}|}
-\hline
-System & Policy source & Enforcement & LLM/action & \shortstack{InjecAgent/\\MCPTox} & Setup cost \\
-\hline
-CaMeL & Model-level & Capability taint tracking & No & No & Model change \\
-\hline
-StruQ & Model-level & Fine-tuned model & No & No & Model change \\
-\hline
-Task Shield & Task-scoped (LLM-derived) & LLM-as-judge & Yes & No & Per-task LLM calls \\
-\hline
-ClawGuard & Task-scoped (from user objective) & Deterministic rules & No & Yes & Once per request \\
-\hline
-Progent & Task policy (LLM-derived) & Symbolic checks, SMT updates & No (updates) & No & Automatic generation, approval \\
-\hline
-ToolGate & Manual pre/post contracts & Deterministic symbolic & No & No & 145 contracts (InjecAgent) \\
-\hline
-\textbf{Ours} & \textbf{Auto-derived from user request} & \textbf{Embedding + rule veto} & No & Yes & \textbf{0 contracts} \\
-\hline
-\end{tabular}
+  \caption{Related-work comparison: policy source, enforcement, per-action LLM use, benchmarks, and setup cost.}
+  \label{tab:relatedwork}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{|p{56pt}|p{82pt}|p{92pt}|c|p{88pt}|p{88pt}|}
+    \hline
+    System        & Policy source                           & Enforcement                    & LLM/action   & \shortstack{InjecAgent/                                  \\MCPTox} & Setup cost \\
+    \hline
+    CaMeL         & Model-level                             & Capability taint tracking      & No           & No                      & Model change                   \\
+    \hline
+    StruQ         & Model-level                             & Fine-tuned model               & No           & No                      & Model change                   \\
+    \hline
+    Task Shield   & Task-scoped (LLM-derived)               & LLM-as-judge                   & Yes          & No                      & Per-task LLM calls             \\
+    \hline
+    ClawGuard     & Task-scoped (from user objective)       & Deterministic rules            & No           & Yes                     & Once per request               \\
+    \hline
+    Progent       & Task policy (LLM-derived)               & Symbolic checks, SMT updates   & No (updates) & No                      & Automatic generation, approval \\
+    \hline
+    ToolGate      & Manual pre/post contracts               & Deterministic symbolic         & No           & No                      & 145 contracts (InjecAgent)     \\
+    \hline
+    \textbf{Ours} & \textbf{Auto-derived from user request} & \textbf{Embedding + rule veto} & No           & Yes                     & \textbf{0 contracts}           \\
+    \hline
+  \end{tabular}
 \end{table*}
 
 \section{Method}
@@ -114,103 +110,103 @@ ToolGate & Manual pre/post contracts & Deterministic symbolic & No & No & 145 co
 IntentGate sits between the agent and the executor. Figure~\ref{fig:gate} shows the pipeline. The ordering invariant is strictly enforced. The intent contract is parsed from the trusted user request \emph{before} tool definitions or any attacker content (injected observations, poisoned tool descriptions) are assembled. Tool outputs are never passed to the parser. Every proposed tool call, user-initiated and attacker-influenced alike, passes through \texttt{GateMiddleware.execute()} with no bypass path.
 
 \subsection{Intent parser and contract schema}
-A trusted intent parser (an LLM at temperature 0, JSON mode, one repair retry) reads the user request once per session and emits an intent contract, the request-derived policy used by the gate
+A trusted intent parser (an LLM with temperature 0, JSON mode, one repair retry) reads the user request once per session and outputs an intent contract, the request-derived policy used by the gate.
 \begin{equation}
-C = (A, K, H), \label{eq:contract}
+  C = (A, K, H), \label{eq:contract}
 \end{equation}
-In this contract, $A$ is the set of allowed (entity, operation, resource) elements, $K$ is a set of numeric and path constraints, and $H$ is a set of high-risk flags. The implementation realizes $A$ as the contract's goals, expected tool categories, and permitted data access, $K$ as argument constraints, and $H$ as side-effect limits. A call that touches an element outside $A$, violates a constraint in $K$, or matches a flag in $H$ fails the rule check and triggers the veto. The schema is versioned and frozen for the evaluation. The contract is embedded once per session and reused. Only the proposed call is embedded at decision time, which keeps the agent prompt cacheable and the gate out of the prompt.
+In this contract, $A$ is the set of allowed (entity, operation, resource) elements, $K$ is a set of numeric and path constraints, and $H$ is a set of high-risk flags. The implementation represents $A$ as the contract's goals, expected tool categories, and permitted data access, $K$ as argument constraints, and $H$ as side-effect limitations. If a call has contact with an element outside of $A$, violates a constraint within $K$, or contains a flag within $H$, then it will fail the rule check and trigger the veto. The schema is versioned and locked for the evaluation. The contract is embedded only once during each session and then reused. Only the proposed call is embedded at decision time. Therefore, the agent's prompt remains cacheable and the gate is removed from the prompt.
 
 \subsection{Scorer}
-Each proposed tool call $c$ is scored against the contract. The semantic component maps the cosine similarity between the contract embedding $e_C$ and the call embedding $e_c$ to $[0,1]$:
+Each proposed tool call $c$ is evaluated relative to the contract. The semantic component converts the cosine similarity between the contract embedding $e_C$ and the call embedding $e_c$ into $[0,1]$:
 \begin{equation}
-S_{\mathrm{sem}} = \frac{1 + \cos(e_C, e_c)}{2} = \frac{1}{2}\left(1+\frac{e_C \cdot e_c}{\lVert e_C \rVert \, \lVert e_c \rVert}\right), \label{eq:sem}
+  S_{\mathrm{sem}} = \frac{1 + \cos(e_C, e_c)}{2} = \frac{1}{2}\left(1+\frac{e_C \cdot e_c}{\lVert e_C \rVert \, \lVert e_c \rVert}\right), \label{eq:sem}
 \end{equation}
-The rule component is deterministic: $S_{\mathrm{rule}} \in \{0,1\}$. It is 1 when $c$ passes all constraints in $K$ and 0 when the veto fires. The combined score is
+The rule component is also deterministic: $S_{\mathrm{rule}} \in \{0,1\}$. It is equal to 1 if the call satisfies all constraints in $K$ and 0 otherwise. The overall score is
 \begin{equation}
-S = \alpha \, S_{\mathrm{sem}} + (1 - \alpha) \, S_{\mathrm{rule}}, \label{eq:score}
+  S = \alpha \, S_{\mathrm{sem}} + (1 - \alpha) \, S_{\mathrm{rule}}, \label{eq:score}
 \end{equation}
-A veto sets $S=0$ before thresholding. The default is $\alpha = 0.7$. The threshold $\tau = 0.75$ and half-width $\delta = 0.1$ were fixed on a 50-call pilot before any benchmark run. The study reports the operating point and does not claim that $\tau$ or $\delta$ are optimal or that they transfer across splits.
+A veto results in setting $S=0$ prior to thresholding. The default value is $\alpha=0.7$. Both $\tau=0.75$ and $\delta=0.1$ are fixed values based on a 50-call pilot before any benchmark was performed. This study reports the operating point and does not assert that either $\tau$ or $\delta$ is optimal or that either value would be transferred across splits.
 
 \subsection{Gate middleware and escalate band}
-The middleware decides per call:
+The middleware makes a decision for each call based on Equation~\ref{eq:decision}:
 \begin{equation}
-\mathrm{decision}(c) =
-\begin{cases}
-\text{\textsc{block}}, & S_{\mathrm{rule}}=0 \ \text{or}\ S < \tau-\delta, \\
-\text{\textsc{escalate}}, & S_{\mathrm{rule}}=1 \ \text{and}\ \tau-\delta \le S < \tau, \\
-\text{\textsc{allow}}, & \text{otherwise},
-\end{cases} \label{eq:decision}
+  \mathrm{decision}(c) =
+  \begin{cases}
+    \text{\textsc{block}},    & S_{\mathrm{rule}}=0 \ \text{or}\ S < \tau-\delta,           \\
+    \text{\textsc{escalate}}, & S_{\mathrm{rule}}=1 \ \text{and}\ \tau-\delta \le S < \tau, \\
+    \text{\textsc{allow}},    & \text{otherwise},
+  \end{cases} \label{eq:decision}
 \end{equation}
-The block case is fail-closed. The escalate case routes to human review, is counted as a block in benchmark mode, and is shown to the user in demo mode. Algorithm~\ref{alg:gate} lists the full procedure. Of the 583 escalated calls, 60.7\% target attacker tools, 14.8\% target user tools, and 24.5\% target other tools. The gate adds no LLM call per action. Measured p95 per-call latency is 16--20 ms on CPU.
+The block case is fail-closed. The escalate case sends the call to human review and counts as a block in benchmark mode but is displayed to users in demo mode. Algorithm~\ref{alg:gate} shows the full procedure. Of the 583 escalated calls, 60.7\% targeted attacker tools, 14.8\% targeted user tools, and 24.5\% targeted other tools. No additional LLM calls are made per action by the gate. As such, measured p95 per-call latency is 16--20 ms on CPU.
 
 \begin{figure}[t]
-\centering
-\begin{tikzpicture}[x=1pt,y=1pt,>={Stealth[length=3.2pt]}]
-\tikzset{
-  rbox/.style={draw, rounded corners=2.5pt, align=center, inner xsep=4pt, inner ysep=3pt, font=\sffamily\small},
-  trustedbox/.style={rbox, draw=green!45!black, fill=green!7},
-  untrustedbox/.style={rbox, draw=red!60!black, fill=red!7, dashed},
-  agentbox/.style={rbox, draw=black!55, fill=black!6},
-  gatebox/.style={rbox, draw=blue!60!black, fill=blue!6},
-  decbox/.style={rbox, minimum height=34pt},
-  arr/.style={->, draw=black!75, line width=0.5pt},
-  darr/.style={arr, dashed},
-}
-% gate container
-\draw[rounded corners=4pt, draw=blue!60!black, fill=blue!4] (2,12) rectangle (238,148);
-\node[font=\sffamily\footnotesize\bfseries, text=blue!60!black] at (120,139) {ACTION GATE (middleware)};
-% trusted / untrusted columns
-\node[trustedbox, text width=92pt] (user) at (54,256) {{\bfseries User request}\\[1pt]{\footnotesize (trusted)}};
-\node[untrustedbox, text width=100pt] (untrusted) at (180,256) {{\bfseries Untrusted content}\\[1pt]{\footnotesize tool defs and outputs}};
-\node[trustedbox, text width=92pt] (parser) at (54,213) {{\bfseries Intent parser (LLM)}\\[1pt]{\footnotesize runs once, first}};
-\node[agentbox, text width=100pt] (agent) at (180,213) {{\bfseries Agent (ReAct)}\\[1pt]{\footnotesize any backbone}};
-\node[trustedbox, text width=92pt] (contract) at (54,169) {{\bfseries Intent contract}\\[1pt]{\footnotesize frozen, read-only}};
-% gate internals
-\node[gatebox, text width=86pt] (sem) at (56,119) {{\bfseries Semantic score}\\[1pt]{\footnotesize $S_{\mathrm{sem}}$ = embedding cosine similarity}};
-\node[gatebox, text width=86pt] (rule) at (180,119) {{\bfseries Rule engine}\\[1pt]{\footnotesize hard constraints, $S_{\mathrm{rule}}\!\in\!\{0,1\}$}};
-\node[gatebox, text width=208pt] (score) at (120,86) {{\bfseries Combined score}\\[1pt]{\footnotesize $S=\alpha\,S_{\mathrm{sem}}+(1-\alpha)\,S_{\mathrm{rule}}$\quad veto $\Rightarrow$ block (fail-closed)}};
-\node[decbox, text width=64pt, fill=red!10, draw=red!65!black] (block) at (48,45) {{\bfseries BLOCK}\\[1pt]{\footnotesize $S<\tau-\delta$ or veto}};
-\node[decbox, text width=70pt, fill=yellow!18, draw=orange!70!black] (esc) at (128,45) {{\bfseries ESCALATE}\\[1pt]{\footnotesize $\tau-\delta\leq S<\tau$}};
-\node[decbox, text width=54pt, fill=green!10, draw=green!50!black] (allow) at (201,45) {{\bfseries ALLOW}\\[1pt]{\footnotesize $S\geq\tau$}};
-% arrows
-\draw[arr] (user) -- (parser);
-\draw[arr] (untrusted) -- (agent);
-\draw[arr] (parser) -- (contract);
-\draw[darr] (40,157) -- (40,132);
-\node[font=\sffamily\footnotesize, text=black!70, anchor=west] at (42,152.5) {contract};
-\draw[arr] (agent.south) -- (180,148);
-\node[font=\sffamily\footnotesize, text=black!70, anchor=east] at (178,178) {proposed call};
-\draw[arr] (sem) -- (score);
-\draw[arr] (rule) -- (score);
-\draw[arr] (score) -- (block);
-\draw[arr] (score) -- (esc);
-\draw[arr] (score) -- (allow);
-\draw[arr] (allow.east) -- (240,45) -- (240,213) -- (agent.east);
-\node[rotate=90, font=\sffamily\footnotesize, inner sep=1pt] at (247,132) {tool result to agent};
-\end{tikzpicture}
-\caption{IntentGate middleware architecture. The intent parser derives a contract once from the trusted request, before any attacker content (tool definitions, tool outputs) is loaded. The gate scores each proposed call with embedding similarity and a hard-rule veto, then decides allow, block, or escalate. Per-action enforcement uses no LLM call.}
-\label{fig:gate}
+  \centering
+  \begin{tikzpicture}[x=1pt,y=1pt,>={Stealth[length=3.2pt]}]
+    \tikzset{
+      rbox/.style={draw, rounded corners=2.5pt, align=center, inner xsep=4pt, inner ysep=3pt, font=\sffamily\small},
+      trustedbox/.style={rbox, draw=green!45!black, fill=green!7},
+      untrustedbox/.style={rbox, draw=red!60!black, fill=red!7, dashed},
+      agentbox/.style={rbox, draw=black!55, fill=black!6},
+      gatebox/.style={rbox, draw=blue!60!black, fill=blue!6},
+      decbox/.style={rbox, minimum height=34pt},
+      arr/.style={->, draw=black!75, line width=0.5pt},
+      darr/.style={arr, dashed},
+    }
+    % gate container
+    \draw[rounded corners=4pt, draw=blue!60!black, fill=blue!4] (2,12) rectangle (238,148);
+    \node[font=\sffamily\footnotesize\bfseries, text=blue!60!black] at (120,139) {ACTION GATE (middleware)};
+    % trusted / untrusted columns
+    \node[trustedbox, text width=92pt] (user) at (54,256) {{\bfseries User request}\\[1pt]{\footnotesize (trusted)}};
+    \node[untrustedbox, text width=100pt] (untrusted) at (180,256) {{\bfseries Untrusted content}\\[1pt]{\footnotesize tool defs and outputs}};
+    \node[trustedbox, text width=92pt] (parser) at (54,213) {{\bfseries Intent parser (LLM)}\\[1pt]{\footnotesize runs once, first}};
+    \node[agentbox, text width=100pt] (agent) at (180,213) {{\bfseries Agent (ReAct)}\\[1pt]{\footnotesize any backbone}};
+    \node[trustedbox, text width=92pt] (contract) at (54,169) {{\bfseries Intent contract}\\[1pt]{\footnotesize frozen, read-only}};
+    % gate internals
+    \node[gatebox, text width=86pt] (sem) at (56,119) {{\bfseries Semantic score}\\[1pt]{\footnotesize $S_{\mathrm{sem}}$ = embedding cosine similarity}};
+    \node[gatebox, text width=86pt] (rule) at (180,119) {{\bfseries Rule engine}\\[1pt]{\footnotesize hard constraints, $S_{\mathrm{rule}}\!\in\!\{0,1\}$}};
+    \node[gatebox, text width=208pt] (score) at (120,86) {{\bfseries Combined score}\\[1pt]{\footnotesize $S=\alpha\,S_{\mathrm{sem}}+(1-\alpha)\,S_{\mathrm{rule}}$\quad veto $\Rightarrow$ block (fail-closed)}};
+    \node[decbox, text width=64pt, fill=red!10, draw=red!65!black] (block) at (48,45) {{\bfseries BLOCK}\\[1pt]{\footnotesize $S<\tau-\delta$ or veto}};
+    \node[decbox, text width=70pt, fill=yellow!18, draw=orange!70!black] (esc) at (128,45) {{\bfseries ESCALATE}\\[1pt]{\footnotesize $\tau-\delta\leq S<\tau$}};
+    \node[decbox, text width=54pt, fill=green!10, draw=green!50!black] (allow) at (201,45) {{\bfseries ALLOW}\\[1pt]{\footnotesize $S\geq\tau$}};
+    % arrows
+    \draw[arr] (user) -- (parser);
+    \draw[arr] (untrusted) -- (agent);
+    \draw[arr] (parser) -- (contract);
+    \draw[darr] (40,157) -- (40,132);
+    \node[font=\sffamily\footnotesize, text=black!70, anchor=west] at (42,152.5) {contract};
+    \draw[arr] (agent.south) -- (180,148);
+    \node[font=\sffamily\footnotesize, text=black!70, anchor=east] at (178,178) {proposed call};
+    \draw[arr] (sem) -- (score);
+    \draw[arr] (rule) -- (score);
+    \draw[arr] (score) -- (block);
+    \draw[arr] (score) -- (esc);
+    \draw[arr] (score) -- (allow);
+    \draw[arr] (allow.east) -- (240,45) -- (240,213) -- (agent.east);
+    \node[rotate=90, font=\sffamily\footnotesize, inner sep=1pt] at (247,132) {tool result to agent};
+  \end{tikzpicture}
+  \caption{IntentGate middleware architecture. The intent parser derives a contract once from the trusted request, before any attacker content (tool definitions, tool outputs) is loaded. The gate scores each proposed call with embedding similarity and a hard-rule veto, then decides allow, block, or escalate. Per-action enforcement uses no LLM call.}
+  \label{fig:gate}
 \end{figure}
 
 \begin{algorithm}[t]
-\caption{Gate decision for one proposed tool call}
-\label{alg:gate}
-\footnotesize
-\begin{algorithmic}[1]
-\Require contract $C=(A,K,H)$ with embedding $e_C$; tool call $c$ with embedding $e_c$; parameters $\alpha,\tau,\delta$
-\Ensure decision $d$: allow, block, or escalate
-\State $S_{\mathrm{sem}} \gets \frac{1 + \cos(e_C, e_c)}{2}$
-\State $S_{\mathrm{rule}} \gets 1$ if $c$ satisfies $A$ and $K$, else $0$
-\State $S \gets \alpha S_{\mathrm{sem}} + (1-\alpha) S_{\mathrm{rule}}$
-\If{$S_{\mathrm{rule}}=0$ or $S < \tau-\delta$}
-  \State $d \gets \mathrm{block}$ \Comment{fail-closed hard veto}
-\ElsIf{$S < \tau$}
-  \State $d \gets \mathrm{escalate}$ \Comment{human-review band}
-\Else
-  \State $d \gets \mathrm{allow}$
-\EndIf
-\State \Return $d$
-\end{algorithmic}
+  \caption{Gate decision for one proposed tool call}
+  \label{alg:gate}
+  \footnotesize
+  \begin{algorithmic}[1]
+    \Require contract $C=(A,K,H)$ with embedding $e_C$; tool call $c$ with embedding $e_c$; parameters $\alpha,\tau,\delta$
+    \Ensure decision $d$: allow, block, or escalate
+    \State $S_{\mathrm{sem}} \gets \frac{1 + \cos(e_C, e_c)}{2}$
+    \State $S_{\mathrm{rule}} \gets 1$ if $c$ satisfies $A$ and $K$, else $0$
+    \State $S \gets \alpha S_{\mathrm{sem}} + (1-\alpha) S_{\mathrm{rule}}$
+    \If{$S_{\mathrm{rule}}=0$ or $S < \tau-\delta$}
+    \State $d \gets \mathrm{block}$ \Comment{fail-closed hard veto}
+    \ElsIf{$S < \tau$}
+    \State $d \gets \mathrm{escalate}$ \Comment{human-review band}
+    \Else
+    \State $d \gets \mathrm{allow}$
+    \EndIf
+    \State \Return $d$
+  \end{algorithmic}
 \end{algorithm}
 
 \section{ToolGate Baseline (B2)}
@@ -239,50 +235,50 @@ Comparisons used the paired McNemar test with continuity correction~\cite{diette
 Table~\ref{tab:headline} and Figure~\ref{fig:bars} summarize the headline result. On InjecAgent, IntentGate reduces ASR from 19.0\% to 0.7\%. On MCPTox, it reduces attack-influenced calls from 20.7\% to 10.7\%. On the primary slices (the enhanced data-stealing portion of InjecAgent and the full MCPTox snapshot), McNemar gives $p=1.3\mathrm{e}{-}33$ and $p=1.25\mathrm{e}{-}07$. The ToolGate baseline reduces ASR by 1.8 percentage points (17.2\% vs.\ 19.0\%) on InjecAgent and is not statistically distinguishable from the unprotected agent on MCPTox. Call-level utility is reported with the benign-task pilot in Section~\ref{sec:validation}.
 
 \begin{table}[t]
-\caption{Headline results (full evaluation matrix). MCPTox reports attack-influenced ASR. Setup cost counts hand-authored contracts.}
-\label{tab:headline}
-\centering
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{|l|c|c|c|c|}
-\hline
-Condition & \shortstack{InjecAgent\\ASR} & \shortstack{MCPTox\\ASR} & Setup cost & p95 latency \\
-\hline
-B1 (none) & 19.0\% & 20.7\% & n/a & n/a \\
-\hline
-B2 (ToolGate) & 17.2\% & 20.1\% & 145 contracts & 0.06 ms \\
-\hline
-\textbf{Ours (IntentGate)} & \textbf{0.7\%} & \textbf{10.7\%} & \textbf{0} & 16--20 ms \\
-\hline
-\end{tabular}
+  \caption{Headline results (full evaluation matrix). MCPTox reports attack-influenced ASR. Setup cost counts hand-authored contracts.}
+  \label{tab:headline}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    Condition                  & \shortstack{InjecAgent                                               \\ASR} & \shortstack{MCPTox\\ASR} & Setup cost & p95 latency \\
+    \hline
+    B1 (none)                  & 19.0\%                 & 20.7\%          & n/a           & n/a       \\
+    \hline
+    B2 (ToolGate)              & 17.2\%                 & 20.1\%          & 145 contracts & 0.06 ms   \\
+    \hline
+    \textbf{Ours (IntentGate)} & \textbf{0.7\%}         & \textbf{10.7\%} & \textbf{0}    & 16--20 ms \\
+    \hline
+  \end{tabular}
 \end{table}
 
 \begin{figure}[t]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-  width=\columnwidth, height=4.1cm,
-  ybar, bar width=7pt,
-  symbolic x coords={InjecAgent, MCPTox},
-  xtick=data,
-  ymin=0, ymax=25,
-  ylabel={ASR (\%)},
-  ytick={0,5,10,15,20,25},
-  ymajorgrids, major grid style={black!10},
-  tick label style={font=\small}, label style={font=\small},
-  legend style={font=\small, at={(0.5,-0.26)}, anchor=north, legend columns=3, draw=black!25},
-  nodes near coords={\pgfmathprintnumber[fixed,zerofill,precision=1]{\pgfplotspointmeta}},
-  nodes near coords style={font=\fontsize{6.5}{7}\selectfont, rotate=90, anchor=west},
-  enlarge x limits=0.3,
-]
-\addplot[fill=black!25, draw=black!60] coordinates {(InjecAgent,19.0) (MCPTox,20.7)};
-\addplot[fill=orange!40, draw=orange!70!black] coordinates {(InjecAgent,17.2) (MCPTox,20.1)};
-\addplot[fill=green!35, draw=green!55!black] coordinates {(InjecAgent,0.7) (MCPTox,10.7)};
-\legend{B1 (none), B2 (ToolGate), Ours (IntentGate)}
-\end{axis}
-\end{tikzpicture}
-\caption{Attack success rate by condition on the full evaluation matrix (MCPTox reports attack-influenced ASR). IntentGate reaches 0.7\% on InjecAgent and 10.7\% on MCPTox, while the ToolGate baseline stays close to the unprotected agent.}
-\label{fig:bars}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\columnwidth, height=4.1cm,
+        ybar, bar width=7pt,
+        symbolic x coords={InjecAgent, MCPTox},
+        xtick=data,
+        ymin=0, ymax=25,
+        ylabel={ASR (\%)},
+        ytick={0,5,10,15,20,25},
+        ymajorgrids, major grid style={black!10},
+        tick label style={font=\small}, label style={font=\small},
+        legend style={font=\small, at={(0.5,-0.26)}, anchor=north, legend columns=3, draw=black!25},
+        nodes near coords={\pgfmathprintnumber[fixed,zerofill,precision=1]{\pgfplotspointmeta}},
+        nodes near coords style={font=\fontsize{6.5}{7}\selectfont, rotate=90, anchor=west},
+        enlarge x limits=0.3,
+      ]
+      \addplot[fill=black!25, draw=black!60] coordinates {(InjecAgent,19.0) (MCPTox,20.7)};
+      \addplot[fill=orange!40, draw=orange!70!black] coordinates {(InjecAgent,17.2) (MCPTox,20.1)};
+      \addplot[fill=green!35, draw=green!55!black] coordinates {(InjecAgent,0.7) (MCPTox,10.7)};
+      \legend{B1 (none), B2 (ToolGate), Ours (IntentGate)}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Attack success rate by condition on the full evaluation matrix (MCPTox reports attack-influenced ASR). IntentGate reaches 0.7\% on InjecAgent and 10.7\% on MCPTox, while the ToolGate baseline stays close to the unprotected agent.}
+  \label{fig:bars}
 \end{figure}
 
 \subsection{Setup cost}
@@ -292,52 +288,52 @@ IntentGate requires zero hand-authored contracts. ToolGate requires 145 contract
 Semantic scoring alone reaches 0.0\% ASR on InjecAgent. The rule-only ablation (A2) is the weakest condition, with 14.7\% ASR on InjecAgent and 263 attack-influenced MCPTox calls, close to the unprotected agent on the hard slices. Semantic-only (A1) detects more than the full gate on MCPTox (81 vs.\ 144 attack-influenced calls) but over-blocks legitimate calls, as the benign-task pilot shows. The raw-request ablation (A3) matches the full gate on InjecAgent (0.7\% both) and catches slightly more attacks on MCPTox (116 vs.\ 144 attack-influenced calls). The contract's value is therefore utility and auditability. Headline ASR is similar. The false-escalate rate is 14.8\% over those 583 escalated calls.
 
 \begin{table}[t]
-\caption{Ablations (full evaluation matrix). A1--A3 replace gate components. MCPTox reports attack-influenced calls (out of 1{,}348).}
-\label{tab:ablation}
-\centering
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{|l|c|c|p{88pt}|}
-\hline
-Condition & \shortstack{InjecAgent\\ASR} & \shortstack{MCPTox\\calls} & Notes \\
-\hline
-A1 (semantic-only) & 0.0\% & 81 & Detects more. Over-blocks legitimate calls \\
-\hline
-A2 (rule-only) & 14.7\% & 263 & Closest to unprotected on hard slices \\
-\hline
-A3 (raw-request) & 0.7\% & 116 & Equal to ours on \mbox{InjecAgent}. Fewer MCPTox calls \\
-\hline
-\textbf{Ours (full)} & \textbf{0.7\%} & \textbf{144} & Contract adds utility and auditability \\
-\hline
-\end{tabular}
+  \caption{Ablations (full evaluation matrix). A1--A3 replace gate components. MCPTox reports attack-influenced calls (out of 1{,}348).}
+  \label{tab:ablation}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{|l|c|c|p{88pt}|}
+    \hline
+    Condition            & \shortstack{InjecAgent                                                                         \\ASR} & \shortstack{MCPTox\\calls} & Notes \\
+    \hline
+    A1 (semantic-only)   & 0.0\%                  & 81           & Detects more. Over-blocks legitimate calls             \\
+    \hline
+    A2 (rule-only)       & 14.7\%                 & 263          & Closest to unprotected on hard slices                  \\
+    \hline
+    A3 (raw-request)     & 0.7\%                  & 116          & Equal to ours on \mbox{InjecAgent}. Fewer MCPTox calls \\
+    \hline
+    \textbf{Ours (full)} & \textbf{0.7\%}         & \textbf{144} & Contract adds utility and auditability                 \\
+    \hline
+  \end{tabular}
 \end{table}
 
 \subsection{Pareto and threshold}
 Figure~\ref{fig:sweep} shows the threshold sweep on the pilot data: attack success falls to zero at the operating point $\tau=0.75$ while the false-positive rate stays at 4\%. The operating point is fixed for the full matrix, and threshold transfer across encoders and splits is not claimed.
 
 \begin{figure}[t]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-  width=\columnwidth, height=4.3cm,
-  xlabel={Threshold $\tau$}, ylabel={Rate},
-  xmin=0.38, xmax=0.82, ymin=0, ymax=0.62,
-  xtick={0.4,0.5,0.6,0.7,0.75,0.8},
-  ytick={0,0.2,0.4,0.6},
-  grid=major, grid style={black!10},
-  tick label style={font=\small}, label style={font=\small},
-  legend style={font=\small, cells={anchor=west}, at={(0.03,0.04)}, anchor=south west, draw=black!25},
-  line width=0.7pt, mark size=1.3pt,
-]
-\addplot[color=blue!65!black, mark=*] coordinates {(0.40,0.56) (0.45,0.56) (0.50,0.56) (0.55,0.56) (0.60,0.56) (0.65,0.56) (0.70,0.28) (0.75,0.00) (0.80,0.00)};
-\addplot[color=red!70!black, mark=square*] coordinates {(0.40,0.00) (0.45,0.00) (0.50,0.00) (0.55,0.00) (0.60,0.00) (0.65,0.00) (0.70,0.04) (0.75,0.04) (0.80,0.08)};
-\legend{Pilot ASR, Pilot FPR}
-\draw[dashed, black!60, line width=0.5pt] (axis cs:0.75,0) -- (axis cs:0.75,0.62);
-\node[font=\footnotesize, text=black!70, anchor=east] at (axis cs:0.745,0.52) {operating point};
-\end{axis}
-\end{tikzpicture}
-\caption{Threshold sweep on the 200-case pilot ($\delta=0.1$): attack success rate (ASR) and false-positive rate (FPR) versus $\tau$. The operating point $\tau=0.75$ sits at the knee: ASR reaches zero while FPR stays at 4\%.}
-\label{fig:sweep}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\columnwidth, height=4.3cm,
+        xlabel={Threshold $\tau$}, ylabel={Rate},
+        xmin=0.38, xmax=0.82, ymin=0, ymax=0.62,
+        xtick={0.4,0.5,0.6,0.7,0.75,0.8},
+        ytick={0,0.2,0.4,0.6},
+        grid=major, grid style={black!10},
+        tick label style={font=\small}, label style={font=\small},
+        legend style={font=\small, cells={anchor=west}, at={(0.03,0.04)}, anchor=south west, draw=black!25},
+        line width=0.7pt, mark size=1.3pt,
+      ]
+      \addplot[color=blue!65!black, mark=*] coordinates {(0.40,0.56) (0.45,0.56) (0.50,0.56) (0.55,0.56) (0.60,0.56) (0.65,0.56) (0.70,0.28) (0.75,0.00) (0.80,0.00)};
+      \addplot[color=red!70!black, mark=square*] coordinates {(0.40,0.00) (0.45,0.00) (0.50,0.00) (0.55,0.00) (0.60,0.00) (0.65,0.00) (0.70,0.04) (0.75,0.04) (0.80,0.08)};
+      \legend{Pilot ASR, Pilot FPR}
+      \draw[dashed, black!60, line width=0.5pt] (axis cs:0.75,0) -- (axis cs:0.75,0.62);
+      \node[font=\footnotesize, text=black!70, anchor=east] at (axis cs:0.745,0.52) {operating point};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Threshold sweep on the 200-case pilot ($\delta=0.1$): attack success rate (ASR) and false-positive rate (FPR) versus $\tau$. The operating point $\tau=0.75$ sits at the knee: ASR reaches zero while FPR stays at 4\%.}
+  \label{fig:sweep}
 \end{figure}
 
 \subsection{Error taxonomy}
@@ -352,29 +348,29 @@ The benign-task pilot (50 clean cases) compares the unprotected agent, the full 
 The prompt-baseline pilot tests 50 attack cases per condition. ASR is 6.8\% with no defense prompt, 4.3\% with delimiters, 4.3\% with sandwiching, and 8.9\% with instructional prevention. DeepSeek V4.1 Flash refused the static injections (0/100 in both conditions), so its delta is undefined. This is a model-level refusal, not a gate effect. Phrasings that change how the injection is delivered stayed at or below 2.2\% gated ASR. All pilot numbers are preliminary.
 
 \begin{table}[t]
-\caption{Utility and validation pilots (preliminary): benign-task utility, second backbone, and prompt-level baselines.}
-\label{tab:validation}
-\centering
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{|l|p{142pt}|}
-\hline
-Pilot & Result \\
-\hline
-Benign utility & user-tool allowed: none 16.0\%, ours 12.0\%, semantic-only 8.0\%. Clean-call block: none 0.0\%, ours 25.0\%, semantic-only 42.9\% \\
-\hline
-Second backbone & qwen3.5:4b: ASR 27.1\% $\rightarrow$ 2.1\% \\
-\hline
-Prompt baselines & delimiters 4.3\%, sandwich 4.3\%, no \mbox{defense} 6.8\%, instructional prevention 8.9\% (50 cases each) \\
-\hline
-\end{tabular}
+  \caption{Utility and validation pilots (preliminary): benign-task utility, second backbone, and prompt-level baselines.}
+  \label{tab:validation}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{|l|p{142pt}|}
+    \hline
+    Pilot            & Result                                                                                                                            \\
+    \hline
+    Benign utility   & user-tool allowed: none 16.0\%, ours 12.0\%, semantic-only 8.0\%. Clean-call block: none 0.0\%, ours 25.0\%, semantic-only 42.9\% \\
+    \hline
+    Second backbone  & qwen3.5:4b: ASR 27.1\% $\rightarrow$ 2.1\%                                                                                        \\
+    \hline
+    Prompt baselines & delimiters 4.3\%, sandwich 4.3\%, no \mbox{defense} 6.8\%, instructional prevention 8.9\% (50 cases each)                         \\
+    \hline
+  \end{tabular}
 \end{table}
 
 \section{Limitations}
 
-The study focuses on static attacks. No claim is made about adaptive-attacker performance. An offline probe can copy the user request into free-text tool arguments and raise $S$ above $\tau$. During an offline replay, a six-token verbatim echo guard blocked all 34 measured adaptive calls (11/11 call templates) while blocking none of the 194 allowed user-tool calls. The main conclusions remain unchanged. MCPTox results reflect a static snapshot, not live servers. The full matrix uses a single backbone (gpt-4o-mini). qwen3.5:4b replicates the delta found in InjecAgent. However, gpt-6-luna is incompatible with the shared ReAct-style prompt. DeepSeek's refusal indicates a model boundary, not gate generality. The parser is an LLM call once per session, included in the cost. Action-level enforcement uses no LLM.
+Static attacks were studied. There was no assertion to the effect that adaptive attackers would be able to perform better than the static attacker. An offline probe can create a copy of the user's request into free-text tool arguments and cause $S$ to exceed $\tau$. A single backbone (gpt-4o-mini) is used for all elements of the full matrix. qwen3.5:4b replicates the delta found in InjecAgent.
 
-For the ToolGate baseline, contract coverage for MCPTox tools outside the evaluated subset remains low by design. Missing contracts are always marked as \texttt{no\_contract} and never silently permitted. Valid rate represents the percentage of user tool calls permissible by the system, not end-to-end task success. The benign-task pilot is a 50-case comparison and should be read as such. Block rates include escalate candidates and thus are not a pure false-positive rate. The MCPTox attack-influenced metric comes from a heuristic evaluator (payload and sensitive-path evidence), and is less granular than a direct objective evaluation.
+Contract coverage for MCPTox tools that are outside the subset evaluated in ToolGate remains low by design. Valid rate refers to the percent of the user's requests to use tools allowed by the system and not overall success of completing tasks. The MCPTox attack-influenced metric is obtained through a heuristic evaluator (payload and sensitive path evidence) and therefore is less detailed than an objective evaluator.
 
 \section{Conclusion}
 

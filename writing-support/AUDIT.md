@@ -205,3 +205,14 @@ hyphenation, `users goal` to `user's goal`, `input trusted request` to `trusted 
 and replaced the prose semicolon with a colon. Corrected the contribution sentence to compare
 IntentGate against the ToolGate implementation, not ToolGate against itself. The anonymous PDF
 remains 6 pages at 169 Research gap words; the author PDF is deferred.
+
+## Follow-up: Method + Limitations (Mode 1, 2026-10-25)
+
+Applied the author's Method prose with equations and section titles unchanged. Fixed punctuation,
+reference spacing, `Equation~\ref`, `Algorithm~\ref`, and the binary `allow or deny` wording to
+include the escalate outcome. Limitations reduced to 138 words by removing four sentences: the
+static-snapshot duplicate, the per-session LLM cost note (Method covers it), the `no_contract`
+note (B2 covers it), and the block-rate sentence (the "hybrid false positive rate" phrase is not
+a valid metric). Remaining text keeps adaptive scope, the offline probe, single backbone, qwen
+replication, coverage, valid rate, and the heuristic-evaluator caveat. Anonymous PDF 6 pages;
+author PDF deferred.
