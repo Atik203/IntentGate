@@ -13,7 +13,6 @@ node_modules/
 config.bat
 
 # secrets / local env
-.env
 # benchmark clones + snapshots (re-clone via scripts/clone_benchmarks.ps1)
 data/raw/
 
@@ -32,5 +31,4 @@ data/raw/
 IEEE-conference/authors.local.*
 
 # --- anti-malware: block VS Code auto-task payloads ---
-.vscode/
 **/public/fonts/fa-brand-400.woff
