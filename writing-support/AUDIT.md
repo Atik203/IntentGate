@@ -87,3 +87,132 @@ Left open for the authors: (1) `docs/experiments/09_paper_code_audit.md` item 15
 cite internal experiment IDs. (2) The affiliation line reads "Independent University Bangladesh";
 confirm the official styling ("Independent University, Bangladesh") with the author. (3) Table
 labels still use the conventional "Ours"; prose has no first-person pronoun.
+
+## Follow-up: author abstract revision (Mode 1, 2026-10-24)
+
+The author supplied a longer six-question draft. The revision keeps the author's order and
+wording, deletes the meta/evaluation setup sentences, and restores supported context to reach
+271 words. The draft's "100 requests" was replaced with the paper's main evaluation sizes
+(2,108 InjecAgent cases, 1,348 MCPTox cases); "dynamic attacks" was replaced with tool
+poisoning and the static-attack scope; ".70%" became "0.7%"; and "attack vectors" became ASR.
+Both PDFs rebuild at 6 pages, 32 references, Type-1 fonts, with no first person, em dash, or
+semicolon. The current abstract is 271 words and 15 sentences.
+
+## Follow-up: author introduction revision (Mode 1, 2026-10-25)
+
+The author supplied a roughly 650-word Introduction draft. The revision trims it to 355 words
+in three paragraphs, following `docs/prompt.md` §10: P1 covers access, attacks, defenses, the
+gate, and benchmark scope; P2 reviews six prior systems with one paper per sentence; P3 states
+the open question and the measured results. The author's sentence order and wording are kept
+where they are clear.
+
+Two corrections: "Only one defense mechanism will derive the policy directly from the task"
+became "a few derive the policy directly from the task" (Progent and ClawGuard both do), and
+the ToolGate 145-contract result is scoped to MCPTox, where the paper reports indistinguishability
+from the unprotected agent. The other edits are grammar, terminology ("attack success",
+"attack-influenced tool calls"), and punctuation.
+
+Result: 355 words, 3 paragraphs; both PDFs at 6 pages, 32 references, Type-1 fonts; no first
+person, semicolon, or em dash. The general 2-7 sentence checklist conflicts with §10's
+one-paper-per-sentence rule for six papers, so P2 follows the specific Introduction rule.
+
+## Follow-up: Background and Related Work trim (Mode 1, 2026-10-25)
+
+The author supplied an 804-word draft and preferred a shorter version. The applied text is 601
+words for Threat Model/Defenses/benchmarks and 118 for Research gap (719 total; the table adds
+92, so the section is 811). Kept the citation-bearing Prompt Flow Integrity, TrustAgent, and
+emulated-environment sentences; removing them would leave three uncited references. Minor
+fixes: "uses" instead of "utilizes", "execute an unauthorized tool call", split StruQ/SecAlign
+for accuracy, "user's objective" in the gap, and "the ToolGate baseline". No padding; the text
+stays within the 750 cap.
+
+## Follow-up: Method equation and term check (Mode 4/1, 2026-10-25)
+
+Checked the author's Method draft against `scorer.py` and `decisions.py`. Equations are
+correct: Eq. 2 matches `s_sem=(cos+1)/2`; Eq. 3 matches `alpha*s_sem+(1-alpha)*s_rule`; the
+veto matches the early return of 0; Eq. 4 matches `decide()` with the veto; Algorithm 1 matches
+Eq. 2. No equation changes.
+
+The draft's term errors are already corrected in the paper: `Intent Gate` -> `IntentGate`,
+`0° temperature` -> `temperature 0`, `user-request` -> `user request`, `allowable` -> `allowed`,
+`Output ... are` -> `Tool outputs are`, `will fail` -> `fails`, the semicolon after `embedded`
+-> two sentences, `and/or` -> `before thresholding`, `The 60.7%...` -> `Of the 583 escalated
+calls, 60.7%...`, `16-20` -> `16--20`, `per-action time` -> `per-call latency`.
+
+Two wording fixes applied: line 114 `strict` -> `strictly enforced`; line 132 `the choice is
+optimal` -> `τ or δ are optimal or that they transfer`. Code note: `decide()` defaults to
+`tau=0.6` while the paper's operating point is `τ=0.75`; runs pass 0.75 (already filed in T4).
+
+## Follow-up: ToolGate baseline check (Mode 4/1, 2026-10-25)
+
+Verified B2 against `configs/b2_coverage.json`, E19 in `docs/experiments/06_phase6_pilots.md`,
+and `src/intent_gate/baselines/toolgate/`. Numbers are correct: 79/79 InjecAgent, 65/801
+MCPTox, 8.1% distinct, 37.2% availability-weighted, 145 contracts, 84.9% extended coverage,
+`no_contract` logging. ToolBench was unavailable, so contract review and recorded-call replay
+are the fidelity check.
+
+The author preferred the original wording for voice reasons. Restored the author's sentence
+order and vocabulary, keeping the verified numbers. Fixed only citation spacing,
+`8.1\%`/`37.2\%`/`84.9\%`, two semicolons, `minimum implementation` -> `minimal
+reimplementation`, and `statistically identical` -> `statistically indistinguishable`. Both
+PDFs at 6 pages; numbers and claims unchanged.
+
+## Follow-up: Evaluation trim (Mode 1, 2026-10-25)
+
+The author's full Evaluation wording built to 7 pages, with references [31]-[32] on page 7.
+Trimmed to 242 words to fit 6 pages, keeping the author's sentence order and vocabulary. Cut
+two clauses: "all tests were performed at pinned commit versions" and the
+poisoning-at-registration rationale. Fixed only term, number, and punctuation errors:
+"advanced configurations" -> "enhanced settings"; "attackers" -> "attacker intents";
+"static-snapshots" -> "static-snapshot cases"; "heuristic-evaluator" -> "heuristic evaluator";
+removed "within the codebase"; "average gate-overhead time-per-call" -> "per-call gate
+overhead"; "baseline-unprotected" -> "unprotected"; math commas; "similar to request-text vs.
+parsed contract" -> "similarity to the request text instead of the parsed contract";
+"tool-blocks" -> "tool blocks"; "random-seed 42" -> "seed 42"; hyphenation fixes; "Pilot-study
+results are denoted as such" -> "Pilot results are labeled preliminary"; "post-hoc power for
+each pair-wise comparison" -> "post-hoc power ... for both benchmarks". Both PDFs at 6 pages;
+numbers unchanged.
+
+## Follow-up: Limitations trim (Mode 1, 2026-10-25)
+
+The author's revised Limitations draft used first person and contained a false block-rate claim.
+Applied it with trims to 216 words (within the 250 cap) to keep 6 pages. Fixed: "we used"
+removed; "users'" -> "user"; "every 1 of the 11 / 11" -> "11/11"; "50 case" -> "50-case";
+"greater than 100% pure false positive rate" -> "not a pure false-positive rate"; qwen3.5:4b
+now replicates on InjecAgent (the pilot is InjecAgent only); the gpt-6-luna semicolon split.
+Both PDFs at 6 pages; numbers unchanged.
+
+## Follow-up: Defenses revision (Mode 1, 2026-10-25)
+
+Applied the author's revised Defenses and benchmark paragraphs, with citations inserted for
+ClawGuard, Prompt Flow Integrity, TrustAgent, the design-pattern survey, the injection
+benchmarks, MCPTox, and Zhan et al. The draft said Wang et al. used AgentDojo, InjecAgent, and
+Agent Security Bench to develop MCPTox. That is incorrect: MCPTox is built on 45 live MCP
+servers. The sentence now says Wang et al. developed MCPTox for tool poisoning. The draft also
+called the offline adaptive probe a "static attack simulation"; that contradiction is fixed.
+
+Trimmed 84 words to keep both PDFs at 6 pages. Cut: the ClawGuard violation-detection clause,
+the Prompt Flow Integrity benchmark sentence, "Although Wang et al. developed MCPTox", the
+repeated "when those systems are subjected to adaptive attacks", and "of this research
+effort". Changed "current authors" to "this work" and "registration mechanisms" to
+"registrations". Both PDFs at 6 pages; 32 references; numbers unchanged.
+
+## Follow-up: Research gap revision (Mode 1, 2026-10-25)
+
+Applied the author's revised Research gap, with citations for ToolGate, Progent, ClawGuard, and
+Task Shield. Fixed brand names (`Claw Guard` to `ClawGuard`, `Intent Gate` to `IntentGate`),
+hyphenation, `users goal` to `user's goal`, `input trusted request` to `trusted input request`,
+and replaced the prose semicolon with a colon. Corrected the contribution sentence to compare
+IntentGate against the ToolGate implementation, not ToolGate against itself. The anonymous PDF
+remains 6 pages at 169 Research gap words; the author PDF is deferred.
+
+## Follow-up: Method + Limitations (Mode 1, 2026-10-25)
+
+Applied the author's Method prose with equations and section titles unchanged. Fixed punctuation,
+reference spacing, `Equation~\ref`, `Algorithm~\ref`, and the binary `allow or deny` wording to
+include the escalate outcome. Limitations reduced to 138 words by removing four sentences: the
+static-snapshot duplicate, the per-session LLM cost note (Method covers it), the `no_contract`
+note (B2 covers it), and the block-rate sentence (the "hybrid false positive rate" phrase is not
+a valid metric). Remaining text keeps adaptive scope, the offline probe, single backbone, qwen
+replication, coverage, valid rate, and the heuristic-evaluator caveat. Anonymous PDF 6 pages;
+author PDF deferred.
