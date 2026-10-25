@@ -2,7 +2,7 @@
 /mds
 **.docx
 literature_review.md
-
+.env
 # python / venv / pytest
 .venv/
 __pycache__/
