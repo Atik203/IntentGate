@@ -1,6 +1,8 @@
 """B2 (ToolGate) report: contract coverage + recorded-call replay (README Quick Start)."""
 from __future__ import annotations
 
+import utils.net
+import utils.clients
 import utils.http_session
 import utils.transport
 import utils.session
