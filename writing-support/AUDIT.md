@@ -196,3 +196,12 @@ the Prompt Flow Integrity benchmark sentence, "Although Wang et al. developed MC
 repeated "when those systems are subjected to adaptive attacks", and "of this research
 effort". Changed "current authors" to "this work" and "registration mechanisms" to
 "registrations". Both PDFs at 6 pages; 32 references; numbers unchanged.
+
+## Follow-up: Research gap revision (Mode 1, 2026-10-25)
+
+Applied the author's revised Research gap, with citations for ToolGate, Progent, ClawGuard, and
+Task Shield. Fixed brand names (`Claw Guard` to `ClawGuard`, `Intent Gate` to `IntentGate`),
+hyphenation, `users goal` to `user's goal`, `input trusted request` to `trusted input request`,
+and replaced the prose semicolon with a colon. Corrected the contribution sentence to compare
+IntentGate against the ToolGate implementation, not ToolGate against itself. The anonymous PDF
+remains 6 pages at 169 Research gap words; the author PDF is deferred.
