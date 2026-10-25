@@ -181,3 +181,18 @@ removed; "users'" -> "user"; "every 1 of the 11 / 11" -> "11/11"; "50 case" -> "
 "greater than 100% pure false positive rate" -> "not a pure false-positive rate"; qwen3.5:4b
 now replicates on InjecAgent (the pilot is InjecAgent only); the gpt-6-luna semicolon split.
 Both PDFs at 6 pages; numbers unchanged.
+
+## Follow-up: Defenses revision (Mode 1, 2026-10-25)
+
+Applied the author's revised Defenses and benchmark paragraphs, with citations inserted for
+ClawGuard, Prompt Flow Integrity, TrustAgent, the design-pattern survey, the injection
+benchmarks, MCPTox, and Zhan et al. The draft said Wang et al. used AgentDojo, InjecAgent, and
+Agent Security Bench to develop MCPTox. That is incorrect: MCPTox is built on 45 live MCP
+servers. The sentence now says Wang et al. developed MCPTox for tool poisoning. The draft also
+called the offline adaptive probe a "static attack simulation"; that contradiction is fixed.
+
+Trimmed 84 words to keep both PDFs at 6 pages. Cut: the ClawGuard violation-detection clause,
+the Prompt Flow Integrity benchmark sentence, "Although Wang et al. developed MCPTox", the
+repeated "when those systems are subjected to adaptive attacks", and "of this research
+effort". Changed "current authors" to "this work" and "registration mechanisms" to
+"registrations". Both PDFs at 6 pages; 32 references; numbers unchanged.
