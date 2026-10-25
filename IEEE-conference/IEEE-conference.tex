@@ -309,7 +309,7 @@ Semantic scoring alone reaches 0.0\% ASR on InjecAgent. The rule-only ablation (
 \end{table}
 
 \subsection{Pareto and threshold}
-Figure~\ref{fig:sweep} shows the threshold sweep on the pilot data: attack success falls to zero at the operating point $\tau=0.75$ while the false-positive rate stays at 4\%. The operating point is fixed for the full matrix, and threshold transfer across encoders and splits is not claimed.
+Figure~\ref{fig:sweep} shows the results of a threshold sweep on the pilot data, where the attack-success rate drops to zero as soon as $\tau=0.75$, whereas the false-positive rate remains constant at 4\%. This operating point is fixed for the entire decision matrix, and threshold transfer across different encoders or splits is not claimed.
 
 \begin{figure}[t]
   \centering
