@@ -97,7 +97,7 @@ ToolGate requires a hand-authored contract for each tool~\cite{liu2026toolgate}.
     \hline
     Progent       & Task policy (LLM-derived)               & Symbolic checks, SMT updates   & No (updates) & No                      & Automatic generation, approval \\
     \hline
-    ToolGate      & Manual pre/post contracts               & Deterministic symbolic         & No           & No                      & 145 contracts (InjecAgent)     \\
+    ToolGate      & Manual pre/post contracts               & Deterministic symbolic         & No           & No                      & 145 contracts total            \\
     \hline
     \textbf{Ours} & \textbf{Auto-derived from user request} & \textbf{Embedding + rule veto} & No           & Yes                     & \textbf{0 contracts}           \\
     \hline
@@ -213,7 +213,7 @@ The block case is fail-closed. The escalate case sends the call to human review 
 
 The main baseline has been a minimal reimplementation of ToolGate~\cite{liu2026toolgate}: contracts with preconditions $P$ and post-conditions $Q$ on a symbolic state space, together with the ability to save snapshots and roll-back after a failed post-condition. Only the evaluated tool set has been covered by contracts. Of the user and attacker tools of InjecAgent (79/79), MCPTox registered tools (65/801) had 8.1\% distinct and 37.2\% availability-weighted. No silent allowance exists if no contracts exist: they have been accounted for as \texttt{no\_contract} and logged. Instead of executing a ToolBench run, fidelity has been reviewed using contract reviews and recorded-call replays.
 
-Hand-authored contracts were required for ToolGate: 145 on InjecAgent, and none were needed for IntentGate, since the contract was automatically generated based upon the request. Expanding contracts towards 84.9\% weighted coverage on MCPTox did not result in reduced attack success, because an attack call will look like a normal query. The call itself is legitimate. However, the registration is poisoned. As such, the ToolGate results are statistically indistinguishable from the unprotected baseline results for MCPTox, thus supporting this comparison.
+Hand-authored contracts were required for ToolGate: 145 total, and none were needed for IntentGate, since the contract was automatically generated based upon the request. Expanding contracts towards 84.9\% weighted coverage on MCPTox did not result in reduced attack success, because an attack call will look like a normal query. The call itself is legitimate. However, the registration is poisoned. As such, the ToolGate results are statistically indistinguishable from the unprotected baseline results for MCPTox, thus supporting this comparison.
 
 \section{Evaluation}
 
@@ -227,7 +227,7 @@ Attack success rate (ASR) represents the fraction of attack cases in which the a
 B1 is the unprotected agent. B2 is the ToolGate reimplementation. IntentGate employs $\tau=0.75$, $\delta=0.1$, and $\alpha=0.7$. The full matrix includes three ablations: A1 semantic-only (rule veto disabled), A2 rule-only (embeddings disabled), and A3 raw-request embedding (similarity to the request text instead of the parsed contract). Each condition employed identical prompts, tool blocks, agent model (gpt-4o-mini), embedding model (all-MiniLM-L6-v2~\cite{reimers2019sentence}), and seed 42.
 
 \subsection{Statistics}
-Comparisons used the paired McNemar test with continuity correction~\cite{dietterich1998approximate}. Confidence intervals used a seeded bootstrap with 10k resamples for each benchmark and risk breakdown. The ten risk breakdowns use Bonferroni correction ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Full-matrix results are presented as-is. Pilot results are labeled preliminary.
+Comparisons were made using the paired McNemar test (with continuity correction)~\cite{dietterich1998approximate}. Confidence intervals were obtained by bootstrapping from the same data set, which was done to obtain 10k resampled estimates of each benchmark and risk breakdown. The ten non-Other risk breakdowns had Bonferroni corrections applied ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Full-matrix results are presented as they were calculated. Pilot results are marked preliminary.
 
 \section{Results}
 
@@ -282,7 +282,7 @@ Table~\ref{tab:headline} and Figure~\ref{fig:bars} summarize the headline result
 \end{figure}
 
 \subsection{Setup cost}
-IntentGate requires zero hand-authored contracts. ToolGate requires 145 contracts on InjecAgent and 65 on MCPTox (full matrix). Extending the MCPTox set to 583 ToolGate contracts raised weighted coverage to 84.9\% without closing the gap. ToolGate's paper does not report this setup-cost metric.
+IntentGate requires zero hand-authored contracts. ToolGate requires 145 total contracts and covers 79/79 InjecAgent and 65/801 MCPTox tools (full matrix). Extending the MCPTox set to 583 ToolGate contracts raised weighted coverage to 84.9\% without closing the gap. ToolGate's paper does not report this setup-cost metric.
 
 \subsection{Ablations}
 Semantic scoring alone reaches 0.0\% ASR on InjecAgent. The rule-only ablation (A2) is the weakest condition, with 14.7\% ASR on InjecAgent and 263 attack-influenced MCPTox calls, close to the unprotected agent on the hard slices. Semantic-only (A1) detects more than the full gate on MCPTox (81 vs.\ 144 attack-influenced calls) but over-blocks legitimate calls, as the benign-task pilot shows. The raw-request ablation (A3) matches the full gate on InjecAgent (0.7\% both) and catches slightly more attacks on MCPTox (116 vs.\ 144 attack-influenced calls). The contract's value is therefore utility and auditability. Headline ASR is similar. The false-escalate rate is 14.8\% over those 583 escalated calls.
@@ -309,7 +309,7 @@ Semantic scoring alone reaches 0.0\% ASR on InjecAgent. The rule-only ablation (
 \end{table}
 
 \subsection{Pareto and threshold}
-Figure~\ref{fig:sweep} shows the results of a threshold sweep on the pilot data, where the attack-success rate drops to zero as soon as $\tau=0.75$, whereas the false-positive rate remains constant at 4\%. This operating point is fixed for the entire decision matrix, and threshold transfer across different encoders or splits is not claimed.
+Figure~\ref{fig:sweep} shows the results of a threshold sweep on the pilot data, where the attack-success rate drops to zero as soon as $\tau=0.75$, whereas the false-positive rate is 4\% at the operating point. This operating point is fixed for the entire decision matrix, and threshold transfer across different encoders or splits is not claimed.
 
 \begin{figure}[t]
   \centering
@@ -341,7 +341,7 @@ Thirteen InjecAgent failures remain. All are read-only exfiltration calls with $
 
 \subsection{Validation results (preliminary)}
 \label{sec:validation}
-A second backbone, qwen3.5:4b, replicates the ASR reduction on InjecAgent (27.1\% $\rightarrow$ 2.1\%, $n=100$ per condition). gpt-6-luna is excluded because its prose-only output never participates in the ReAct-style loop. On 2,013 gated calls, the block rate is 12.8\% for specific contracts, 9.6\% for vague contracts, and 12.4\% overall.
+A second backbone, qwen3.5:4b, replicates the ASR reduction on InjecAgent (27.1\% $\rightarrow$ 2.1\%, $n=100$ per condition). gpt-6-luna is excluded because its prose-only output never participates in the ReAct-style loop. On 2,013 gated calls, the block rate is 42.4\% for specific contracts, 33.0\% for vague contracts, and 41.4\% overall.
 
 The benign-task pilot (50 clean cases) compares the unprotected agent, the full gate, and the semantic-only ablation. User-tool allowed rates are 16.0\%, 12.0\%, and 8.0\%. Clean-call block rates are 0.0\%, 25.0\%, and 42.9\%. Semantic-only over-blocks legitimate calls, so the contract preserves more of them in this comparison.
 
