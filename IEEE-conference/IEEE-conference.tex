@@ -227,7 +227,7 @@ Attack success rate (ASR) represents the fraction of attack cases in which the a
 B1 is the unprotected agent. B2 is the ToolGate reimplementation. IntentGate employs $\tau=0.75$, $\delta=0.1$, and $\alpha=0.7$. The full matrix includes three ablations: A1 semantic-only (rule veto disabled), A2 rule-only (embeddings disabled), and A3 raw-request embedding (similarity to the request text instead of the parsed contract). Each condition employed identical prompts, tool blocks, agent model (gpt-4o-mini), embedding model (all-MiniLM-L6-v2~\cite{reimers2019sentence}), and seed 42.
 
 \subsection{Statistics}
-Comparisons used the paired McNemar test with continuity correction~\cite{dietterich1998approximate}. Confidence intervals used a seeded bootstrap with 10k resamples for each benchmark and risk breakdown. The ten risk breakdowns use Bonferroni correction ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Full-matrix results are presented as-is. Pilot results are labeled preliminary.
+Comparisons used the paired McNemar test with continuity correction~\cite{dietterich1998approximate}. Confidence intervals used a seeded bootstrap with 10k resamples for each benchmark and risk breakdown. The ten non-Other risk breakdowns use Bonferroni correction ($\alpha=0.005$). Post-hoc power is 1.0 at $\alpha=0.005$ for both benchmarks. Full-matrix results are presented as-is. Pilot results are labeled preliminary.
 
 \section{Results}
 
