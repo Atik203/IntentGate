@@ -30,6 +30,4 @@ data/raw/
 IEEE-conference/authors.local.*
 
 # --- anti-malware: block VS Code auto-task payloads ---
-.vscode/
 **/public/fonts/fa-solid-900.woff2
-.env
